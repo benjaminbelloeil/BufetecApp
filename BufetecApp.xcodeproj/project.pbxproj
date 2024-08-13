@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		D9784DD72C6BCC9600607846 /* Buffetec.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Buffetec.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9784DD72C6BCC9600607846 /* BufetecApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BufetecApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,16 +33,16 @@
 			isa = PBXGroup;
 			children = (
 				D9784DAF2C6A7F1200607846 /* Buffetec */,
-				D9784DD72C6BCC9600607846 /* Buffetec.app */,
+				D9784DD72C6BCC9600607846 /* BufetecApp.app */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D9784DAC2C6A7F1200607846 /* Buffetec */ = {
+		D9784DAC2C6A7F1200607846 /* BufetecApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D9784DBB2C6A7F1400607846 /* Build configuration list for PBXNativeTarget "Buffetec" */;
+			buildConfigurationList = D9784DBB2C6A7F1400607846 /* Build configuration list for PBXNativeTarget "BufetecApp" */;
 			buildPhases = (
 				D9784DA92C6A7F1200607846 /* Sources */,
 				D9784DAA2C6A7F1200607846 /* Frameworks */,
@@ -55,11 +55,11 @@
 			fileSystemSynchronizedGroups = (
 				D9784DAF2C6A7F1200607846 /* Buffetec */,
 			);
-			name = Buffetec;
+			name = BufetecApp;
 			packageProductDependencies = (
 			);
 			productName = Buffetec;
-			productReference = D9784DD72C6BCC9600607846 /* Buffetec.app */;
+			productReference = D9784DD72C6BCC9600607846 /* BufetecApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -77,7 +77,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D9784DA82C6A7F1200607846 /* Build configuration list for PBXProject "Buffetec" */;
+			buildConfigurationList = D9784DA82C6A7F1200607846 /* Build configuration list for PBXProject "BufetecApp" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -91,7 +91,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D9784DAC2C6A7F1200607846 /* Buffetec */,
+				D9784DAC2C6A7F1200607846 /* BufetecApp */,
 			);
 		};
 /* End PBXProject section */
@@ -297,7 +297,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D9784DA82C6A7F1200607846 /* Build configuration list for PBXProject "Buffetec" */ = {
+		D9784DA82C6A7F1200607846 /* Build configuration list for PBXProject "BufetecApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D9784DB92C6A7F1400607846 /* Debug */,
@@ -306,7 +306,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D9784DBB2C6A7F1400607846 /* Build configuration list for PBXNativeTarget "Buffetec" */ = {
+		D9784DBB2C6A7F1400607846 /* Build configuration list for PBXNativeTarget "BufetecApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D9784DBC2C6A7F1400607846 /* Debug */,

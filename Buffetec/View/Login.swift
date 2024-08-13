@@ -1,36 +1,30 @@
 //
-//  Signup.swift
+//  Login.swift
 //  Buffetec
 //
-//  Created by Benjamin Belloeil on 8/13/24.
+//  Created by Benjamin Belloeil on 8/12/24.
 //
 
 import SwiftUI
 
-struct Signup: View {
+struct Login: View {
     @Binding var showSignup: Bool
     /// View properties
     @State private var emailID: String = ""
-    @State private var fullName: String = ""
     @State private var password: String = ""
+    @State private var showForgotPasswordView: Bool = false
+    /// Reset Password View
+    @State private var showResetView: Bool = false
+
     var body: some View {
         VStack ( alignment: .leading, spacing: 15, content: {
-            /// Back button
-            Button(action: {
-                showSignup = false
-            }, label: {
-                Image(systemName: "arrow.left")
-                    .font(.title2)
-                    .foregroundStyle(.gray)
-            })
-            .padding(.top, 10)
+            Spacer(minLength: 0)
             
-            Text("SignUp")
+            Text("Login")
                 .font(.largeTitle)
                 .fontWeight(.heavy)
-                .padding(.top, 25)
             
-            Text("Please sign up to continue")
+            Text("Please sign in to continue")
                 .font(.callout)
                 .fontWeight(.semibold)
                 .foregroundStyle(.gray)
@@ -38,32 +32,36 @@ struct Signup: View {
             
             VStack(spacing: 25) {
                 /// Custom Text Fields
-                CustomTF(sfIcon: "person", hint: "Full Name", value: $fullName)
-                    .padding(.top, 5)
-
                 CustomTF(sfIcon: "at", hint: "Email", value: $emailID)
                 
                 CustomTF(sfIcon: "lock", hint: "Password", isPassword: true, value: $password)
                     .padding(.top, 5)
-
-                /// Signup Button
-                GradientButton(title: "Continue", icon: "arrow.right") {
+                
+                Button("Forgot Paswword?"){
+                    showForgotPasswordView.toggle()
+                }
+                .font(.callout)
+                .fontWeight(.heavy)
+                .hSpacing(.trailing)
+                
+                /// Login Button
+                GradientButton(title: "Login", icon: "arrow.right") {
                     
                 }
                 .hSpacing(.trailing)
                 /// Disabling unit the  Data is entered
-                .disabledWithOpacity(emailID.isEmpty || password.isEmpty || fullName.isEmpty)
+                .disabledWithOpacity(emailID.isEmpty || password.isEmpty)
             }
             .padding(.top, 20)
             
             Spacer(minLength: 0)
             
             HStack(spacing: 6) {
-                Text("Already have an account?")
+                Text("Dont have an account?")
                     .foregroundStyle(.gray)
                 
-                Button("Login") {
-                    showSignup =  false
+                Button("Sign Up") {
+                    showSignup.toggle()
                 }
                 .fontWeight(.bold)
                 .tint(.blue)
@@ -74,6 +72,17 @@ struct Signup: View {
         .padding(.vertical, 15)
         .padding(.horizontal, 25)
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showForgotPasswordView, content: {
+            if #available(iOS 16.4, *) {
+                /// To create a custom sheet radius
+                ForgotPassword(showResetView: $showResetView)
+                    .presentationDetents([.height(300)])
+                    .presentationCornerRadius(30)
+            } else {
+                ForgotPassword(showResetView: $showResetView)
+                    .presentationDetents([.height(300)])
+            }
+        })
     }
 }
 
