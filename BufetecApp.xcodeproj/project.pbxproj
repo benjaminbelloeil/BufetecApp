@@ -11,9 +11,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		D9784DAF2C6A7F1200607846 /* Buffetec */ = {
+		D9784DAF2C6A7F1200607846 /* BufetecApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Buffetec;
+			path = BufetecApp;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		D9784DA42C6A7F1200607846 = {
 			isa = PBXGroup;
 			children = (
-				D9784DAF2C6A7F1200607846 /* Buffetec */,
+				D9784DAF2C6A7F1200607846 /* BufetecApp */,
 				D9784DD72C6BCC9600607846 /* BufetecApp.app */,
 			);
 			sourceTree = "<group>";
@@ -53,7 +53,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				D9784DAF2C6A7F1200607846 /* Buffetec */,
+				D9784DAF2C6A7F1200607846 /* BufetecApp */,
 			);
 			name = BufetecApp;
 			packageProductDependencies = (
@@ -243,7 +243,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Buffetec/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"BufetecApp/Preview Content\"";
 				DEVELOPMENT_TEAM = DQQALW53ZU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -272,7 +272,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Buffetec/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"BufetecApp/Preview Content\"";
 				DEVELOPMENT_TEAM = DQQALW53ZU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
