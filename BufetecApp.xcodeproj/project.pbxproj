@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		D9784DAD2C6A7F1200607846 /* Buffetec.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Buffetec.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9784DD72C6BCC9600607846 /* Buffetec.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Buffetec.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,16 +33,8 @@
 			isa = PBXGroup;
 			children = (
 				D9784DAF2C6A7F1200607846 /* Buffetec */,
-				D9784DAE2C6A7F1200607846 /* Products */,
+				D9784DD72C6BCC9600607846 /* Buffetec.app */,
 			);
-			sourceTree = "<group>";
-		};
-		D9784DAE2C6A7F1200607846 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				D9784DAD2C6A7F1200607846 /* Buffetec.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -67,7 +59,7 @@
 			packageProductDependencies = (
 			);
 			productName = Buffetec;
-			productReference = D9784DAD2C6A7F1200607846 /* Buffetec.app */;
+			productReference = D9784DD72C6BCC9600607846 /* Buffetec.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -95,7 +87,7 @@
 			mainGroup = D9784DA42C6A7F1200607846;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = D9784DAE2C6A7F1200607846 /* Products */;
+			productRefGroup = D9784DA42C6A7F1200607846;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
