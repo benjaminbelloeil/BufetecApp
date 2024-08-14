@@ -72,6 +72,7 @@ struct Login: View {
         .padding(.vertical, 15)
         .padding(.horizontal, 25)
         .toolbar(.hidden, for: .navigationBar)
+        /// Asking for email to send the reset link
         .sheet(isPresented: $showForgotPasswordView, content: {
             if #available(iOS 16.4, *) {
                 /// To create a custom sheet radius
@@ -81,6 +82,18 @@ struct Login: View {
             } else {
                 ForgotPassword(showResetView: $showResetView)
                     .presentationDetents([.height(300)])
+            }
+        })
+        /// Reset Password View
+        .sheet(isPresented: $showResetView, content: {
+            if #available(iOS 16.4, *) {
+                /// To create a custom sheet radius
+                PasswordResetView()
+                    .presentationDetents([.height(350)])
+                    .presentationCornerRadius(30)
+            } else {
+                PasswordResetView()
+                    .presentationDetents([.height(350)])
             }
         })
     }
