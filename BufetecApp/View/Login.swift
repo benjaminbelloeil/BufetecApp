@@ -1,81 +1,148 @@
-//
-//  Login.swift
-//  Buffetec
-//
-//  Created by Benjamin Belloeil on 8/12/24.
-//
-
 import SwiftUI
+import AuthenticationServices
 
 struct Login: View {
     @Binding var showSignup: Bool
-    /// View properties
-    @State private var emailID: String = ""
+    @Binding var showIntro: Bool
+    @State private var email: String = ""
     @State private var password: String = ""
+    @State private var showPassword: Bool = false
     @State private var showForgotPasswordView: Bool = false
-    /// Reset Password View
     @State private var showResetView: Bool = false
 
     var body: some View {
-        VStack ( alignment: .leading, spacing: 15, content: {
-            Spacer(minLength: 0)
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [Color(hex: "E6F3FF"), .white]), startPoint: .top, endPoint: .bottom)
+                .edgesIgnoringSafeArea(.all)
             
-            Text("Login")
-                .font(.largeTitle)
-                .fontWeight(.heavy)
-            
-            Text("Please sign in to continue")
-                .font(.callout)
-                .fontWeight(.semibold)
-                .foregroundStyle(.gray)
-                .padding(.top, -5)
-            
-            VStack(spacing: 25) {
-                /// Custom Text Fields
-                CustomTF(sfIcon: "at", hint: "Email", value: $emailID)
+            VStack(spacing: 20) {
+                Text("Iniciar Sesión")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color(hex: "3B5998"))
                 
-                CustomTF(sfIcon: "lock", hint: "Password", isPassword: true, value: $password)
-                    .padding(.top, 5)
+                Text("Asesoría jurídica gratuita y trámites notariales a menor costo, con calidad garantizada.")
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                    .foregroundColor(.gray)
                 
-                Button("Forgot Paswword?"){
-                    showForgotPasswordView.toggle()
-                }
-                .font(.callout)
-                .fontWeight(.heavy)
-                .hSpacing(.trailing)
-                
-                /// Login Button
-                GradientButton(title: "Login", icon: "arrow.right") {
+                HStack(spacing: 20) {
+                    Button(action: {
+                        // Implement Apple sign in
+                    }) {
+                        HStack {
+                            Image(systemName: "apple.logo")
+                            Text("Apple")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(Color.black)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                    }
                     
+                    Button(action: {
+                        // Implement Google sign in
+                    }) {
+                        HStack {
+                            Image("Google")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 20, height: 20)
+                            Text("Google")
+                            .foregroundColor(Color.black)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                    }
                 }
-                .hSpacing(.trailing)
-                /// Disabling unit the  Data is entered
-                .disabledWithOpacity(emailID.isEmpty || password.isEmpty)
-            }
-            .padding(.top, 20)
-            
-            Spacer(minLength: 0)
-            
-            HStack(spacing: 6) {
-                Text("Dont have an account?")
-                    .foregroundStyle(.gray)
+                .padding(.horizontal)
                 
-                Button("Sign Up") {
-                    showSignup.toggle()
+                HStack {
+                    Divider()
+                        .frame(width: 100, height: 1)
+                        .background(Color.gray)
+                    Text("Or")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    Divider()
+                        .frame(width: 100, height: 1)
+                        .background(Color.gray)
                 }
-                .fontWeight(.bold)
-                .tint(.blue)
+                
+                VStack(spacing: 15) {
+                    TextField("Correo Electrónico/Teléfono", text: $email)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                    
+                    HStack {
+                        if showPassword {
+                            TextField("Contraseña", text: $password)
+                        } else {
+                            SecureField("Contraseña", text: $password)
+                        }
+                        
+                        Button(action: {
+                            showPassword.toggle()
+                        }) {
+                            Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .shadow(radius: 2)
+                }
+                .padding(.horizontal)
+                
+                Button(action: {
+                    // Implement login functionality
+                }) {
+                    Text("Iniciar Sesión")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(hex: "8EC5FC"))
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                /*
+                Button("Ver Intro") {
+                    showIntro = true
+                }
+                .foregroundColor(Color(hex: "3B5998"))
+                */
+                VStack {
+                    HStack{
+                        Text("¿No tienes cuenta?")
+                        Button("Regístrate") {
+                            showSignup.toggle()
+                        }
+                        .fontWeight(.bold)
+                        .foregroundColor(Color(hex: "3B5998"))
+                        
+                    }
+                    .padding(20)
+                    Button("¿Olvidaste tu contraseña?") {
+                        showForgotPasswordView = true
+                    }
+                    .foregroundColor(Color(hex: "3B5998"))
+                    .fontWeight(.bold)
+                }
+                .font(.footnote)
             }
-            .font(.callout)
-            .hSpacing()
-        })
-        .padding(.vertical, 15)
-        .padding(.horizontal, 25)
-        .toolbar(.hidden, for: .navigationBar)
-        /// Asking for email to send the reset link
+            .padding()
+        }
         .sheet(isPresented: $showForgotPasswordView, content: {
             if #available(iOS 16.4, *) {
-                /// To create a custom sheet radius
                 ForgotPassword(showResetView: $showResetView)
                     .presentationDetents([.height(300)])
                     .presentationCornerRadius(30)
@@ -84,10 +151,8 @@ struct Login: View {
                     .presentationDetents([.height(300)])
             }
         })
-        /// Reset Password View
         .sheet(isPresented: $showResetView, content: {
             if #available(iOS 16.4, *) {
-                /// To create a custom sheet radius
                 PasswordResetView()
                     .presentationDetents([.height(350)])
                     .presentationCornerRadius(30)
@@ -98,7 +163,6 @@ struct Login: View {
         })
     }
 }
-
 
 #Preview {
     ContentView()

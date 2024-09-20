@@ -10,23 +10,33 @@ import SwiftUI
 struct ContentView: View {
     /// View Properties
     @State private var showSignup: Bool = false
+    @State private var showIntro: Bool = true
+    
     var body: some View {
-        NavigationStack {
-            Login(showSignup: $showSignup)
-                .navigationDestination(isPresented: $showSignup) {
-                    Signup(showSignup: $showSignup)
-            }
-        }
-        .overlay {
-            /// Bounce animation
-            if #available(iOS 17, *) {
-                CircleView()
-                    .animation(.smooth(duration: 0.45, extraBounce: 0), value: showSignup)
+        ZStack {
+            if showIntro {
+                IntroView(showIntro: $showIntro)
             } else {
-                CircleView()
-                    .animation(.easeInOut(duration: 0.3), value: showSignup)
+                NavigationStack {
+                    Login(showSignup: $showSignup, showIntro: $showIntro)
+                        .navigationDestination(isPresented: $showSignup) {
+                            Signup(showSignup: $showSignup)
+                        }
+                }
+                .overlay {
+                    /// Bounce animation
+                    if #available(iOS 17, *) {
+                        CircleView()
+                            .animation(.smooth(duration: 0.45, extraBounce: 0), value: showSignup)
+                    } else {
+                        CircleView()
+                            .animation(.easeInOut(duration: 0.3), value: showSignup)
+                    }
+                }
             }
         }
+        .transition(.opacity)
+        .animation(.easeInOut, value: showIntro)
     }
     
     /// Moving blurred background
@@ -35,7 +45,7 @@ struct ContentView: View {
         Circle()
             .fill(LinearGradient(colors: [.blue, .cyan, .teal], startPoint: .top, endPoint: .bottom))
             .frame(width: 200, height: 200)
-            /// Moving when the signup pages loads/dissmises
+            /// Moving when the signup pages loads/dismisses
             .offset(x: showSignup ? 90 : -90, y: -90)
             .blur(radius: 15)
             .hSpacing(showSignup ? .trailing : .leading)

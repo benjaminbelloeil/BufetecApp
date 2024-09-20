@@ -1,82 +1,138 @@
-//
-//  Signup.swift
-//  Buffetec
-//
-//  Created by Benjamin Belloeil on 8/13/24.
-//
-
 import SwiftUI
+import AuthenticationServices
 
 struct Signup: View {
     @Binding var showSignup: Bool
-    /// View properties
-    @State private var emailID: String = ""
-    @State private var fullName: String = ""
+    @State private var name: String = ""
+    @State private var email: String = ""
     @State private var password: String = ""
+    @State private var showPassword: Bool = false
+
     var body: some View {
-        VStack ( alignment: .leading, spacing: 15, content: {
-            /// Back button
-            Button(action: {
-                showSignup = false
-            }, label: {
-                Image(systemName: "arrow.left")
-                    .font(.title2)
-                    .foregroundStyle(.gray)
-            })
-            .padding(.top, 10)
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [Color(hex: "E6F3FF"), .white]), startPoint: .top, endPoint: .bottom)
+                .edgesIgnoringSafeArea(.all)
             
-            Text("SignUp")
-                .font(.largeTitle)
-                .fontWeight(.heavy)
-                .padding(.top, 25)
-            
-            Text("Please sign up to continue")
-                .font(.callout)
-                .fontWeight(.semibold)
-                .foregroundStyle(.gray)
-                .padding(.top, -5)
-            
-            VStack(spacing: 25) {
-                /// Custom Text Fields
-                CustomTF(sfIcon: "person", hint: "Full Name", value: $fullName)
-                    .padding(.top, 5)
-
-                CustomTF(sfIcon: "at", hint: "Email", value: $emailID)
+            VStack(spacing: 20) {
+                Text("Regístrate")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color(hex: "3B5998"))
                 
-                CustomTF(sfIcon: "lock", hint: "Password", isPassword: true, value: $password)
-                    .padding(.top, 5)
-
-                /// Signup Button
-                GradientButton(title: "Continue", icon: "arrow.right") {
+                Text("Asesoría jurídica gratuita y trámites notariales a menor costo, con calidad garantizada.")
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                    .foregroundColor(.gray)
+                
+                HStack(spacing: 20) {
+                    Button(action: {
+                        // Implement Apple sign in
+                    }) {
+                        HStack {
+                            Image(systemName: "apple.logo")
+                            Text("Apple")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(Color.black)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                    }
                     
+                    Button(action: {
+                        // Implement Google sign in
+                    }) {
+                        HStack {
+                            Image("Google")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 20, height: 20)
+                            Text("Google")
+                            .foregroundColor(Color.black)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                    }
                 }
-                .hSpacing(.trailing)
-                /// Disabling unit the  Data is entered
-                .disabledWithOpacity(emailID.isEmpty || password.isEmpty || fullName.isEmpty)
-            }
-            .padding(.top, 20)
-            
-            Spacer(minLength: 0)
-            
-            HStack(spacing: 6) {
-                Text("Already have an account?")
-                    .foregroundStyle(.gray)
+                .padding(.horizontal)
                 
-                Button("Login") {
-                    showSignup =  false
+                HStack {
+                    Divider()
+                        .frame(width: 100, height: 1)
+                        .background(Color.gray)
+                    Text("Or")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    Divider()
+                        .frame(width: 100, height: 1)
+                        .background(Color.gray)
                 }
-                .fontWeight(.bold)
-                .tint(.blue)
+                
+                VStack(spacing: 15) {
+                    TextField("Nombre", text: $name)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                    
+                    TextField("Correo Electrónico/Teléfono", text: $email)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 2)
+                    
+                    HStack {
+                        if showPassword {
+                            TextField("Contraseña", text: $password)
+                        } else {
+                            SecureField("Contraseña", text: $password)
+                        }
+                        
+                        Button(action: {
+                            showPassword.toggle()
+                        }) {
+                            Image(systemName: showPassword ? "eye.slash.fill" : "eye.fill")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .shadow(radius: 2)
+                }
+                .padding(.horizontal)
+                
+                Button(action: {
+                    // Implement sign up functionality
+                }) {
+                    Text("Crear Cuenta")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(hex: "8EC5FC"))
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                
+                HStack {
+                    Text("¿Tienes cuenta?")
+                    Button("Inicia Sesión") {
+                        showSignup = false
+                    }
+                    .fontWeight(.bold)
+                    .foregroundColor(Color(hex: "3B5998"))
+                }
+                .font(.footnote)
             }
-            .font(.callout)
-            .hSpacing()
-        })
-        .padding(.vertical, 15)
-        .padding(.horizontal, 25)
-        .toolbar(.hidden, for: .navigationBar)
+            .padding()
+        }
     }
 }
-
 
 #Preview {
     ContentView()
