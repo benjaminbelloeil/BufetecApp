@@ -7,12 +7,10 @@ struct Signup: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var showPassword: Bool = false
+    @State private var showQuestions = false
 
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color(hex: "E6F3FF"), .white]), startPoint: .top, endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            
             VStack(spacing: 20) {
                 Text("Regístrate")
                     .font(.largeTitle)
@@ -108,7 +106,8 @@ struct Signup: View {
                 .padding(.horizontal)
                 
                 Button(action: {
-                    // Implement sign up functionality
+                    // Add signup functionality and validation before showing questions
+                    showQuestions = true
                 }) {
                     Text("Crear Cuenta")
                         .frame(maxWidth: .infinity)
@@ -118,7 +117,7 @@ struct Signup: View {
                         .cornerRadius(10)
                 }
                 .padding(.horizontal)
-                
+
                 HStack {
                     Text("¿Tienes cuenta?")
                     Button("Inicia Sesión") {
@@ -131,8 +130,12 @@ struct Signup: View {
             }
             .padding()
         }
+        .fullScreenCover(isPresented: $showQuestions) {
+            QuestionView(showQuestions: $showQuestions)
+        }
     }
 }
+
 
 #Preview {
     ContentView()

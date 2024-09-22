@@ -12,9 +12,6 @@ struct Login: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color(hex: "E6F3FF"), .white]), startPoint: .top, endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            
             VStack(spacing: 20) {
                 Text("Iniciar Sesión")
                     .font(.largeTitle)
@@ -114,12 +111,7 @@ struct Login: View {
                         .cornerRadius(10)
                 }
                 .padding(.horizontal)
-                /*
-                Button("Ver Intro") {
-                    showIntro = true
-                }
-                .foregroundColor(Color(hex: "3B5998"))
-                */
+
                 VStack {
                     HStack{
                         Text("¿No tienes cuenta?")
