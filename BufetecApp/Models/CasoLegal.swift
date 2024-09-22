@@ -2,17 +2,17 @@
 //  CasoLegal.swift
 //  BufetecApp
 //
-//  Created by Benjamin Belloeil on 9/21/24.
+//  Created by Edsel Cisneros Bautista on 22/09/24.
 //
+import Foundation
 
-import SwiftUI
-
-struct CasoLegal: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
-
-#Preview {
-    CasoLegal()
+struct CasoLegal: Identifiable {
+    var id = UUID()
+    var nombre: String
+    var expediente: String
+    var parteActora: String
+    var parteDemandada: String
+    var estado: String
+    var perfilCliente: String
+    var notas: String
 }
