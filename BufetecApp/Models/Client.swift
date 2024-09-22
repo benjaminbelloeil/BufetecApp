@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct Client: Identifiable {
+    let id: Int
+    var name: String
+}
