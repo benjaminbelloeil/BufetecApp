@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -10,15 +10,20 @@ struct HomeView: View {
                     Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
                     Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2")
                 ])) {
-                    Text("Go to Abogado List")
-                        .font(.title)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                    HStack {
+                        Image("HomeIcons")
+                            .resizable()
+                            .frame(width: 70, height: 70)
+                        Text("Abogados")
+                            .font(.title)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
                 }
+                .navigationTitle("Home")
             }
-            .navigationTitle("Home")
         }
     }
 }
