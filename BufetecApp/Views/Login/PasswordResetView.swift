@@ -1,20 +1,25 @@
-//
-//  PasswordResetView.swift
-//  BufetecApp
-//
-//  Created by Benjamin Belloeil on 8/14/24.
-//
-
 import SwiftUI
 
 struct PasswordResetView: View {
     /// View properties
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
+
     /// Environment properties
     @Environment(\.dismiss) private var dismiss
+    
+    /// Check if the form is filled (both fields filled)
+    private var isFormFilled: Bool {
+        return !password.isEmpty && !confirmPassword.isEmpty
+    }
+    
+    /// Check if the form is valid (both fields filled and passwords match)
+    private var isFormValid: Bool {
+        return isFormFilled && password == confirmPassword
+    }
+    
     var body: some View {
-        VStack ( alignment: .leading, spacing: 15, content: {
+        VStack (alignment: .leading, spacing: 15) {
             /// Back button
             Button(action: {
                 dismiss()
@@ -32,30 +37,33 @@ struct PasswordResetView: View {
             
             VStack(spacing: 25) {
                 /// Custom Text Fields
-
                 CustomTF(sfIcon: "lock", hint: "Password", value: $password)
-
                 CustomTF(sfIcon: "lock", hint: "Confirm Password", value: $confirmPassword)
                     .padding(.top, 5)
 
-                /// Signup Button
-                GradientButton(title: "Send Link", icon: "arrow.right") {
-                /// Reset password logic here
-
+                /// Send Link Button
+                Button(action: {
+                    /// Reset password logic here
+                }) {
+                    Text("Enviar Link")
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(isFormFilled ? Color.blue : Color(hex: "8EC5FC"))  // Blue if fields are filled, default color if not
+                        .foregroundColor(.white)
+                        .cornerRadius(10)  // Rounded corners
                 }
-                .hSpacing(.trailing)
-                /// Disabling unit the  Data is entered
-                .disabledWithOpacity(password.isEmpty || confirmPassword.isEmpty)
+                /// Disable the button until both fields are filled and passwords match
+                .disabled(!isFormValid)
             }
             .padding(.top, 20)
-        })
+        }
         .padding(.vertical, 15)
         .padding(.horizontal, 25)
-        /// Since this is going to be a sheet.
         .interactiveDismissDisabled()
     }
 }
 
 #Preview {
-    ContentView()
+    PasswordResetView()
 }

@@ -1,10 +1,3 @@
-//
-//  ForgotPassword.swift
-//  Buffetec
-//
-//  Created by Benjamin Belloeil on 8/13/24.
-//
-
 import SwiftUI
 
 struct ForgotPassword: View {
@@ -13,8 +6,13 @@ struct ForgotPassword: View {
     @State private var emailID: String = ""
     /// Environment properties
     @Environment(\.dismiss) private var dismiss
+    
+    private var isEmailFilled: Bool {
+        !emailID.isEmpty
+    }
+    
     var body: some View {
-        VStack ( alignment: .leading, spacing: 15, content: {
+        VStack(alignment: .leading, spacing: 15) {
             /// Back button
             Button(action: {
                 dismiss()
@@ -38,11 +36,10 @@ struct ForgotPassword: View {
             
             VStack(spacing: 25) {
                 /// Custom Text Fields
-
                 CustomTF(sfIcon: "at", hint: "Email", value: $emailID)
 
-                /// Signup Button
-                GradientButton(title: "Send Link", icon: "arrow.right") {
+                /// Send Link Button
+                Button(action: {
                     /// Own code here:
                     /// After the link is sent
                     Task {
@@ -51,13 +48,21 @@ struct ForgotPassword: View {
                         /// showing the reset view
                         showResetView = true
                     }
+                }) {
+                    HStack {
+                        Text("Send Link")
+                        Image(systemName: "arrow.right")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(isEmailFilled ? Color(.blue) : Color(hex: "8EC5FC"))
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
                 }
-                .hSpacing(.trailing)
-                /// Disabling unit the  Data is entered
-                .disabledWithOpacity(emailID.isEmpty)
+                .disabled(!isEmailFilled)
             }
             .padding(.top, 20)
-        })
+        }
         .padding(.vertical, 15)
         .padding(.horizontal, 25)
         /// Since this is going to be a sheet.
