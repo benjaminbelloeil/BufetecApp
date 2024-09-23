@@ -9,6 +9,10 @@ struct Signup: View {
     @State private var showPassword: Bool = false
     @State private var showQuestions = false
 
+    private var isFormFilled: Bool {
+        !name.isEmpty && !email.isEmpty && !password.isEmpty
+    }
+
     var body: some View {
         ZStack {
             VStack(spacing: 20) {
@@ -112,11 +116,12 @@ struct Signup: View {
                     Text("Crear Cuenta")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(hex: "8EC5FC"))
+                        .background(isFormFilled ? Color(.blue) : Color(hex: "8EC5FC"))
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
                 .padding(.horizontal)
+                .disabled(!isFormFilled)
 
                 HStack {
                     Text("¿Tienes cuenta?")
@@ -135,7 +140,6 @@ struct Signup: View {
         }
     }
 }
-
 
 #Preview {
     ContentView()

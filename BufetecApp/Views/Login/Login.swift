@@ -10,6 +10,10 @@ struct Login: View {
     @State private var showForgotPasswordView: Bool = false
     @State private var showResetView: Bool = false
 
+    private var isFormFilled: Bool {
+        !email.isEmpty && !password.isEmpty
+    }
+
     var body: some View {
         ZStack {
             VStack(spacing: 20) {
@@ -106,11 +110,12 @@ struct Login: View {
                     Text("Iniciar Sesión")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(hex: "8EC5FC"))
+                        .background(isFormFilled ? Color(.blue) : Color(hex: "8EC5FC"))
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
                 .padding(.horizontal)
+                .disabled(!isFormFilled)
 
                 VStack {
                     HStack{

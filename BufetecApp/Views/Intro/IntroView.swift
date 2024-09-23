@@ -84,7 +84,7 @@ struct IntroView: View {
                         ForEach(0..<Intro.introPages.count, id: \.self) { index in
                             if index == currentPage {
                                 Capsule()
-                                    .fill(Color(hex: "8EC5FC"))
+                                    .fill(Color(.blue))
                                     .frame(width: 20, height: 8)
                             } else {
                                 Circle()
@@ -110,7 +110,7 @@ struct IntroView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color(hex: "8EC5FC"))
+                            .background(Color(.blue))
                             .cornerRadius(10)
                     }
                     .padding(.horizontal, 20)

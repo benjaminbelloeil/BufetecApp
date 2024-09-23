@@ -3,7 +3,7 @@ import SwiftUI
 enum UserType {
     case client
     case lawyer
-    case other
+    case student
 }
 
 struct QuestionView: View {
@@ -13,6 +13,7 @@ struct QuestionView: View {
     @State private var selectedProblem: String?
     @State private var identification = ""
     @State private var password = ""
+    @State private var matricula = ""
     @Namespace private var animation
     
     var body: some View {
@@ -78,6 +79,8 @@ struct QuestionView: View {
                     clientQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 } else if userType == .lawyer {
                     lawyerQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                } else if userType == .student {
+                    studentQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 }
             }
             .animation(.easeInOut(duration: 0.3), value: currentQuestion)
@@ -112,14 +115,14 @@ struct QuestionView: View {
     
     var roleSelectionView: some View {
         VStack(spacing: 15) {
-            Text("Por favor, seleccione su rol:\n¿Es usted cliente, abogado u otro?")
+            Text("Por favor, seleccione su rol:\n¿Es usted cliente, abogado o estudiante?")
                 .font(.title3)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
-            ForEach(["Cliente", "Abogado", "Otro"], id: \.self) { option in
-                OptionRow(option: String(option.first!),
+            ForEach(Array(zip(["Cliente", "Abogado", "Estudiante"].indices, ["Cliente", "Abogado", "Estudiante"])), id: \.0) { index, option in
+                OptionRow(option: String(Character(UnicodeScalar(65 + index)!)),
                           text: option,
                           isSelected: userType == UserType(rawValue: option.lowercased())) {
                     userType = UserType(rawValue: option.lowercased())
@@ -137,8 +140,8 @@ struct QuestionView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
-            ForEach(["Asuntos de Familia y Matrimonio", "Custodia y Tutela de Menores", "Herencias y Sucesiones", "Identidad y Registro Civil", "Autorizaciones Legales y Apoyo"], id: \.self) { problem in
-                OptionRow(option: String(problem.first!),
+            ForEach(Array(zip(["Asuntos de Familia y Matrimonio", "Custodia y Tutela de Menores", "Herencias y Sucesiones", "Identidad y Registro Civil", "Autorizaciones Legales y Apoyo"].indices, ["Asuntos de Familia y Matrimonio", "Custodia y Tutela de Menores", "Herencias y Sucesiones", "Identidad y Registro Civil", "Autorizaciones Legales y Apoyo"])), id: \.0) { index, problem in
+                OptionRow(option: String(Character(UnicodeScalar(65 + index)!)),
                           text: problem,
                           isSelected: selectedProblem == problem) {
                     selectedProblem = problem
@@ -149,36 +152,115 @@ struct QuestionView: View {
     }
     
     var lawyerQuestionView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 25) {
             Text("Por favor, ingrese su Identificación y Contraseña.")
                 .font(.title3)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
-            VStack(spacing: 15) {
+            Image(systemName: "person.text.rectangle")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 100, height: 100)
+                .foregroundColor(.blue)
+                .padding(.bottom, 20)
+            
+            VStack(spacing: 20) {
                 HStack {
                     Image(systemName: "person.circle")
                         .foregroundColor(.gray)
-                    TextField("Identificación", text: $identification)
+                        .font(.system(size: 22))
+                        .frame(width: 30)
+                    TextField("", text: $identification)
+                        .placeholder(when: identification.isEmpty) {
+                            Text("Identificación").foregroundColor(.gray.opacity(0.7))
+                        }
                 }
                 .padding()
-                .background(Color.gray.opacity(0.1))
+                .background(Color(UIColor.systemGray6))
                 .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
                 
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.gray)
-                    SecureField("Contraseña", text: $password)
+                        .font(.system(size: 22))
+                        .frame(width: 30)
+                    SecureField("", text: $password)
+                        .placeholder(when: password.isEmpty) {
+                            Text("Contraseña").foregroundColor(.gray.opacity(0.7))
+                        }
                 }
                 .padding()
-                .background(Color.gray.opacity(0.1))
+                .background(Color(UIColor.systemGray6))
                 .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(15)
-            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+            .padding(.horizontal)
+        }
+        .padding()
+    }
+    
+    var studentQuestionView: some View {
+        VStack(spacing: 25) {
+            Text("Por favor, ingrese su Matrícula y Contraseña.")
+                .font(.title3)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Image(systemName: "graduationcap")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 100, height: 100)
+                .foregroundColor(.blue)
+                .padding(.bottom, 20)
+            
+            VStack(spacing: 20) {
+                HStack {
+                    Image(systemName: "number")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 22))
+                        .frame(width: 30)
+                    TextField("", text: $matricula)
+                        .placeholder(when: matricula.isEmpty) {
+                            Text("Matrícula").foregroundColor(.gray.opacity(0.7))
+                        }
+                }
+                .padding()
+                .background(Color(UIColor.systemGray6))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
+                
+                HStack {
+                    Image(systemName: "lock")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 22))
+                        .frame(width: 30)
+                    SecureField("", text: $password)
+                        .placeholder(when: password.isEmpty) {
+                            Text("Contraseña").foregroundColor(.gray.opacity(0.7))
+                        }
+                }
+                .padding()
+                .background(Color(UIColor.systemGray6))
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
+            }
+            .padding(.horizontal)
         }
         .padding()
     }
@@ -186,10 +268,10 @@ struct QuestionView: View {
     var totalQuestions: Int {
         switch userType {
         case .client:
-            return 3
-        case .lawyer:
             return 2
-        case .other, .none:
+        case .lawyer, .student:
+            return 2
+        case .none:
             return 1
         }
     }
@@ -199,15 +281,19 @@ struct QuestionView: View {
         case 1:
             return userType != nil
         case 2:
-            if userType == .client {
+            switch userType {
+            case .client:
                 return selectedProblem != nil
-            } else if userType == .lawyer {
+            case .lawyer:
                 return !identification.isEmpty && !password.isEmpty
+            case .student:
+                return !matricula.isEmpty && !password.isEmpty
+            case .none:
+                return false
             }
         default:
             return true
         }
-        return false
     }
 }
 
@@ -246,10 +332,26 @@ extension UserType {
             self = .client
         case "abogado":
             self = .lawyer
-        case "otro":
-            self = .other
+        case "estudiante":
+            self = .student
         default:
             return nil
         }
     }
+}
+
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content) -> some View {
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
+        }
+    }
+}
+
+#Preview{
+    QuestionView(showQuestions: .constant(true))
 }
