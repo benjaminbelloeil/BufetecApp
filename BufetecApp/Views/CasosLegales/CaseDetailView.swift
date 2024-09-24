@@ -1,10 +1,10 @@
-// CaseDetailView.swift
 import SwiftUI
 
 struct CaseDetailView: View {
     // MARK: - State Properties
     @Environment(\.presentationMode) var presentationMode
     @State private var notes: String = ""
+    @State private var isPresentingNewCaseView = false
 
     var body: some View {
         ScrollView {
@@ -37,17 +37,23 @@ struct CaseDetailView: View {
                 .padding(.horizontal)
 
                 // Notes Section
-                NotesSection(notes: $notes)
+                TextEditor(text: $notes)
+                    .frame(height: 200)
+                    .border(Color.gray, width: 1)
+                    .padding(.horizontal)
             }
             .padding()
         }
         .navigationTitle("Gestión de casos")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $isPresentingNewCaseView) {
+            NewCaseView()
+        }
     }
 
     // MARK: - Action Methods
     private func addCase() {
-        // Implementar lógica para añadir un caso
+        isPresentingNewCaseView = true
         print("Añadir caso desde CaseDetailView")
     }
 
@@ -64,4 +70,3 @@ struct CaseDetailView_Previews: PreviewProvider {
         }
     }
 }
-
