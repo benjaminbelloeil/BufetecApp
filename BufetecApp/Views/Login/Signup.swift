@@ -8,6 +8,8 @@ struct Signup: View {
     @State private var password: String = ""
     @State private var showPassword: Bool = false
     @State private var showQuestions = false
+    @State private var errorMessage: String = ""
+    @State private var userId: String = ""
 
     private var isFormFilled: Bool {
         !name.isEmpty && !email.isEmpty && !password.isEmpty
@@ -110,8 +112,7 @@ struct Signup: View {
                 .padding(.horizontal)
                 
                 Button(action: {
-                    // Add signup functionality and validation before showing questions
-                    showQuestions = true
+                    signupUser()
                 }) {
                     Text("Crear Cuenta")
                         .frame(maxWidth: .infinity)
@@ -122,6 +123,12 @@ struct Signup: View {
                 }
                 .padding(.horizontal)
                 .disabled(!isFormFilled)
+
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                }
 
                 HStack {
                     Text("¿Tienes cuenta?")
@@ -136,11 +143,67 @@ struct Signup: View {
             .padding()
         }
         .fullScreenCover(isPresented: $showQuestions) {
-            QuestionView(showQuestions: $showQuestions)
+            QuestionView(showQuestions: $showQuestions, userId: $userId)
         }
+    }
+
+    private func signupUser() {
+        guard let url = URL(string: "http://localhost:5001/signup") else {
+            print("Invalid URL")
+            return
+        }
+
+        let parameters = ["name": name, "email_or_phone": email, "password": password]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            print("Error: \(error.localizedDescription)")
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error: \(error.localizedDescription)"
+                }
+                return
+            }
+
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.errorMessage = "No data received"
+                }
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    DispatchQueue.main.async {
+                        if let message = json["message"] as? String, message == "Signup successful" {
+                            if let userId = json["user_id"] as? String {
+                                self.userId = userId
+                                self.showQuestions = true
+                            }
+                            self.errorMessage = ""
+                        } else if let error = json["error"] as? String {
+                            self.errorMessage = error
+                        }
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error decoding response: \(error.localizedDescription)"
+                }
+            }
+        }.resume()
     }
 }
 
 #Preview {
-    ContentView()
+    Signup(showSignup: .init(get: { true }, set: { _ in }))
 }
