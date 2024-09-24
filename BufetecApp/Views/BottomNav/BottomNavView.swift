@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct HomeView: View {
+struct BottomNav: View {
     var body: some View {
         NavigationView {
             TabView {
@@ -29,9 +29,9 @@ struct HomeView: View {
         }
     }
 }
-struct HomeView_Previews: PreviewProvider {
+struct BottomNav_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView()
+        BottomNav()
     }
 }
 
