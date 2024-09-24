@@ -91,23 +91,8 @@ struct PerfilView: View {
         }
         .background(Color(UIColor.systemBackground))
         .edgesIgnoringSafeArea(.bottom)
-        .overlay(
-            // Bottom navigation bar
-            HStack {
-                navButton(icon: "magnifyingglass", text: "Explorar")
-                Spacer()
-                navButton(icon: "heart", text: "Clientes")
-                Spacer()
-                navButton(icon: "book", text: "Biblioteca")
-                Spacer()
-                navButton(icon: "person.fill", text: "Perfil", isActive: true)
-            }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 20)
-            .background(Color.white)
-            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: -5)
-            , alignment: .bottom
-        )
+
+        
     }
 
     private func infoCard(title: String, content: [(String, String)]) -> some View {
@@ -132,15 +117,7 @@ struct PerfilView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
-    private func navButton(icon: String, text: String, isActive: Bool = false) -> some View {
-        VStack {
-            Image(systemName: isActive ? icon + ".fill" : icon)
-                .foregroundColor(isActive ? .blue : .gray)
-            Text(text)
-                .font(.caption)
-                .foregroundColor(isActive ? .blue : .gray)
-        }
-    }
+
 }
 
 struct PerfilView_Previews: PreviewProvider {
