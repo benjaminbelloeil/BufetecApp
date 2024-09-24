@@ -14,6 +14,14 @@ struct BibliotecaView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading) {
+                    
+                    // Search bar
+                    TextField("Search", text: .constant(""))
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    
                     // Sección "Continuar explorando"
                     Text("Continuar explorando")
                         .font(.headline)
@@ -21,17 +29,41 @@ struct BibliotecaView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            ForEach(viewModel.bibliotecas) { biblioteca in
+                            ForEach(viewModel.obtenerDocumentosDeChats()) { documento in
                                 VStack {
-                                    // Puedes personalizar la imagen según el tipo de recurso
+                                    Image(systemName: "doc.text")
+                                        .resizable()
+                                        .frame(width: 100, height: 150)
+                                    Text(documento.nombreDocumento)
+                                        .font(.caption)
+                                        .frame(width: 100)
+                                        .multilineTextAlignment(.center)
+                                    Text("Autor desconocido") // Puedes agregar el autor si tienes esta información
+                                        .font(.caption2)
+                                }
+                                .padding(.leading)
+                            }
+                        }
+                    }
+                    
+                    // Sección "Para ti"
+                    Text("Para ti")
+                        .font(.headline)
+                        .padding(.leading)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Derecho Familiar")) { biblioteca in
+                                VStack {
                                     Image(systemName: "book")
                                         .resizable()
                                         .frame(width: 100, height: 150)
-                                    
                                     Text(biblioteca.titulo)
                                         .font(.caption)
                                         .frame(width: 100)
                                         .multilineTextAlignment(.center)
+                                    Text(biblioteca.autor)
+                                        .font(.caption2)
                                 }
                                 .padding(.leading)
                             }
@@ -43,21 +75,23 @@ struct BibliotecaView: View {
                         .font(.headline)
                         .padding(.leading)
                     
-                    ForEach(viewModel.documentos) { documento in
+                    ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            // Puedes personalizar el ícono según el tipo de documento
-                            Image(systemName: "doc.text")
-                                .resizable()
-                                .frame(width: 50, height: 50)
-                            
-                            VStack(alignment: .leading) {
-                                Text(documento.nombreDocumento)
-                                    .font(.subheadline)
-                                Text("Tipo: \(documento.tipoDocumento)")
-                                    .font(.caption)
+                            ForEach(viewModel.obtenerDocumentosUsuario()) { documento in
+                                VStack {
+                                    Image(systemName: "doc.text")
+                                        .resizable()
+                                        .frame(width: 100, height: 150)
+                                    Text(documento.nombreDocumento)
+                                        .font(.caption)
+                                        .frame(width: 100)
+                                        .multilineTextAlignment(.center)
+                                    Text("Autor desconocido") // Puedes agregar el autor si tienes esta información
+                                        .font(.caption2)
+                                }
+                                .padding(.leading)
                             }
                         }
-                        .padding()
                     }
                 }
             }

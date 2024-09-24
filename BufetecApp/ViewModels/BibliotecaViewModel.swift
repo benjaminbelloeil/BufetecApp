@@ -10,10 +10,11 @@ import Foundation
 class BibliotecaViewModel: ObservableObject {
     // Datos de la biblioteca
     @Published var bibliotecas: [Biblioteca] = []
-    // Datos de documentos
+    // Datos de documentos del usuario
     @Published var documentos: [Documento] = []
-    
-    // Datos dummy (estos serán reemplazados cuando se haga el fetch desde la API)
+    // Datos de chats asociados al usuario
+    @Published var chats: [Chat] = []
+
     init() {
         // Datos dummy para la biblioteca
         bibliotecas = [
@@ -21,19 +22,37 @@ class BibliotecaViewModel: ObservableObject {
             Biblioteca(id: "2", titulo: "Matrimonio y divorcio", tipoRecurso: "Libro", categoria: "Derecho Familiar", autor: "María Pinkus", fechaCreacion: Date(), urlRecurso: "https://mi_servidor/videos/matrimonio_divorcio.pdf", status: "Activo")
         ]
         
-        // Datos dummy para los documentos
         documentos = [
             Documento(id: "1", casoId: "123", nombreDocumento: "Sentencia de divorcio", tipoDocumento: "Sentencia", urlDocumento: "https://mi_servidor/documentos/sentencia.pdf", status: "Activo", createdAt: Date()),
             Documento(id: "2", casoId: "124", nombreDocumento: "Acta de matrimonio", tipoDocumento: "Acta", urlDocumento: "https://mi_servidor/documentos/acta_matrimonio.pdf", status: "Activo", createdAt: Date())
         ]
+        
+        // Datos dummy para los chats
+        chats = [
+            Chat(id: "1", chatId: "111", userId: "1", documentId: "1", assistantId: "999", messages: [
+                Message(sender: "user", message: "Hola, ¿cómo puedo ayudarte hoy?", timestamp: Date()),
+                Message(sender: "assistant", message: "Estoy aquí para ayudarte con tus dudas legales.", timestamp: Date())
+            ])
+        ]
+    }
+
+    // Función para obtener documentos de los chats del usuario (Continuar explorando)
+    func obtenerDocumentosDeChats() -> [Documento] {
+        let documentIds = chats.map { $0.documentId }
+        return documentos.filter { documentIds.contains($0.id) }
     }
     
-    // Preparar para hacer el fetch de la API Flask
-    func fetchBibliotecas() {
-        // Aquí se hará el llamado a la API Flask para obtener los datos reales
+    // Función para obtener sugerencias de documentos basados en el tipo de proceso (Para ti)
+    func obtenerSugerencias(tipoProceso: String) -> [Biblioteca] {
+        return bibliotecas.filter { $0.categoria == tipoProceso }
     }
     
-    func fetchDocumentos() {
-        // Aquí se hará el llamado a la API Flask para obtener los documentos reales
+    // Función para obtener los documentos del usuario (Tus documentos)
+    func obtenerDocumentosUsuario() -> [Documento] {
+        return documentos
     }
+
+    // Aquí haremos el fetch real cuando la API esté lista
+    // func fetchBibliotecas() { }
+    // func fetchDocumentos() { }
 }
