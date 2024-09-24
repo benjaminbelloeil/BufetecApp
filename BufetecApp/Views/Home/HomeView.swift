@@ -4,55 +4,31 @@ struct HomeView: View {
     var body: some View {
         NavigationView {
             TabView {
-                VStack {
-                    // Existing content of HomeView
-                    NavigationLink(destination: AbogadoListView(lawyers: [
-                        Lawyer(name:"Lic. Ana María López", specialty: "Derechos Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
-                        Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
-                        Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2")
-                    ])) {
-                        HStack(spacing: 0) {
-                            Image("HomeIcons")
-                                .resizable()
-                                .frame(width: 66, height: 66)
-                            Text("Abogados")
-                                .font(.title)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                        }
-                    }
-                    
-                    NavigationLink(destination: NewCaseView()) {
-                        HStack(spacing: 0) {
-                            Image(systemName: "plus.circle.fill")
-                                .resizable()
-                                .frame(width: 48, height: 50)
-                            Text("Nuevo Caso")
-                                .font(.title)
-                                .padding()
-                                .background(Color.green)
-                                .foregroundColor(.white)
-                        }
-                    }
-                    
-                    
-                    
-                }
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
-                
                 ClienteListView()
                     .tabItem {
-                        Label("Clientes", systemImage: "person.3")
+                        Image(systemName: "person.2.fill")
+                        Text("Clientes")
                     }
-                    .navigationTitle("Home")
+                
+                CaseDetailView()
+                    .tabItem {
+                        Image(systemName: "list.bullet")
+                        Text("Mis Casos")
+                    }
+                
+                AbogadoListView(lawyers: [
+                    Lawyer(name: "Lic. Ana María López", specialty: "Derechos Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
+                    Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
+                    Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2")
+                ])
+                    .tabItem {
+                        Image(systemName: "person.3.fill")
+                        Text("Abogados")
+                    }
             }
         }
     }
 }
-
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()
