@@ -14,9 +14,13 @@ struct BottomNav: View {
                     .tabItem { EmptyView() }
                     .tag(Tab.profile)
 
-                ClienteListView()
-                    .tabItem { EmptyView() }
-                    .tag(Tab.clients)
+                ClienteListView(clientes: [
+                    Cliente(name: "María González", caseType: "Divorcio", status: "Activo"),
+                    Cliente(name: "Carlos Rodríguez", caseType: "Custodia", status: "En espera"),
+                    Cliente(name: "Ana Martínez", caseType: "Herencia", status: "Cerrado")
+                ])
+                .tabItem { EmptyView() }
+                .tag(Tab.clients)
 
                 CaseDetailView()
                     .tabItem { EmptyView() }
