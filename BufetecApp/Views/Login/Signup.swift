@@ -3,16 +3,16 @@ import AuthenticationServices
 
 struct Signup: View {
     @Binding var showSignup: Bool
-    @State private var name: String = ""
-    @State private var email: String = ""
-    @State private var password: String = ""
+    @State private var nombre: String = ""
+    @State private var correo_o_telefono: String = ""
+    @State private var contrasena: String = ""
     @State private var showPassword: Bool = false
     @State private var showQuestions = false
     @State private var errorMessage: String = ""
     @State private var userId: String = ""
 
     private var isFormFilled: Bool {
-        !name.isEmpty && !email.isEmpty && !password.isEmpty
+        !nombre.isEmpty && !correo_o_telefono.isEmpty && !contrasena.isEmpty
     }
 
     var body: some View {
@@ -69,7 +69,7 @@ struct Signup: View {
                     Divider()
                         .frame(width: 100, height: 1)
                         .background(Color.gray)
-                    Text("Or")
+                    Text("O")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     Divider()
@@ -78,13 +78,13 @@ struct Signup: View {
                 }
                 
                 VStack(spacing: 15) {
-                    TextField("Nombre", text: $name)
+                    TextField("Nombre", text: $nombre)
                         .padding()
                         .background(Color.white)
                         .cornerRadius(10)
                         .shadow(radius: 2)
                     
-                    TextField("Correo Electrónico/Teléfono", text: $email)
+                    TextField("Correo Electrónico/Teléfono", text: $correo_o_telefono)
                         .padding()
                         .background(Color.white)
                         .cornerRadius(10)
@@ -92,9 +92,9 @@ struct Signup: View {
                     
                     HStack {
                         if showPassword {
-                            TextField("Contraseña", text: $password)
+                            TextField("Contraseña", text: $contrasena)
                         } else {
-                            SecureField("Contraseña", text: $password)
+                            SecureField("Contraseña", text: $contrasena)
                         }
                         
                         Button(action: {
@@ -149,11 +149,11 @@ struct Signup: View {
 
     private func signupUser() {
         guard let url = URL(string: "http://localhost:5001/signup") else {
-            print("Invalid URL")
+            print("URL inválida")
             return
         }
 
-        let parameters = ["name": name, "email_or_phone": email, "password": password]
+        let parameters = ["nombre": nombre, "correo_o_telefono": correo_o_telefono, "contrasena": contrasena]
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -176,7 +176,7 @@ struct Signup: View {
 
             guard let data = data else {
                 DispatchQueue.main.async {
-                    self.errorMessage = "No data received"
+                    self.errorMessage = "No se recibieron datos"
                 }
                 return
             }
@@ -184,7 +184,7 @@ struct Signup: View {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     DispatchQueue.main.async {
-                        if let message = json["message"] as? String, message == "Signup successful" {
+                        if let mensaje = json["mensaje"] as? String, mensaje == "Registro exitoso" {
                             if let userId = json["user_id"] as? String {
                                 self.userId = userId
                                 self.showQuestions = true
@@ -197,7 +197,7 @@ struct Signup: View {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.errorMessage = "Error decoding response: \(error.localizedDescription)"
+                    self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
                 }
             }
         }.resume()
@@ -205,5 +205,5 @@ struct Signup: View {
 }
 
 #Preview {
-    Signup(showSignup: .init(get: { true }, set: { _ in }))
+    Signup(showSignup: .constant(true))
 }

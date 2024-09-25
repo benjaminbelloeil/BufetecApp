@@ -4,15 +4,15 @@ import AuthenticationServices
 struct Login: View {
     @Binding var showSignup: Bool
     @Binding var showIntro: Bool
-    @State private var email: String = ""
-    @State private var password: String = ""
+    @State private var correo_o_telefono: String = ""
+    @State private var contrasena: String = ""
     @State private var showPassword: Bool = false
     @State private var showForgotPasswordView: Bool = false
     @State private var showResetView: Bool = false
     @State private var errorMessage: String = ""
 
     private var isFormFilled: Bool {
-        !email.isEmpty && !password.isEmpty
+        !correo_o_telefono.isEmpty && !contrasena.isEmpty
     }
 
     var body: some View {
@@ -69,7 +69,7 @@ struct Login: View {
                     Divider()
                         .frame(width: 100, height: 1)
                         .background(Color.gray)
-                    Text("Or")
+                    Text("O")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     Divider()
@@ -78,7 +78,7 @@ struct Login: View {
                 }
                 
                 VStack(spacing: 15) {
-                    TextField("Correo Electrónico/Teléfono", text: $email)
+                    TextField("Correo Electrónico/Teléfono", text: $correo_o_telefono)
                         .padding()
                         .background(Color.white)
                         .cornerRadius(10)
@@ -86,9 +86,9 @@ struct Login: View {
                     
                     HStack {
                         if showPassword {
-                            TextField("Contraseña", text: $password)
+                            TextField("Contraseña", text: $contrasena)
                         } else {
-                            SecureField("Contraseña", text: $password)
+                            SecureField("Contraseña", text: $contrasena)
                         }
                         
                         Button(action: {
@@ -169,11 +169,11 @@ struct Login: View {
 
     private func loginUser() {
         guard let url = URL(string: "http://localhost:5001/login") else {
-            print("Invalid URL")
+            print("URL inválida")
             return
         }
 
-        let parameters = ["email_or_phone": email, "password": password]
+        let parameters = ["correo_o_telefono": correo_o_telefono, "contrasena": contrasena]
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -196,7 +196,7 @@ struct Login: View {
 
             guard let data = data else {
                 DispatchQueue.main.async {
-                    self.errorMessage = "No data received"
+                    self.errorMessage = "No se recibieron datos"
                 }
                 return
             }
@@ -204,10 +204,14 @@ struct Login: View {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     DispatchQueue.main.async {
-                        if let message = json["message"] as? String, message == "Login successful" {
+                        if let mensaje = json["mensaje"] as? String, mensaje == "Inicio de sesión exitoso" {
                             // Handle successful login (e.g., navigate to home screen)
-                            print("Login successful")
+                            print("Inicio de sesión exitoso")
                             self.errorMessage = ""
+                            if let userId = json["user_id"] as? String {
+                                // Store or use the user_id as needed
+                                print("User ID: \(userId)")
+                            }
                         } else if let error = json["error"] as? String {
                             self.errorMessage = error
                         }
@@ -215,7 +219,7 @@ struct Login: View {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.errorMessage = "Error decoding response: \(error.localizedDescription)"
+                    self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
                 }
             }
         }.resume()

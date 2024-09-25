@@ -1,9 +1,9 @@
 import SwiftUI
 
 enum UserType {
-    case client
-    case lawyer
-    case student
+    case cliente
+    case abogado
+    case estudiante
 }
 
 struct QuestionView: View {
@@ -12,8 +12,8 @@ struct QuestionView: View {
     @State private var userType: UserType?
     @State private var currentQuestion = 1
     @State private var selectedProblem: String?
-    @State private var identification = ""
-    @State private var password = ""
+    @State private var id_abogado = ""
+    @State private var contrasena = ""
     @State private var matricula = ""
     @State private var errorMessage: String = ""
     @Namespace private var animation
@@ -77,11 +77,11 @@ struct QuestionView: View {
             ZStack {
                 if currentQuestion == 1 {
                     roleSelectionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if userType == .client {
+                } else if userType == .cliente {
                     clientQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if userType == .lawyer {
+                } else if userType == .abogado {
                     lawyerQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if userType == .student {
+                } else if userType == .estudiante {
                     studentQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 }
             }
@@ -179,8 +179,8 @@ struct QuestionView: View {
                         .foregroundColor(.gray)
                         .font(.system(size: 22))
                         .frame(width: 30)
-                    TextField("", text: $identification)
-                        .placeholder(when: identification.isEmpty) {
+                    TextField("", text: $id_abogado)
+                        .placeholder(when: id_abogado.isEmpty) {
                             Text("Identificación").foregroundColor(.gray.opacity(0.7))
                         }
                 }
@@ -197,8 +197,8 @@ struct QuestionView: View {
                         .foregroundColor(.gray)
                         .font(.system(size: 22))
                         .frame(width: 30)
-                    SecureField("", text: $password)
-                        .placeholder(when: password.isEmpty) {
+                    SecureField("", text: $contrasena)
+                        .placeholder(when: contrasena.isEmpty) {
                             Text("Contraseña").foregroundColor(.gray.opacity(0.7))
                         }
                 }
@@ -254,8 +254,8 @@ struct QuestionView: View {
                         .foregroundColor(.gray)
                         .font(.system(size: 22))
                         .frame(width: 30)
-                    SecureField("", text: $password)
-                        .placeholder(when: password.isEmpty) {
+                    SecureField("", text: $contrasena)
+                        .placeholder(when: contrasena.isEmpty) {
                             Text("Contraseña").foregroundColor(.gray.opacity(0.7))
                         }
                 }
@@ -274,9 +274,9 @@ struct QuestionView: View {
     
     var totalQuestions: Int {
         switch userType {
-        case .client:
+        case .cliente:
             return 2
-        case .lawyer, .student:
+        case .abogado, .estudiante:
             return 2
         case .none:
             return 1
@@ -289,12 +289,12 @@ struct QuestionView: View {
             return userType != nil
         case 2:
             switch userType {
-            case .client:
+            case .cliente:
                 return selectedProblem != nil
-            case .lawyer:
-                return !identification.isEmpty && !password.isEmpty
-            case .student:
-                return !matricula.isEmpty && !password.isEmpty
+            case .abogado:
+                return !id_abogado.isEmpty && !contrasena.isEmpty
+            case .estudiante:
+                return !matricula.isEmpty && !contrasena.isEmpty
             case .none:
                 return false
             }
@@ -305,26 +305,26 @@ struct QuestionView: View {
 
     private func submitResponses() {
         guard let url = URL(string: "http://localhost:5001/role") else {
-            print("Invalid URL")
+            print("URL inválida")
             return
         }
 
         var parameters: [String: Any] = ["user_id": userId]
 
         switch userType {
-        case .client:
-            parameters["role"] = "client"
-            parameters["case_type"] = selectedProblem
-        case .lawyer:
-            parameters["role"] = "lawyer"
-            parameters["lawyer_id"] = identification
-            parameters["password"] = password
-        case .student:
-            parameters["role"] = "student"
+        case .cliente:
+            parameters["rol"] = "cliente"
+            parameters["tipo_caso"] = selectedProblem
+        case .abogado:
+            parameters["rol"] = "abogado"
+            parameters["id_abogado"] = id_abogado
+            parameters["contrasena"] = contrasena
+        case .estudiante:
+            parameters["rol"] = "estudiante"
             parameters["matricula"] = matricula
-            parameters["password"] = password
+            parameters["contrasena"] = contrasena
         case .none:
-            errorMessage = "Please select a user type"
+            errorMessage = "Por favor, seleccione un tipo de usuario"
             return
         }
         
@@ -349,7 +349,7 @@ struct QuestionView: View {
 
             guard let data = data else {
                 DispatchQueue.main.async {
-                    self.errorMessage = "No data received"
+                    self.errorMessage = "No se recibieron datos"
                 }
                 return
             }
@@ -357,9 +357,9 @@ struct QuestionView: View {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     DispatchQueue.main.async {
-                        if let message = json["message"] as? String, message == "Role and additional details saved successfully" {
+                        if let mensaje = json["mensaje"] as? String, mensaje == "Rol y detalles adicionales guardados exitosamente" {
                             // Handle successful submission (e.g., navigate to home screen)
-                            print("Responses submitted successfully")
+                            print("Respuestas enviadas exitosamente")
                             self.showQuestions = false
                         } else if let error = json["error"] as? String {
                             self.errorMessage = error
@@ -368,7 +368,7 @@ struct QuestionView: View {
                 }
             } catch {
                 DispatchQueue.main.async {
-                    self.errorMessage = "Error decoding response: \(error.localizedDescription)"
+                    self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
                 }
             }
         }.resume()
@@ -407,11 +407,11 @@ extension UserType {
     init?(rawValue: String) {
         switch rawValue {
         case "cliente":
-            self = .client
+            self = .cliente
         case "abogado":
-            self = .lawyer
+            self = .abogado
         case "estudiante":
-            self = .student
+            self = .estudiante
         default:
             return nil
         }

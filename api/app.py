@@ -19,9 +19,9 @@ mongo = PyMongo(app)
 # Test MongoDB connection
 try:
     mongo.db.command('ping')
-    app.logger.info("MongoDB connection successful")
+    app.logger.info("Conexión a MongoDB exitosa")
 except Exception as e:
-    app.logger.error(f"MongoDB connection failed: {str(e)}")
+    app.logger.error(f"Fallo en la conexión a MongoDB: {str(e)}")
 
 # Collections
 users_collection = mongo.db.users
@@ -30,146 +30,231 @@ students_collection = mongo.db.alumnos
 clients_collection = mongo.db.clientes
 
 # Password hashing utility
-def hash_password(password):
-    return generate_password_hash(password)
+def hash_password(contrasena):
+    return generate_password_hash(contrasena)
 
-def verify_password(stored_password, provided_password):
-    return check_password_hash(stored_password, provided_password)
+def verify_password(contrasena_almacenada, contrasena_proporcionada):
+    return check_password_hash(contrasena_almacenada, contrasena_proporcionada)
+
+# Function to insert student data
+def insert_student(student_data):
+    student_data['contrasena'] = hash_password(student_data['contrasena'])
+    student_data['user_id'] = None  # Initialize user_id as None
+    result = students_collection.insert_one(student_data)
+    return result.inserted_id
+
+# Function to insert lawyer data
+def insert_lawyer(lawyer_data):
+    lawyer_data['contrasena'] = hash_password(lawyer_data['contrasena'])
+    lawyer_data['user_id'] = None  # Initialize user_id as None
+    result = lawyers_collection.insert_one(lawyer_data)
+    return result.inserted_id
+
+# Function to insert sample data
+def insert_sample_data():
+    try:
+        # Sample student data
+        estudiantes = [
+            {
+                "matricula": "A00838158",
+                "nombre": "Benjamin Belloeil",
+                "correo": "A00838158@tec.mx",
+                "contrasena": "Benjamin2017",
+                "ano_de_estudio": 3,
+                "carrera": "ITC"
+            }    
+        ]
+
+        # Sample lawyer data
+        abogados = [
+            {
+                "id_abogado": "AB123",
+                "nombre": "María Rodríguez",
+                "correo": "maria.rodriguez@bufete.com",
+                "contrasena": "abogado",
+                "especializacion": "Derecho Civil",
+                "anos_de_experiencia": 10
+            },
+            {
+                "id_abogado": "AB124",
+                "nombre": "Juan Pérez",
+                "correo": "juan.perez@bufete.com",
+                "contrasena": "abogado",
+                "especializacion": "Derecho Penal",
+                "anos_de_experiencia": 15
+            }
+        ]
+
+        # Insert students
+        for estudiante in estudiantes:
+            if students_collection.count_documents({"matricula": estudiante["matricula"]}) == 0:
+                insert_student(estudiante)
+                app.logger.info(f"Sample student data inserted: {estudiante['nombre']}")
+            else:
+                app.logger.info(f"Student already exists: {estudiante['nombre']}")
+
+        # Insert lawyers
+        for abogado in abogados:
+            if lawyers_collection.count_documents({"id_abogado": abogado["id_abogado"]}) == 0:
+                insert_lawyer(abogado)
+                app.logger.info(f"Sample lawyer data inserted: {abogado['nombre']}")
+            else:
+                app.logger.info(f"Lawyer already exists: {abogado['nombre']}")
+
+    except Exception as e:
+        app.logger.error(f"Error inserting sample data: {str(e)}")
 
 # Sign-Up Route
 @app.route('/signup', methods=['POST'])
 def signup():
     try:
-        data = request.get_json()
-        app.logger.info(f"Received signup data: {data}")
+        datos = request.get_json()
+        app.logger.info(f"Datos de registro recibidos: {datos}")
 
         # Extract sign-up details
-        name = data.get('name')
-        email_or_phone = data.get('email_or_phone')
-        password = data.get('password')
+        nombre = datos.get('nombre')
+        correo_o_telefono = datos.get('correo_o_telefono')
+        contrasena = datos.get('contrasena')
 
         # Validate input
-        if not all([name, email_or_phone, password]):
-            return jsonify({"error": "Missing required fields"}), 400
+        if not all([nombre, correo_o_telefono, contrasena]):
+            return jsonify({"error": "Faltan campos requeridos"}), 400
 
         # Check if user already exists
-        existing_user = users_collection.find_one({"email_or_phone": email_or_phone})
-        if existing_user:
-            return jsonify({"error": "User already exists"}), 409
+        usuario_existente = users_collection.find_one({"correo_o_telefono": correo_o_telefono})
+        if usuario_existente:
+            return jsonify({"error": "El usuario ya existe"}), 409
 
         # Hash password
-        hashed_password = hash_password(password)
+        contrasena_hasheada = hash_password(contrasena)
 
         # Insert into users collection
-        new_user = {
-            "name": name,
-            "email_or_phone": email_or_phone,
-            "password": hashed_password,
+        nuevo_usuario = {
+            "nombre": nombre,
+            "correo_o_telefono": correo_o_telefono,
+            "contrasena": contrasena_hasheada,
         }
-        result = users_collection.insert_one(new_user)
+        resultado = users_collection.insert_one(nuevo_usuario)
         
-        if result.inserted_id:
-            app.logger.info(f"User created with ID: {result.inserted_id}")
-            return jsonify({"message": "Signup successful", "user_id": str(result.inserted_id)}), 201
+        if resultado.inserted_id:
+            app.logger.info(f"Usuario creado con ID: {resultado.inserted_id}")
+            return jsonify({"mensaje": "Registro exitoso", "user_id": str(resultado.inserted_id)}), 201
         else:
-            app.logger.error("Failed to insert user into database")
-            return jsonify({"error": "Failed to create user"}), 500
+            app.logger.error("Fallo al insertar usuario en la base de datos")
+            return jsonify({"error": "Fallo al crear usuario"}), 500
 
     except Exception as e:
-        app.logger.error(f"Error in signup: {str(e)}")
+        app.logger.error(f"Error en el registro: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 # Role Questionnaire Route
 @app.route('/role', methods=['POST'])
 def role():
     try:
-        data = request.get_json()
-        app.logger.info(f"Received role data: {data}")
-        user_id = data.get('user_id')
-        role = data.get('role')
+        datos = request.get_json()
+        app.logger.info(f"Datos de rol recibidos: {datos}")
+        user_id = datos.get('user_id')
+        rol = datos.get('rol')
 
-        if not user_id or not role:
-            return jsonify({"error": "Missing user_id or role"}), 400
+        if not user_id or not rol:
+            return jsonify({"error": "Falta user_id o rol"}), 400
 
-        if role == 'client':
-            case_type = data.get('case_type')
-            if not case_type:
-                return jsonify({"error": "Missing case_type for client"}), 400
-            result = clients_collection.insert_one({
+        if rol == 'cliente':
+            tipo_caso = datos.get('tipo_caso')
+            if not tipo_caso:
+                return jsonify({"error": "Falta tipo_caso para el cliente"}), 400
+            resultado = clients_collection.insert_one({
                 "user_id": ObjectId(user_id),
-                "case_type": case_type
+                "tipo_caso": tipo_caso
             })
-        elif role == 'lawyer':
-            lawyer_id = data.get('lawyer_id')
-            password = data.get('password')
-            if not lawyer_id or not password:
-                return jsonify({"error": "Missing lawyer_id or password"}), 400
-            result = lawyers_collection.insert_one({
-                "user_id": ObjectId(user_id),
-                "lawyer_id": lawyer_id,
-                "password": hash_password(password),
-            })
-        elif role == 'student':
-            matricula = data.get('matricula')
-            password = data.get('password')
-            if not matricula or not password:
-                return jsonify({"error": "Missing matricula or password"}), 400
-            result = students_collection.insert_one({
-                "user_id": ObjectId(user_id),
-                "matricula": matricula,
-                "password": hash_password(password),
-            })
+        elif rol == 'abogado':
+            id_abogado = datos.get('id_abogado')
+            contrasena = datos.get('contrasena')
+            if not id_abogado or not contrasena:
+                return jsonify({"error": "Falta id_abogado o contrasena"}), 400
+            
+            # Verify lawyer credentials
+            abogado = lawyers_collection.find_one({"id_abogado": id_abogado})
+            if not abogado:
+                return jsonify({"error": "Abogado no encontrado"}), 404
+            if not verify_password(abogado['contrasena'], contrasena):
+                return jsonify({"error": "Credenciales de abogado inválidas"}), 401
+            
+            # Link user account to lawyer credentials
+            resultado = lawyers_collection.update_one(
+                {"id_abogado": id_abogado},
+                {"$set": {"user_id": ObjectId(user_id)}}
+            )
+        elif rol == 'estudiante':
+            matricula = datos.get('matricula')
+            contrasena = datos.get('contrasena')
+            if not matricula or not contrasena:
+                return jsonify({"error": "Falta matricula o contrasena"}), 400
+            
+            # Verify student credentials
+            estudiante = students_collection.find_one({"matricula": matricula})
+            if not estudiante:
+                return jsonify({"error": "Estudiante no encontrado"}), 404
+            if not verify_password(estudiante['contrasena'], contrasena):
+                return jsonify({"error": "Credenciales de estudiante inválidas"}), 401
+            
+            # Link user account to student credentials
+            resultado = students_collection.update_one(
+                {"matricula": matricula},
+                {"$set": {"user_id": ObjectId(user_id)}}
+            )
         else:
-            return jsonify({"error": "Invalid role"}), 400
+            return jsonify({"error": "Rol inválido"}), 400
 
-        if result.inserted_id:
-            app.logger.info(f"Role details saved for user ID: {user_id}")
-            return jsonify({"message": "Role and additional details saved successfully"}), 200
+        if resultado.modified_count > 0 or (rol == 'cliente' and resultado.inserted_id):
+            app.logger.info(f"Detalles del rol guardados para el user ID: {user_id}")
+            return jsonify({"mensaje": "Rol y detalles adicionales guardados exitosamente"}), 200
         else:
-            app.logger.error(f"Failed to save role details for user ID: {user_id}")
-            return jsonify({"error": "Failed to save role details"}), 500
+            app.logger.error(f"Fallo al guardar detalles del rol para el user ID: {user_id}")
+            return jsonify({"error": "Fallo al guardar detalles del rol"}), 500
 
     except Exception as e:
-        app.logger.error(f"Error in role assignment: {str(e)}")
+        app.logger.error(f"Error en la asignación de rol: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 # Login Route
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        data = request.get_json()
-        app.logger.info(f"Received login attempt for: {data.get('email_or_phone')}")
-        email_or_phone = data.get('email_or_phone')
-        password = data.get('password')
+        datos = request.get_json()
+        app.logger.info(f"Intento de inicio de sesión recibido para: {datos.get('correo_o_telefono')}")
+        correo_o_telefono = datos.get('correo_o_telefono')
+        contrasena = datos.get('contrasena')
 
-        if not email_or_phone or not password:
-            return jsonify({"error": "Missing email/phone or password"}), 400
+        if not correo_o_telefono or not contrasena:
+            return jsonify({"error": "Falta correo/teléfono o contrasena"}), 400
 
         # Fetch user from the database
-        user = users_collection.find_one({"email_or_phone": email_or_phone})
+        usuario = users_collection.find_one({"correo_o_telefono": correo_o_telefono})
 
-        if user and verify_password(user['password'], password):
-            app.logger.info(f"Successful login for user: {email_or_phone}")
-            return jsonify({"message": "Login successful", "user_id": str(user['_id'])}), 200
+        if usuario and verify_password(usuario['contrasena'], contrasena):
+            app.logger.info(f"Inicio de sesión exitoso para el usuario: {correo_o_telefono}")
+            return jsonify({"mensaje": "Inicio de sesión exitoso", "user_id": str(usuario['_id'])}), 200
         else:
-            app.logger.warning(f"Failed login attempt for user: {email_or_phone}")
-            return jsonify({"error": "Invalid credentials"}), 401
+            app.logger.warning(f"Intento de inicio de sesión fallido para el usuario: {correo_o_telefono}")
+            return jsonify({"error": "Credenciales inválidas"}), 401
     except Exception as e:
-        app.logger.error(f"Error in login: {str(e)}")
+        app.logger.error(f"Error en el inicio de sesión: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 # Test Database Connection Route
 @app.route('/test_db', methods=['GET'])
 def test_db():
     try:
-        result = users_collection.insert_one({"test": "data"})
-        app.logger.info(f"Test insertion successful. ID: {result.inserted_id}")
-        users_collection.delete_one({"_id": result.inserted_id})
-        return jsonify({"message": "Database connection and operations successful"}), 200
+        resultado = users_collection.insert_one({"test": "datos"})
+        app.logger.info(f"Inserción de prueba exitosa. ID: {resultado.inserted_id}")
+        users_collection.delete_one({"_id": resultado.inserted_id})
+        return jsonify({"mensaje": "Conexión a la base de datos y operaciones exitosas"}), 200
     except Exception as e:
-        app.logger.error(f"Database test failed: {str(e)}")
+        app.logger.error(f"Prueba de base de datos fallida: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 # Running the Flask app
 if __name__ == '__main__':
+    insert_sample_data()  # Insert sample data when the app starts
     app.run(debug=True, host='0.0.0.0', port=5001)
