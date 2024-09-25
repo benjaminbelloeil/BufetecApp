@@ -1,64 +1,44 @@
 //
-//  BibliotecaDetailView.swift
+//  DocumentDetailView.swift
 //  BufetecApp
 //
-//  Created by David Balleza Ayala on 24/09/24.
+//  Created by David Balleza Ayala on 25/09/24.
 //
 
 import SwiftUI
 
-struct BibliotecaDetailView: View {
-    var biblioteca: Biblioteca // El modelo que contiene los datos del documento
+struct DocumentDetailView: View {
+    var documento: Documento // El modelo de documento
 
     var body: some View {
         ScrollView {
             VStack(alignment: .center, spacing: 16) {
                 // Título del documento
-                Text(biblioteca.titulo)
+                Text(documento.nombreDocumento)
                     .font(.title2)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.center)
 
                 // Autor del documento (si está disponible)
-                Text(biblioteca.autor)
+                Text("Autor desconocido")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
 
                 // Imagen de la portada (si está disponible)
-                AsyncImage(url: URL(string: biblioteca.urlRecurso)) { image in
+                AsyncImage(url: URL(string: documento.urlDocumento)) { image in
                     image
                         .resizable()
                         .scaledToFit()
                         .frame(width: 150, height: 220)
                 } placeholder: {
-                    Image(systemName: "book")
+                    Image(systemName: "doc.text")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 150, height: 220)
                         .background(Color(.systemGray5))
                         .cornerRadius(8)
                 }
-
-                // Número de páginas (si está disponible)
-//                if let paginas = biblioteca.paginas {
-//                    Text("\(paginas) Páginas")
-//                        .font(.caption)
-//                        .fontWeight(.bold)
-//                        .padding(.vertical, 8)
-//                }
-
-                // Descripción (si está disponible)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Descripción")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Text(biblioteca.descripcion)
-                        .font(.body)
-                        .foregroundColor(.gray)
-                }
-                .padding(.horizontal)
 
                 // Botones: Preguntar y Descargar
                 HStack(spacing: 20) {
@@ -96,22 +76,20 @@ struct BibliotecaDetailView: View {
             }
             .padding()
         }
-        .navigationTitle(biblioteca.titulo)
+        .navigationTitle(documento.nombreDocumento)
     }
 }
 
 #Preview {
-    let dummyBiblioteca = Biblioteca(
+    let dummyDocumento = Documento(
         id: "1",
-        titulo: "Constitución Política de los Estados Unidos Mexicanos",
-        descripcion: "Libro epico",
-        tipoRecurso: "Libro",
-        categoria: "Derecho Constitucional",
-        autor: "Aguilar Morales, Luis María",
-        fechaCreacion: Date(),
-        urlRecurso: "https://example.com/portada.jpg", // Imagen de ejemplo
-        status: "Activo"
+        casoId: "123",
+        nombreDocumento: "Sentencia de divorcio",
+        tipoDocumento: "Sentencia",
+        urlDocumento: "https://example.com/sentencia.pdf",
+        status: "Activo",
+        createdAt: Date()
     )
-
-    BibliotecaDetailView(biblioteca: dummyBiblioteca)
+    
+    DocumentDetailView(documento: dummyDocumento)
 }

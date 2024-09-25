@@ -1,15 +1,8 @@
-//
-//  BibliotecaView.swift
-//  BufetecApp
-//
-//  Created by David Balleza Ayala on 24/09/24.
-//
-
 import SwiftUI
 
 struct BibliotecaView: View {
     @ObservedObject var viewModel = BibliotecaViewModel()
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -30,18 +23,20 @@ struct BibliotecaView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(viewModel.obtenerDocumentosDeChats()) { documento in
-                                VStack {
-                                    Image(systemName: "doc.text")
-                                        .resizable()
-                                        .frame(width: 100, height: 150)
-                                    Text(documento.nombreDocumento)
-                                        .font(.caption)
-                                        .frame(width: 100)
-                                        .multilineTextAlignment(.center)
-                                    Text("Autor desconocido") // Puedes agregar el autor si tienes esta información
-                                        .font(.caption2)
+                                NavigationLink(destination: DocumentDetailView(documento: documento)) {
+                                    VStack {
+                                        Image(systemName: "doc.text")
+                                            .resizable()
+                                            .frame(width: 100, height: 150)
+                                        Text(documento.nombreDocumento)
+                                            .font(.caption)
+                                            .frame(width: 100)
+                                            .multilineTextAlignment(.center)
+                                        Text("Autor desconocido")
+                                            .font(.caption2)
+                                    }
+                                    .padding(.leading)
                                 }
-                                .padding(.leading)
                             }
                         }
                     }
@@ -54,18 +49,20 @@ struct BibliotecaView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(viewModel.obtenerSugerencias(tipoProceso: "Derecho Familiar")) { biblioteca in
-                                VStack {
-                                    Image(systemName: "book")
-                                        .resizable()
-                                        .frame(width: 100, height: 150)
-                                    Text(biblioteca.titulo)
-                                        .font(.caption)
-                                        .frame(width: 100)
-                                        .multilineTextAlignment(.center)
-                                    Text(biblioteca.autor)
-                                        .font(.caption2)
+                                NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
+                                    VStack {
+                                        Image(systemName: "book")
+                                            .resizable()
+                                            .frame(width: 100, height: 150)
+                                        Text(biblioteca.titulo)
+                                            .font(.caption)
+                                            .frame(width: 100)
+                                            .multilineTextAlignment(.center)
+                                        Text(biblioteca.autor)
+                                            .font(.caption2)
+                                    }
+                                    .padding(.leading)
                                 }
-                                .padding(.leading)
                             }
                         }
                     }
@@ -78,18 +75,20 @@ struct BibliotecaView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(viewModel.obtenerDocumentosUsuario()) { documento in
-                                VStack {
-                                    Image(systemName: "doc.text")
-                                        .resizable()
-                                        .frame(width: 100, height: 150)
-                                    Text(documento.nombreDocumento)
-                                        .font(.caption)
-                                        .frame(width: 100)
-                                        .multilineTextAlignment(.center)
-                                    Text("Autor desconocido") // Puedes agregar el autor si tienes esta información
-                                        .font(.caption2)
+                                NavigationLink(destination: DocumentDetailView(documento: documento)) {
+                                    VStack {
+                                        Image(systemName: "doc.text")
+                                            .resizable()
+                                            .frame(width: 100, height: 150)
+                                        Text(documento.nombreDocumento)
+                                            .font(.caption)
+                                            .frame(width: 100)
+                                            .multilineTextAlignment(.center)
+                                        Text("Autor desconocido")
+                                            .font(.caption2)
+                                    }
+                                    .padding(.leading)
                                 }
-                                .padding(.leading)
                             }
                         }
                     }
@@ -103,3 +102,4 @@ struct BibliotecaView: View {
 #Preview {
     BibliotecaView()
 }
+

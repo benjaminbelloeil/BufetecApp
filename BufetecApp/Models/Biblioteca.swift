@@ -10,6 +10,7 @@ import Foundation
 struct Biblioteca: Identifiable {
     var id: String
     var titulo: String
+    var descripcion: String
     var tipoRecurso: String
     var categoria: String
     var autor: String

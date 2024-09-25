@@ -18,8 +18,8 @@ class BibliotecaViewModel: ObservableObject {
     init() {
         // Datos dummy para la biblioteca
         bibliotecas = [
-            Biblioteca(id: "1", titulo: "Guía sobre derecho civil", tipoRecurso: "Artículo", categoria: "Recursos Educativos", autor: "Carlos Martínez", fechaCreacion: Date(), urlRecurso: "https://mi_servidor/videos/guia_derecho_civil.mp4", status: "Activo"),
-            Biblioteca(id: "2", titulo: "Matrimonio y divorcio", tipoRecurso: "Libro", categoria: "Derecho Familiar", autor: "María Pinkus", fechaCreacion: Date(), urlRecurso: "https://mi_servidor/videos/matrimonio_divorcio.pdf", status: "Activo")
+            Biblioteca(id: "1", titulo: "Guía sobre derecho civil", descripcion: "Libro para darte una idea del derecho civil", tipoRecurso: "Artículo", categoria: "Recursos Educativos", autor: "Carlos Martínez", fechaCreacion: Date(), urlRecurso: "https://mi_servidor/videos/guia_derecho_civil.mp4", status: "Activo"),
+            Biblioteca(id: "2", titulo: "Matrimonio y divorcio", descripcion: "Libro para que aprendas como divociarte", tipoRecurso: "Libro", categoria: "Derecho Familiar", autor: "María Pinkus", fechaCreacion: Date(), urlRecurso: "https://mi_servidor/videos/matrimonio_divorcio.pdf", status: "Activo")
         ]
         
         documentos = [
