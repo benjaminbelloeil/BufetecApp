@@ -48,7 +48,7 @@ struct BibliotecaView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Derecho Familiar")) { biblioteca in
+                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Divorcio")) { biblioteca in
                                 NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
                                     VStack {
                                         Image(systemName: "book")

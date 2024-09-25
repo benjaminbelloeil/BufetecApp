@@ -110,6 +110,7 @@ struct BibliotecaDetailView: View {
         autor: "Aguilar Morales, Luis María",
         fechaCreacion: Date(),
         urlRecurso: "https://example.com/portada.jpg", // Imagen de ejemplo
+        portada: "https://portada.com/hola.png",
         status: "Activo"
     )
 
