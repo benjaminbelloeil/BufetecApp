@@ -1,10 +1,17 @@
 import SwiftUI
 
-struct BottomNav: View {
+struct Main: View {
     @State private var selectedTab: Tab = .profile
+    @State private var userType: UserType = .alumno // Change this to test different user types
 
     enum Tab: Hashable {
-        case profile, clients, cases, lawyers
+        case profile, clients, cases, lawyers, library
+    }
+
+    enum UserType {
+        case cliente
+        case alumno
+        case abogado
     }
 
     var body: some View {
@@ -14,28 +21,44 @@ struct BottomNav: View {
                     .tabItem { EmptyView() }
                     .tag(Tab.profile)
 
-                ClienteListView(clientes: [
-                    Cliente(name: "María González", caseType: "Divorcio", status: "Activo"),
-                    Cliente(name: "Carlos Rodríguez", caseType: "Custodia", status: "En espera"),
-                    Cliente(name: "Ana Martínez", caseType: "Herencia", status: "Cerrado")
-                ])
-                .tabItem { EmptyView() }
-                .tag(Tab.clients)
+                if userType == .alumno || userType == .abogado {
+                    ClienteListView(clientes: [
+                                        Cliente(name: "María González", caseType: "Divorcio", status: "Activo"),
+                                        Cliente(name: "Carlos Rodríguez", caseType: "Custodia", status: "En espera"),
+                                        Cliente(name: "Ana Martínez", caseType: "Herencia", status: "Cerrado")
+                                    ])
+                        .tabItem { EmptyView() }
+                        .tag(Tab.clients)
+                }
 
-                CaseDetailView()
-                    .tabItem { EmptyView() }
-                    .tag(Tab.cases)
+                if userType == .abogado{
+                    CaseDetailView()
+                        .tabItem { EmptyView() }
+                        .tag(Tab.cases)
+                }
 
+                /*if userType == .alumno || userType == .abogado {
+                    LibraryView()//
+                        .tabItem { EmptyView() }
+                        .tag(Tab.library)
+                }*/
+                
+                if userType == .cliente {
+                    ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
+                        .tabItem { EmptyView() }
+                        .tag(Tab.cases)
+                }
+                 
                 AbogadoListView(lawyers: [
                     Lawyer(name: "Lic. Ana María López", specialty: "Derecho Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
                     Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
                     Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Laboral", caseType: "Conflictos Laborales", imageName: "avatar3")
                 ])
-                    .tabItem { EmptyView() }
-                    .tag(Tab.lawyers)
+                .tabItem { EmptyView() }
+                .tag(Tab.lawyers)
             }
 
-            CustomTabBar(selectedTab: $selectedTab)
+            CustomTabBar(selectedTab: $selectedTab, userType: userType)
         }
         .edgesIgnoringSafeArea(.bottom)
     }
@@ -43,21 +66,41 @@ struct BottomNav: View {
 
 struct TabItem: Identifiable {
     let id = UUID()
-    let tab: BottomNav.Tab
+    let tab: Main.Tab
     let icon: String
     let title: String
 }
 
 struct CustomTabBar: View {
-    @Binding var selectedTab: BottomNav.Tab
+    @Binding var selectedTab: Main.Tab
     @Namespace private var namespace
+    let userType: Main.UserType
 
-    let tabItems: [TabItem] = [
-        TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
-        TabItem(tab: .clients, icon: "person.3.fill", title: "Clientes"),
-        TabItem(tab: .cases, icon: "folder.fill", title: "Casos"),
-        TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
-    ]
+    var tabItems: [TabItem] {
+        switch userType {
+        case .cliente:
+            return [
+                TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
+                TabItem(tab: .cases, icon: "folder.fill", title: "Mi Caso"),
+                TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
+            ]
+        case .alumno:
+            return [
+                TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
+              /*  TabItem(tab: .library, icon: "books.vertical.fill", title: "Biblioteca"),*/
+                TabItem(tab: .clients, icon: "person.3.fill", title: "Clientes"),
+                TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
+            ]
+        case .abogado:
+            return [
+                TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
+                TabItem(tab: .clients, icon: "person.3.fill", title: "Clientes"),
+                TabItem(tab: .cases, icon: "folder.fill", title: "Mis Casos"),
+                /*TabItem(tab: .library, icon: "books.vertical.fill", title: "Biblioteca"),*/
+                TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
+            ]
+        }
+    }
 
     var body: some View {
         HStack {
@@ -127,8 +170,9 @@ struct TabBarButton: View {
     }
 }
 
-struct BottomNav_Previews: PreviewProvider {
+struct Main_Previews: PreviewProvider {
     static var previews: some View {
-        BottomNav()
+        Main()
     }
 }
+
