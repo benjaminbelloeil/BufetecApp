@@ -2,7 +2,7 @@ import SwiftUI
 
 struct Main: View {
     @State private var selectedTab: Tab = .profile
-    @State private var userType: UserType = .abogado // Change this to test different user types
+    @State private var userType: UserType = .cliente // Change this to test different user types
 
     enum Tab: Hashable {
         case profile, clients, cases, lawyers, Biblioteca
@@ -33,6 +33,12 @@ struct Main: View {
 
                 if userType == .abogado{
                     CaseDetailView()
+                        .tabItem { EmptyView() }
+                        .tag(Tab.cases)
+                }
+                
+                if userType == .cliente{
+                    ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
                         .tabItem { EmptyView() }
                         .tag(Tab.cases)
                 }
