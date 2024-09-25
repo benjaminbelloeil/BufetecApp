@@ -1,77 +1,79 @@
-//
-//  AbogadoListView.swift
-//  BufetecApp
-//
-//  Created by Benjamin Belloeil on 9/21/24.
-//
-
 import SwiftUI
 
 struct AbogadoListView: View {
-    var lawyers: [Lawyer]  // Cambiamos a un array de abogados
+    var lawyers: [Lawyer]
+    @State private var searchText = ""
+
+    var filteredLawyers: [Lawyer] {
+        if searchText.isEmpty {
+            return lawyers
+        } else {
+            return lawyers.filter { $0.name.lowercased().contains(searchText.lowercased()) ||
+                                    $0.specialty.lowercased().contains(searchText.lowercased()) }
+        }
+    }
 
     var body: some View {
         NavigationView {
-            List(lawyers) { lawyer in
-                HStack(alignment: .top) {
-                    // Imagen del abogado
-                    Image(lawyer.imageName)
-                        .resizable()
-                        .frame(width: 100, height: 60)
-                        .clipShape(Circle())
-                        .padding(.trailing, 10) // Espacio entre la imagen y el texto
-
-                    // Información del abogado con íconos
-                    VStack(alignment: .leading, spacing: 10) { // Aumenta el espacio entre los textos
-                        HStack(alignment: .center, spacing: 10) {
-                            Text(lawyer.name)
-                                .font(.headline)
-                                .foregroundColor(.white)
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    ForEach(filteredLawyers) { lawyer in
+                        NavigationLink(destination: AbogadoDetailView(lawyer: lawyer)) {
+                            LawyerCard(lawyer: lawyer)
                         }
-                        HStack(alignment: .center) {
-                            Image(systemName: "folder")
-                                .foregroundColor(.white)
-                            Text(lawyer.specialty)
-                                .font(.subheadline)
-                                .foregroundColor(.white)
-                        }
-
-                        HStack(alignment: .center, spacing: 10) { // Espacio entre el ícono y el texto
-                            Image(systemName: "doc")
-                                .foregroundColor(.white)
-                                .padding(.top, 10)
-                            Text("Casos Asociado: \(lawyer.caseType)")
-                                .font(.footnote)
-                                .foregroundColor(.white)
-                                .padding(.top, 5) // Alinea el texto con los íconos
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .lineLimit(2)
-                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
-                .frame(maxWidth: .infinity, minHeight: 150) // Asegura que las tarjetas ocupen todo el ancho disponible
-                .padding(.vertical, 12) // Ajusta el padding vertical
-                .padding(.horizontal, 20) // Aumenta el padding horizontal para hacer las tarjetas más anchas
-                .background(Color.blue)
-                .cornerRadius(10)
-                .background(
-                    NavigationLink(destination: AbogadoDetailView(lawyer: lawyer)) {
-                        EmptyView()
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .opacity(0)
-                )
+                .padding()
             }
-            .listStyle(PlainListStyle())  // Para eliminar cualquier estilo adicional de la lista
             .navigationTitle("Abogados")
+            .background(Color(.systemGroupedBackground))
+            .searchable(text: $searchText, prompt: "Buscar abogados")
         }
     }
 }
 
-#Preview {
-    AbogadoListView(lawyers: [
-        Lawyer(name: "Lic. Ana María López", specialty: "Derechos Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
-        Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
-        Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2")
-    ])
+struct LawyerCard: View {
+    var lawyer: Lawyer
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(lawyer.imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 80, height: 80)
+                .clipShape(Circle())
+                .shadow(radius: 3)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text(lawyer.name)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Label(lawyer.specialty, systemImage: "briefcase")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                Label(lawyer.caseType, systemImage: "doc.text")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+            }
+            Spacer()
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}
+
+struct AbogadoListView_Previews: PreviewProvider {
+    static var previews: some View {
+        AbogadoListView(lawyers: [
+            Lawyer(name: "Lic. Ana María López", specialty: "Derecho Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
+            Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
+            Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Laboral", caseType: "Conflictos Laborales", imageName: "avatar3")
+        ])
+    }
 }
