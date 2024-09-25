@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
+from flask_pymongo import PyMongo  # type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
-from flask_cors import CORS
+from flask_cors import CORS  # type: ignore
 import logging
 
 
-app = Flask(__name__)
+app: Flask = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Configure logging
