@@ -2,10 +2,10 @@ import SwiftUI
 
 struct Main: View {
     @State private var selectedTab: Tab = .profile
-    @State private var userType: UserType = .alumno // Change this to test different user types
+    @State private var userType: UserType = .abogado // Change this to test different user types
 
     enum Tab: Hashable {
-        case profile, clients, cases, lawyers, library
+        case profile, clients, cases, lawyers, Biblioteca
     }
 
     enum UserType {
@@ -37,18 +37,12 @@ struct Main: View {
                         .tag(Tab.cases)
                 }
 
-                /*if userType == .alumno || userType == .abogado {
-                    LibraryView()//
+                if userType == .alumno || userType == .abogado {
+                    BibliotecaView()//
                         .tabItem { EmptyView() }
-                        .tag(Tab.library)
-                }*/
-                
-                if userType == .cliente {
-                    ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
-                        .tabItem { EmptyView() }
-                        .tag(Tab.cases)
+                        .tag(Tab.Biblioteca)
                 }
-                 
+
                 AbogadoListView(lawyers: [
                     Lawyer(name: "Lic. Ana María López", specialty: "Derecho Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
                     Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
@@ -87,7 +81,7 @@ struct CustomTabBar: View {
         case .alumno:
             return [
                 TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
-              /*  TabItem(tab: .library, icon: "books.vertical.fill", title: "Biblioteca"),*/
+                TabItem(tab: .Biblioteca, icon: "books.vertical.fill", title: "Biblioteca"),
                 TabItem(tab: .clients, icon: "person.3.fill", title: "Clientes"),
                 TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
             ]
@@ -96,7 +90,7 @@ struct CustomTabBar: View {
                 TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
                 TabItem(tab: .clients, icon: "person.3.fill", title: "Clientes"),
                 TabItem(tab: .cases, icon: "folder.fill", title: "Mis Casos"),
-                /*TabItem(tab: .library, icon: "books.vertical.fill", title: "Biblioteca"),*/
+                TabItem(tab: .Biblioteca, icon: "books.vertical.fill", title: "Biblioteca"),
                 TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
             ]
         }
