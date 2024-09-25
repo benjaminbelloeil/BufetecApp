@@ -26,19 +26,22 @@ struct BibliotecaDetailView: View {
                     .multilineTextAlignment(.center)
 
                 // Imagen de la portada (si está disponible)
-                AsyncImage(url: URL(string: biblioteca.urlRecurso)) { image in
+                AsyncImage(url: URL(string: biblioteca.portada)) { image in
                     image
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill() // Asegura que la imagen llene todo el frame
                         .frame(width: 150, height: 220)
+                        .cornerRadius(8) // Borde redondeado
+                        .clipped() // Recorta las partes que sobresalen del frame
                 } placeholder: {
                     Image(systemName: "book")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 150, height: 220)
                         .background(Color(.systemGray5))
-                        .cornerRadius(8)
+                        .cornerRadius(8) // Borde redondeado también para el placeholder
                 }
+
 
                 // Número de páginas (si está disponible)
 //                if let paginas = biblioteca.paginas {

@@ -45,27 +45,49 @@ struct BibliotecaView: View {
                     Text("Para ti")
                         .font(.headline)
                         .padding(.leading)
-                    
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(viewModel.obtenerSugerencias(tipoProceso: "Divorcio")) { biblioteca in
                                 NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
                                     VStack {
-                                        Image(systemName: "book")
-                                            .resizable()
-                                            .frame(width: 100, height: 150)
+                                        // Imagen de portada
+                                        ZStack {
+                                            Rectangle() // El contenedor de la imagen
+                                                .frame(width: 100, height: 150)
+                                                .foregroundColor(.gray) // Color de fondo si no hay imagen (opcional)
+                                            AsyncImage(url: URL(string: biblioteca.portada)) { image in
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill() // Escala la imagen para llenar el contenedor
+                                                    .frame(width: 100, height: 150)
+                                                    .clipped() // Recorta cualquier desbordamiento de la imagen
+                                            } placeholder: {
+                                                // Placeholder mientras se carga la imagen
+                                                Image(systemName: "book")
+                                                    .resizable()
+                                                    .frame(width: 100, height: 150)
+                                            }
+                                        }
+                                        
+                                        // Título del libro
                                         Text(biblioteca.titulo)
                                             .font(.caption)
                                             .frame(width: 100)
                                             .multilineTextAlignment(.center)
+                                            .foregroundColor(.black) // Texto en color negro
+
+                                        // Autor del libro
                                         Text(biblioteca.autor)
                                             .font(.caption2)
+                                            .foregroundColor(.black) // Texto en color negro
                                     }
                                     .padding(.leading)
                                 }
                             }
                         }
                     }
+
                     
                     // Sección "Tus documentos"
                     Text("Tus documentos")
