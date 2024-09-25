@@ -8,12 +8,14 @@ enum UserType {
 
 struct QuestionView: View {
     @Binding var showQuestions: Bool
+    @Binding var userId: String
     @State private var userType: UserType?
     @State private var currentQuestion = 1
     @State private var selectedProblem: String?
     @State private var identification = ""
     @State private var password = ""
     @State private var matricula = ""
+    @State private var errorMessage: String = ""
     @Namespace private var animation
     
     var body: some View {
@@ -93,8 +95,7 @@ struct QuestionView: View {
                     if currentQuestion < totalQuestions {
                         currentQuestion += 1
                     } else {
-                        // Handle completion
-                        showQuestions = false
+                        submitResponses()
                     }
                 }
             }) {
@@ -108,6 +109,12 @@ struct QuestionView: View {
             .padding(.horizontal)
             .padding(.bottom, 50)
             .disabled(!canProceed)
+
+            if !errorMessage.isEmpty {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .font(.footnote)
+            }
         }
         .background(Color(UIColor.systemBackground))
         .edgesIgnoringSafeArea(.all)
@@ -295,6 +302,77 @@ struct QuestionView: View {
             return true
         }
     }
+
+    private func submitResponses() {
+        guard let url = URL(string: "http://localhost:5001/role") else {
+            print("Invalid URL")
+            return
+        }
+
+        var parameters: [String: Any] = ["user_id": userId]
+
+        switch userType {
+        case .client:
+            parameters["role"] = "client"
+            parameters["case_type"] = selectedProblem
+        case .lawyer:
+            parameters["role"] = "lawyer"
+            parameters["lawyer_id"] = identification
+            parameters["password"] = password
+        case .student:
+            parameters["role"] = "student"
+            parameters["matricula"] = matricula
+            parameters["password"] = password
+        case .none:
+            errorMessage = "Please select a user type"
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            print("Error: \(error.localizedDescription)")
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error: \(error.localizedDescription)"
+                }
+                return
+            }
+
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.errorMessage = "No data received"
+                }
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    DispatchQueue.main.async {
+                        if let message = json["message"] as? String, message == "Role and additional details saved successfully" {
+                            // Handle successful submission (e.g., navigate to home screen)
+                            print("Responses submitted successfully")
+                            self.showQuestions = false
+                        } else if let error = json["error"] as? String {
+                            self.errorMessage = error
+                        }
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error decoding response: \(error.localizedDescription)"
+                }
+            }
+        }.resume()
+    }
 }
 
 struct OptionRow: View {
@@ -352,6 +430,6 @@ extension View {
     }
 }
 
-#Preview{
-    QuestionView(showQuestions: .constant(true))
+#Preview {
+    QuestionView(showQuestions: .constant(true), userId: .constant("12345"))
 }

@@ -9,6 +9,7 @@ struct Login: View {
     @State private var showPassword: Bool = false
     @State private var showForgotPasswordView: Bool = false
     @State private var showResetView: Bool = false
+    @State private var errorMessage: String = ""
 
     private var isFormFilled: Bool {
         !email.isEmpty && !password.isEmpty
@@ -105,7 +106,7 @@ struct Login: View {
                 .padding(.horizontal)
                 
                 Button(action: {
-                    // Implement login functionality
+                    loginUser()
                 }) {
                     Text("Iniciar Sesión")
                         .frame(maxWidth: .infinity)
@@ -116,6 +117,12 @@ struct Login: View {
                 }
                 .padding(.horizontal)
                 .disabled(!isFormFilled)
+
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                }
 
                 VStack {
                     HStack{
@@ -158,6 +165,60 @@ struct Login: View {
                     .presentationDetents([.height(350)])
             }
         })
+    }
+
+    private func loginUser() {
+        guard let url = URL(string: "http://localhost:5001/login") else {
+            print("Invalid URL")
+            return
+        }
+
+        let parameters = ["email_or_phone": email, "password": password]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            print("Error: \(error.localizedDescription)")
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error: \(error.localizedDescription)"
+                }
+                return
+            }
+
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.errorMessage = "No data received"
+                }
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    DispatchQueue.main.async {
+                        if let message = json["message"] as? String, message == "Login successful" {
+                            // Handle successful login (e.g., navigate to home screen)
+                            print("Login successful")
+                            self.errorMessage = ""
+                        } else if let error = json["error"] as? String {
+                            self.errorMessage = error
+                        }
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error decoding response: \(error.localizedDescription)"
+                }
+            }
+        }.resume()
     }
 }
 
