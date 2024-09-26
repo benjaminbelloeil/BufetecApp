@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo  # type: ignore
+from flask_pymongo import PyMongo #type: ignore
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson.objectid import ObjectId
-from flask_cors import CORS  # type: ignore
+from flask_cors import CORS #type: ignore
 import logging
+import uuid
+import datetime
+import threading
+import time
 
-
-app: Flask = Flask(__name__)
+app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Configure logging
@@ -28,6 +31,9 @@ users_collection = mongo.db.users
 lawyers_collection = mongo.db.abogados
 students_collection = mongo.db.alumnos
 clients_collection = mongo.db.clientes
+
+# Temporary storage for user signup data
+temp_users = {} #type: ignore
 
 # Password hashing utility
 def hash_password(contrasena):
@@ -71,7 +77,7 @@ def insert_sample_data():
                 "id_abogado": "AB123",
                 "nombre": "María Rodríguez",
                 "correo": "maria.rodriguez@bufete.com",
-                "contrasena": "abogado",
+                "contrasena": "abogado123",
                 "especializacion": "Derecho Civil",
                 "anos_de_experiencia": 10
             },
@@ -79,7 +85,7 @@ def insert_sample_data():
                 "id_abogado": "AB124",
                 "nombre": "Juan Pérez",
                 "correo": "juan.perez@bufete.com",
-                "contrasena": "abogado",
+                "contrasena": "Abogado124",
                 "especializacion": "Derecho Penal",
                 "anos_de_experiencia": 15
             }
@@ -111,37 +117,30 @@ def signup():
         datos = request.get_json()
         app.logger.info(f"Datos de registro recibidos: {datos}")
 
-        # Extract sign-up details
         nombre = datos.get('nombre')
         correo_o_telefono = datos.get('correo_o_telefono')
         contrasena = datos.get('contrasena')
 
-        # Validate input
         if not all([nombre, correo_o_telefono, contrasena]):
             return jsonify({"error": "Faltan campos requeridos"}), 400
 
-        # Check if user already exists
         usuario_existente = users_collection.find_one({"correo_o_telefono": correo_o_telefono})
         if usuario_existente:
             return jsonify({"error": "El usuario ya existe"}), 409
 
-        # Hash password
-        contrasena_hasheada = hash_password(contrasena)
+        # Generate a temporary user ID
+        temp_user_id = str(uuid.uuid4())
 
-        # Insert into users collection
-        nuevo_usuario = {
+        # Store user data temporarily
+        temp_users[temp_user_id] = {
             "nombre": nombre,
             "correo_o_telefono": correo_o_telefono,
-            "contrasena": contrasena_hasheada,
+            "contrasena": contrasena,
+            "timestamp": datetime.datetime.utcnow()
         }
-        resultado = users_collection.insert_one(nuevo_usuario)
-        
-        if resultado.inserted_id:
-            app.logger.info(f"Usuario creado con ID: {resultado.inserted_id}")
-            return jsonify({"mensaje": "Registro exitoso", "user_id": str(resultado.inserted_id)}), 201
-        else:
-            app.logger.error("Fallo al insertar usuario en la base de datos")
-            return jsonify({"error": "Fallo al crear usuario"}), 500
+
+        app.logger.info(f"Datos de usuario temporales almacenados con ID: {temp_user_id}")
+        return jsonify({"mensaje": "Registro iniciado", "temp_user_id": temp_user_id}), 200
 
     except Exception as e:
         app.logger.error(f"Error en el registro: {str(e)}")
@@ -153,18 +152,33 @@ def role():
     try:
         datos = request.get_json()
         app.logger.info(f"Datos de rol recibidos: {datos}")
-        user_id = datos.get('user_id')
+        temp_user_id = datos.get('temp_user_id')
         rol = datos.get('rol')
 
-        if not user_id or not rol:
-            return jsonify({"error": "Falta user_id o rol"}), 400
+        if not temp_user_id or not rol:
+            return jsonify({"error": "Falta temp_user_id o rol"}), 400
+
+        # Retrieve temporary user data
+        temp_user_data = temp_users.get(temp_user_id)
+        if not temp_user_data:
+            return jsonify({"error": "Datos de usuario temporal no encontrados"}), 404
+
+        # Create user in the database
+        contrasena_hasheada = hash_password(temp_user_data['contrasena'])
+        nuevo_usuario = {
+            "nombre": temp_user_data['nombre'],
+            "correo_o_telefono": temp_user_data['correo_o_telefono'],
+            "contrasena": contrasena_hasheada,
+        }
+        resultado_usuario = users_collection.insert_one(nuevo_usuario)
+        user_id = resultado_usuario.inserted_id
 
         if rol == 'cliente':
             tipo_caso = datos.get('tipo_caso')
             if not tipo_caso:
                 return jsonify({"error": "Falta tipo_caso para el cliente"}), 400
             resultado = clients_collection.insert_one({
-                "user_id": ObjectId(user_id),
+                "user_id": user_id,
                 "tipo_caso": tipo_caso
             })
         elif rol == 'abogado':
@@ -173,17 +187,16 @@ def role():
             if not id_abogado or not contrasena:
                 return jsonify({"error": "Falta id_abogado o contrasena"}), 400
             
-            # Verify lawyer credentials
-            abogado = lawyers_collection.find_one({"id_abogado": id_abogado})
+            abogado = lawyers_collection.find_one({"id_abogado": {"$regex": f"^{id_abogado}$", "$options": "i"}})
             if not abogado:
                 return jsonify({"error": "Abogado no encontrado"}), 404
+            
             if not verify_password(abogado['contrasena'], contrasena):
                 return jsonify({"error": "Credenciales de abogado inválidas"}), 401
             
-            # Link user account to lawyer credentials
             resultado = lawyers_collection.update_one(
-                {"id_abogado": id_abogado},
-                {"$set": {"user_id": ObjectId(user_id)}}
+                {"_id": abogado['_id']},
+                {"$set": {"user_id": user_id}}
             )
         elif rol == 'estudiante':
             matricula = datos.get('matricula')
@@ -191,27 +204,24 @@ def role():
             if not matricula or not contrasena:
                 return jsonify({"error": "Falta matricula o contrasena"}), 400
             
-            # Verify student credentials
             estudiante = students_collection.find_one({"matricula": matricula})
             if not estudiante:
                 return jsonify({"error": "Estudiante no encontrado"}), 404
             if not verify_password(estudiante['contrasena'], contrasena):
                 return jsonify({"error": "Credenciales de estudiante inválidas"}), 401
             
-            # Link user account to student credentials
             resultado = students_collection.update_one(
                 {"matricula": matricula},
-                {"$set": {"user_id": ObjectId(user_id)}}
+                {"$set": {"user_id": user_id}}
             )
         else:
             return jsonify({"error": "Rol inválido"}), 400
 
-        if resultado.modified_count > 0 or (rol == 'cliente' and resultado.inserted_id):
-            app.logger.info(f"Detalles del rol guardados para el user ID: {user_id}")
-            return jsonify({"mensaje": "Rol y detalles adicionales guardados exitosamente"}), 200
-        else:
-            app.logger.error(f"Fallo al guardar detalles del rol para el user ID: {user_id}")
-            return jsonify({"error": "Fallo al guardar detalles del rol"}), 500
+        # Remove temporary user data
+        del temp_users[temp_user_id]
+
+        app.logger.info(f"Usuario creado y rol asignado para el user ID: {user_id}")
+        return jsonify({"mensaje": "Usuario creado y rol asignado exitosamente", "user_id": str(user_id)}), 200
 
     except Exception as e:
         app.logger.error(f"Error en la asignación de rol: {str(e)}")
@@ -254,7 +264,28 @@ def test_db():
         app.logger.error(f"Prueba de base de datos fallida: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# Cleanup function for temporary users
+def cleanup_temp_users():
+    current_time = datetime.datetime.utcnow()
+    expired_users = [uid for uid, data in temp_users.items() 
+                     if (current_time - data['timestamp']).total_seconds() > 3600]  # 1 hour expiration
+    for uid in expired_users:
+        del temp_users[uid]
+    app.logger.info(f"Cleaned up {len(expired_users)} expired temporary users")
+
+# Background thread for cleanup
+def run_cleanup():
+    while True:
+        cleanup_temp_users()
+        time.sleep(3600)  # Run every hour
+
 # Running the Flask app
 if __name__ == '__main__':
     insert_sample_data()  # Insert sample data when the app starts
+    
+    # Start the cleanup thread
+    cleanup_thread = threading.Thread(target=run_cleanup)
+    cleanup_thread.daemon = True  # Daemonize thread
+    cleanup_thread.start()
+
     app.run(debug=True, host='0.0.0.0', port=5001)

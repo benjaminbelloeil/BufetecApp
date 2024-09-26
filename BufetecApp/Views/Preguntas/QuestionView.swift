@@ -1,11 +1,5 @@
 import SwiftUI
 
-enum UserType {
-    case cliente
-    case abogado
-    case estudiante
-}
-
 struct QuestionView: View {
     @Binding var showQuestions: Bool
     @Binding var userId: String
@@ -16,108 +10,115 @@ struct QuestionView: View {
     @State private var contrasena = ""
     @State private var matricula = ""
     @State private var errorMessage: String = ""
+    @State private var showMainView = false
     @Namespace private var animation
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            HStack {
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        if currentQuestion > 1 {
-                            currentQuestion -= 1
-                        } else {
+        Group {
+            if showMainView {
+                MainView(userId: userId)
+            } else {
+                VStack(spacing: 20) {
+                    // Header
+                    HStack {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                if currentQuestion > 1 {
+                                    currentQuestion -= 1
+                                } else {
+                                    showQuestions = false
+                                }
+                            }
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(.blue)
+                                .padding()
+                        }
+                        Spacer()
+                        Text("Preguntas Iniciales")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Spacer()
+                        Button(action: {
                             showQuestions = false
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.gray)
+                                .padding()
                         }
                     }
-                }) {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.blue)
-                        .padding()
-                }
-                Spacer()
-                Text("Preguntas Iniciales")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Spacer()
-                Button(action: {
-                    showQuestions = false
-                }) {
-                    Image(systemName: "xmark")
+                    .padding(.top, 50)
+                    
+                    // Animated Progress bar
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(height: 8)
+                            Rectangle()
+                                .fill(Color.blue)
+                                .frame(width: geometry.size.width * CGFloat(currentQuestion) / CGFloat(totalQuestions), height: 8)
+                                .animation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0), value: currentQuestion)
+                        }
+                        .cornerRadius(4)
+                    }
+                    .frame(height: 8)
+                    .padding(.horizontal)
+                    
+                    Text("\(currentQuestion)/\(totalQuestions)")
+                        .font(.caption)
                         .foregroundColor(.gray)
-                        .padding()
-                }
-            }
-            .padding(.top, 50)
-            
-            // Animated Progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 8)
-                    Rectangle()
-                        .fill(Color.blue)
-                        .frame(width: geometry.size.width * CGFloat(currentQuestion) / CGFloat(totalQuestions), height: 8)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0), value: currentQuestion)
-                }
-                .cornerRadius(4)
-            }
-            .frame(height: 8)
-            .padding(.horizontal)
-            
-            Text("\(currentQuestion)/\(totalQuestions)")
-                .font(.caption)
-                .foregroundColor(.gray)
-            
-            Spacer()
-                .frame(height: 20)
-            
-            // Questions with transition
-            ZStack {
-                if currentQuestion == 1 {
-                    roleSelectionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if userType == .cliente {
-                    clientQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if userType == .abogado {
-                    lawyerQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                } else if userType == .estudiante {
-                    studentQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                }
-            }
-            .animation(.easeInOut(duration: 0.3), value: currentQuestion)
-            
-            Spacer()
-            
-            // Continue Button
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    if currentQuestion < totalQuestions {
-                        currentQuestion += 1
-                    } else {
-                        submitResponses()
+                    
+                    Spacer()
+                        .frame(height: 20)
+                    
+                    // Questions with transition
+                    ZStack {
+                        if currentQuestion == 1 {
+                            roleSelectionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        } else if userType == .cliente {
+                            clientQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        } else if userType == .abogado {
+                            lawyerQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        } else if userType == .estudiante {
+                            studentQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.3), value: currentQuestion)
+                    
+                    Spacer()
+                    
+                    // Continue Button
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            if currentQuestion < totalQuestions {
+                                currentQuestion += 1
+                            } else {
+                                submitResponses()
+                            }
+                        }
+                    }) {
+                        Text("Continuar")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(canProceed ? Color.blue : Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 50)
+                    .disabled(!canProceed)
+
+                    if !errorMessage.isEmpty {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.footnote)
                     }
                 }
-            }) {
-                Text("Continuar")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(canProceed ? Color.blue : Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 50)
-            .disabled(!canProceed)
-
-            if !errorMessage.isEmpty {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .font(.footnote)
+                .background(Color(UIColor.systemBackground))
+                .edgesIgnoringSafeArea(.all)
             }
         }
-        .background(Color(UIColor.systemBackground))
-        .edgesIgnoringSafeArea(.all)
     }
     
     var roleSelectionView: some View {
@@ -309,18 +310,15 @@ struct QuestionView: View {
             return
         }
 
-        var parameters: [String: Any] = ["user_id": userId]
+        var parameters: [String: Any] = ["temp_user_id": userId, "rol": userType?.rawValue ?? ""]
 
         switch userType {
         case .cliente:
-            parameters["rol"] = "cliente"
             parameters["tipo_caso"] = selectedProblem
         case .abogado:
-            parameters["rol"] = "abogado"
             parameters["id_abogado"] = id_abogado
             parameters["contrasena"] = contrasena
         case .estudiante:
-            parameters["rol"] = "estudiante"
             parameters["matricula"] = matricula
             parameters["contrasena"] = contrasena
         case .none:
@@ -357,10 +355,11 @@ struct QuestionView: View {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     DispatchQueue.main.async {
-                        if let mensaje = json["mensaje"] as? String, mensaje == "Rol y detalles adicionales guardados exitosamente" {
-                            // Handle successful submission (e.g., navigate to home screen)
-                            print("Respuestas enviadas exitosamente")
-                            self.showQuestions = false
+                        if let mensaje = json["mensaje"] as? String, mensaje == "Usuario creado y rol asignado exitosamente" {
+                            if let newUserId = json["user_id"] as? String {
+                                self.userId = newUserId
+                            }
+                            self.showMainView = true
                         } else if let error = json["error"] as? String {
                             self.errorMessage = error
                         }
@@ -373,6 +372,12 @@ struct QuestionView: View {
             }
         }.resume()
     }
+}
+
+enum UserType: String {
+    case cliente = "cliente"
+    case abogado = "abogado"
+    case estudiante = "estudiante"
 }
 
 struct OptionRow: View {
@@ -399,21 +404,6 @@ struct OptionRow: View {
             .padding()
             .background(isSelected ? Color.blue.opacity(0.1) : Color(UIColor.secondarySystemBackground))
             .cornerRadius(10)
-        }
-    }
-}
-
-extension UserType {
-    init?(rawValue: String) {
-        switch rawValue {
-        case "cliente":
-            self = .cliente
-        case "abogado":
-            self = .abogado
-        case "estudiante":
-            self = .estudiante
-        default:
-            return nil
         }
     }
 }

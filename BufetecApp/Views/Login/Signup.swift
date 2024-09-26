@@ -9,14 +9,14 @@ struct Signup: View {
     @State private var showPassword: Bool = false
     @State private var showQuestions = false
     @State private var errorMessage: String = ""
-    @State private var userId: String = ""
+    @State private var tempUserId: String = ""
 
     private var isFormFilled: Bool {
         !nombre.isEmpty && !correo_o_telefono.isEmpty && !contrasena.isEmpty
     }
 
     var body: some View {
-        ZStack {
+        NavigationView {
             VStack(spacing: 20) {
                 Text("Regístrate")
                     .font(.largeTitle)
@@ -141,9 +141,10 @@ struct Signup: View {
                 .font(.footnote)
             }
             .padding()
+            .navigationBarHidden(true)
         }
         .fullScreenCover(isPresented: $showQuestions) {
-            QuestionView(showQuestions: $showQuestions, userId: $userId)
+            QuestionView(showQuestions: $showQuestions, userId: $tempUserId)
         }
     }
 
@@ -184,9 +185,9 @@ struct Signup: View {
             do {
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                     DispatchQueue.main.async {
-                        if let mensaje = json["mensaje"] as? String, mensaje == "Registro exitoso" {
-                            if let userId = json["user_id"] as? String {
-                                self.userId = userId
+                        if let mensaje = json["mensaje"] as? String, mensaje == "Registro iniciado" {
+                            if let tempUserId = json["temp_user_id"] as? String {
+                                self.tempUserId = tempUserId
                                 self.showQuestions = true
                             }
                             self.errorMessage = ""
