@@ -84,6 +84,7 @@ struct DocumentDetailView: View {
     let dummyDocumento = Documento(
         id: "1",
         casoId: "123",
+        userId: "235",
         nombreDocumento: "Sentencia de divorcio",
         tipoDocumento: "Sentencia",
         urlDocumento: "https://example.com/sentencia.pdf",

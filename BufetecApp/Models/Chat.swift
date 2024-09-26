@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct Message: Identifiable {
+struct Message: Identifiable, Codable{
     var id = UUID()
     var sender: String
     var message: String
     var timestamp: Date
 }
 
-struct Chat: Identifiable {
+struct Chat: Identifiable, Codable{
     var id: String
     var chatId: String
     var userId: String

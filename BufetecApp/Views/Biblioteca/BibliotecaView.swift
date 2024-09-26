@@ -34,7 +34,7 @@ struct BibliotecaView: View {
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) { // Añadir espacio entre las tarjetas
-                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Divorcio").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
+                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Derecho").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
                                 NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
                                     HStack {
                                         // Contenedor de la imagen con color de fondo
@@ -97,7 +97,7 @@ struct BibliotecaView: View {
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) { // Ajustar el espacio entre las tarjetas
-                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Divorcio").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
+                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Derecho").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
                                 NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
                                     VStack {
                                         // Imagen de portada
