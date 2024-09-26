@@ -23,11 +23,13 @@ class ChatViewModel: ObservableObject {
     // Function to either fetch or create a new chat for a document and user
     func loadOrCreateChat(documentId: String, userId: String) {
         // Check if chat already exists (dummy logic for now)
-        if let existingChat = findChat(documentId: documentId, userId: userId) {
-            self.chat = existingChat
-        } else {
-            createNewChat(documentId: documentId, userId: userId)
-        }
+        let newChat = Chat(id: UUID().uuidString, chatId: UUID().uuidString, userId: userId, documentId: documentId, assistantId: "assistant123", messages: sampleMessages)
+        self.chat = newChat
+        //        if let existingChat = findChat(documentId: documentId, userId: userId) {
+//            self.chat = existingChat
+//        } else {
+//            createNewChat(documentId: documentId, userId: userId)
+//        }
     }
 
     // Dummy function to simulate finding an existing chat

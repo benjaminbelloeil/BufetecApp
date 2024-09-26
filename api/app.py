@@ -16,7 +16,7 @@ CORS(app)  # Enable CORS for all routes
 logging.basicConfig(level=logging.DEBUG)
 
 # MongoDB configuration
-app.config["MONGO_URI"] = "mongodb://10.14.255.54:27017/BufetecDB"
+app.config["MONGO_URI"] = "mongodb://localhost:27017/BufetecDB"
 mongo = PyMongo(app)
 
 # Test MongoDB connection
@@ -279,13 +279,224 @@ def run_cleanup():
         cleanup_temp_users()
         time.sleep(3600)  # Run every hour
 
+@app.route('/biblioteca', methods=['GET'])
+def get_all_biblioteca():
+    try:
+        recursos = mongo.db.biblioteca.find()
+        result = []
+        for recurso in recursos:
+            result.append({
+                "id": str(recurso["_id"]),
+                "titulo": recurso["titulo"],
+                "descripcion": recurso.get("descripcion", ""),
+                "tipoRecurso": recurso["tipo_recurso"],
+                "categoria": recurso["categoria"],
+                "autor": recurso["autor"],
+                "fechaCreacion": recurso["fecha_creacion"],
+                "urlRecurso": recurso["url_recurso"],
+                "portada": recurso.get("portada", ""),
+                "status": recurso["status"]
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/biblioteca/<biblioteca_id>', methods=['GET'])
+def get_biblioteca_by_id(biblioteca_id):
+    try:
+        recurso = mongo.db.biblioteca.find_one({"_id": ObjectId(biblioteca_id)})
+        if recurso:
+            result = {
+                "id": str(recurso["_id"]),
+                "titulo": recurso["titulo"],
+                "descripcion": recurso.get("descripcion", ""),
+                "tipoRecurso": recurso["tipo_recurso"],
+                "categoria": recurso["categoria"],
+                "autor": recurso["autor"],
+                "fechaCreacion": recurso["fecha_creacion"],
+                "urlRecurso": recurso["url_recurso"],
+                "portada": recurso.get("portada", ""),
+                "status": recurso["status"]
+            }
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "Recurso no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/biblioteca', methods=['POST'])
+def create_biblioteca():
+    try:
+        datos = request.get_json()
+        nuevo_recurso = {
+            "titulo": datos["titulo"],
+            "descripcion": datos.get("descripcion", ""),
+            "tipo_recurso": datos["tipo_recurso"],
+            "categoria": datos["categoria"],
+            "autor": datos["autor"],
+            "fecha_creacion": datos.get("fecha_creacion", datetime.datetime.utcnow()),
+            "url_recurso": datos["url_recurso"],
+            "portada": datos.get("portada", ""),
+            "status": datos["status"]
+        }
+        resultado = mongo.db.biblioteca.insert_one(nuevo_recurso)
+        return jsonify({"id": str(resultado.inserted_id)}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/documentos', methods=['GET'])
+def get_all_documents():
+    try:
+        documentos = mongo.db.documentos.find()
+        result = []
+        for documento in documentos:
+            result.append({
+                "id": str(documento["_id"]),
+                "casoId": documento["caso_id"],
+                "userId": documento["user_id"],
+                "nombreDocumento": documento["nombre_documento"],
+                "tipoDocumento": documento["tipo_documento"],
+                "urlDocumento": documento["url_documento"],
+                "status": documento["status"],
+                "createdAt": documento["created_at"]
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/documentos/<user_id>', methods=['GET'])
+def get_documents_by_user(user_id):
+    try:
+        documentos = mongo.db.documentos.find({"user_id": user_id})
+        result = []
+        for documento in documentos:
+            result.append({
+                "id": str(documento["_id"]),
+                "casoId": documento["caso_id"],
+                "userId": documento["user_id"],
+                "nombreDocumento": documento["nombre_documento"],
+                "tipoDocumento": documento["tipo_documento"],
+                "urlDocumento": documento["url_documento"],
+                "status": documento["status"],
+                "createdAt": documento["fecha_creacion"]
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/documento/<documento_id>', methods=['GET'])
+def get_document_by_id(documento_id):
+    try:
+        documento = mongo.db.documentos.find_one({"_id": ObjectId(documento_id)})
+        if documento:
+            result = {
+                "id": str(documento["_id"]),
+                "casoId": documento["casoId"],
+                "nombre_documento": documento["nombre_documento"],
+                "tipo_documento": documento["tipo_documento"],
+                "url_documento": documento["url_documento"],
+                "status": documento["status"],
+                "fecha_creacion": documento["fecha_creacion"]
+            }
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "Documento no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/documento', methods=['POST'])
+def create_document():
+    try:
+        datos = request.get_json()
+        nuevo_documento = {
+            "casoId": datos["casoId"],
+            "nombre_documento": datos["nombre_documento"],
+            "tipo_documento": datos["tipo_documento"],
+            "url_documento": datos["url_documento"],
+            "status": datos["status"],
+            "fecha_creacion": datos.get("fecha_creacion", datetime.datetime.utcnow())
+        }
+        resultado = mongo.db.documentos.insert_one(nuevo_documento)
+        return jsonify({"id": str(resultado.inserted_id)}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/chats/<user_id>', methods=['GET'])
+def get_chats_by_user(user_id):
+    try:
+        chats = mongo.db.chats.find({"user_id": user_id})
+        result = []
+        for chat in chats:
+            result.append({
+                "id": str(chat["_id"]),
+                "chat_id": chat["chat_id"],
+                "user_id": chat["user_id"],
+                "document_id": chat["document_id"],
+                "assistant_id": chat["assistant_id"],
+                "messages": chat["messages"]
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/chat/<chat_id>', methods=['GET'])
+def get_chat_by_id(chat_id):
+    try:
+        chat = mongo.db.chats.find_one({"_id": ObjectId(chat_id)})
+        if chat:
+            result = {
+                "id": str(chat["_id"]),
+                "chat_id": chat["chat_id"],
+                "user_id": chat["user_id"],
+                "document_id": chat["document_id"],
+                "assistant_id": chat["assistant_id"],
+                "messages": chat["messages"]
+            }
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "Chat no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/chat', methods=['POST'])
+def create_chat():
+    try:
+        datos = request.get_json()
+        nuevo_chat = {
+            "chat_id": str(uuid.uuid4()),
+            "user_id": datos["user_id"],
+            "document_id": datos["document_id"],
+            "assistant_id": datos["assistant_id"],
+            "messages": datos.get("messages", [])
+        }
+        resultado = mongo.db.chats.insert_one(nuevo_chat)
+        return jsonify({"id": str(resultado.inserted_id)}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/chat/<chat_id>/messages', methods=['POST'])
+def add_message_to_chat(chat_id):
+    try:
+        datos = request.get_json()
+        nuevo_mensaje = {
+            "id": str(uuid.uuid4()),
+            "sender": datos["sender"],
+            "message": datos["message"],
+            "timestamp": datetime.datetime.utcnow()
+        }
+        resultado = mongo.db.chats.update_one(
+            {"_id": ObjectId(chat_id)},
+            {"$push": {"messages": nuevo_mensaje}}
+        )
+        if resultado.modified_count > 0:
+            return jsonify({"mensaje": "Mensaje agregado correctamente"}), 200
+        else:
+            return jsonify({"error": "Chat no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # Running the Flask app
 if __name__ == '__main__':
-    insert_sample_data()  # Insert sample data when the app starts
-    
-    # Start the cleanup thread
-    cleanup_thread = threading.Thread(target=run_cleanup)
-    cleanup_thread.daemon = True  # Daemonize thread
-    cleanup_thread.start()
-
     app.run(debug=True, host='0.0.0.0', port=5001)
