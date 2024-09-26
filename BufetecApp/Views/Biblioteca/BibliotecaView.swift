@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct BibliotecaView: View {
-    @ObservedObject var viewModel = BibliotecaViewModel()
+    @StateObject private var viewModel = BibliotecaViewModel()
     @State private var searchQuery: String = ""
+    
     // Variables to easily modify the size of the container
-        let containerWidth: CGFloat = 320
-        let cardWidth: CGFloat = 120
-        let containerHeight: CGFloat = 160
-        let imageWidth: CGFloat = 90
-        let imageHeight: CGFloat = 120
-
-
+    let containerWidth: CGFloat = 320
+    let cardWidth: CGFloat = 120
+    let containerHeight: CGFloat = 160
+    let imageWidth: CGFloat = 90
+    let imageHeight: CGFloat = 120
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -31,10 +31,10 @@ struct BibliotecaView: View {
                         .font(.headline)
                         .padding(.leading)
                         .padding(.top)
-
+                    
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) { // Añadir espacio entre las tarjetas
-                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Derecho").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
+                            ForEach(viewModel.bibliotecas.filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
                                 NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
                                     HStack {
                                         // Contenedor de la imagen con color de fondo
@@ -69,7 +69,7 @@ struct BibliotecaView: View {
                                                 .lineLimit(2) // Limitar a 2 líneas
                                                 .truncationMode(.tail) // Mostrar puntos suspensivos (...) si el texto es largo
                                                 .multilineTextAlignment(.leading) // Justificación a la izquierda
-
+                                            
                                             Text(biblioteca.autor)
                                                 .font(.caption) // Tamaño de texto para el autor
                                                 .foregroundColor(.gray)
@@ -78,7 +78,7 @@ struct BibliotecaView: View {
                                                 .multilineTextAlignment(.leading) // Justificación a la izquierda
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading) // Toma el ancho restante del contenedor
-
+                                        
                                     }
                                     .background(Color(.white)) // Fondo claro para toda la tarjeta
                                     .cornerRadius(12) // Bordes redondeados para la tarjeta
@@ -94,10 +94,10 @@ struct BibliotecaView: View {
                     Text("Para ti")
                         .font(.headline)
                         .padding(.leading)
-
+                    
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) { // Ajustar el espacio entre las tarjetas
-                            ForEach(viewModel.obtenerSugerencias(tipoProceso: "Derecho").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
+                            ForEach(viewModel.bibliotecas.filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
                                 NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
                                     VStack {
                                         // Imagen de portada
@@ -121,7 +121,7 @@ struct BibliotecaView: View {
                                                     .frame(width: 80, height: 120)
                                             }
                                         }
-
+                                        
                                         VStack {
                                             // Título del libro
                                             Text(biblioteca.titulo)
@@ -151,15 +151,15 @@ struct BibliotecaView: View {
                         }
                         .padding(.horizontal, 16)
                     }
-
+                    
                     // Sección "Tus documentos"
                     Text("Tus documentos")
                         .font(.headline)
                         .padding(.leading)
-
+                    
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) { // Ajustar el espacio entre las tarjetas
-                            ForEach(viewModel.obtenerDocumentosUsuario().filter { searchQuery.isEmpty || $0.nombreDocumento.localizedCaseInsensitiveContains(searchQuery) }) { documento in
+                            ForEach(viewModel.documentos.filter { searchQuery.isEmpty || $0.nombreDocumento.localizedCaseInsensitiveContains(searchQuery) }) { documento in
                                 NavigationLink(destination: DocumentDetailView(documento: documento)) {
                                     VStack {
                                         // Icono del documento
@@ -174,7 +174,7 @@ struct BibliotecaView: View {
                                                 .resizable()
                                                 .frame(width: imageWidth, height: imageHeight)
                                         }
-
+                                        
                                         // Título del documento
                                         Text(documento.nombreDocumento)
                                             .font(.caption)
@@ -183,7 +183,7 @@ struct BibliotecaView: View {
                                             .multilineTextAlignment(.center)
                                             .foregroundColor(.black) // Texto en color negro
                                             .frame(width: 80)
-
+                                        
                                         // Autor del documento
                                         Text("Autor desconocido")
                                             .font(.caption2)
@@ -209,10 +209,17 @@ struct BibliotecaView: View {
             .background(Color(.systemGray6))
             .navigationTitle("Biblioteca Legal")
         }
+        .onAppear {
+            async {
+                await viewModel.fetchBibliotecas()
+                await viewModel.fetchDocumentos()
+            }
+        }
     }
 }
-
-#Preview {
-    BibliotecaView()
-}
-
+    
+    struct BibliotecaView_Previews: PreviewProvider {
+        static var previews: some View {
+            BibliotecaView()
+        }
+    }

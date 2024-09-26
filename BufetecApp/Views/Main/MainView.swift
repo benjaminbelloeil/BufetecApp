@@ -19,9 +19,6 @@ struct MainView: View {
 
     var body: some View {
         Group {
-            if isLoading {
-                ProgressView("Cargando...")
-            } else {
                 ZStack(alignment: .bottom) {
                     TabView(selection: $selectedTab) {
                         PerfilView()
@@ -64,7 +61,6 @@ struct MainView: View {
                     CustomTabBar(selectedTab: $selectedTab, userType: userType)
                 }
                 .edgesIgnoringSafeArea(.bottom)
-            }
         }
         .onAppear {
             fetchUserData()
@@ -102,6 +98,7 @@ struct MainView: View {
                             default:
                                 print("Rol desconocido")
                             }
+                            print("User Type: \(self.userType)") // Add this line to print the userType
                         }
                         self.isLoading = false
                     }
@@ -163,7 +160,7 @@ struct CustomTabBar: View {
                     namespace: namespace,
                     onTap: {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                            selectedTab = item.tab
+                            selectedTab = item.tab // Update the selectedTab state variable
                         }
                     }
                 )
