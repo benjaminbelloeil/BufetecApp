@@ -4,11 +4,11 @@
 //
 //  Created by David Balleza Ayala on 24/09/24.
 //
-
 import SwiftUI
 
 struct BibliotecaDetailView: View {
     var biblioteca: Biblioteca // El modelo que contiene los datos del documento
+    @State private var navigateToChat = false // State to control navigation
 
     var body: some View {
         ScrollView {
@@ -42,15 +42,6 @@ struct BibliotecaDetailView: View {
                         .cornerRadius(8) // Borde redondeado también para el placeholder
                 }
 
-
-                // Número de páginas (si está disponible)
-//                if let paginas = biblioteca.paginas {
-//                    Text("\(paginas) Páginas")
-//                        .font(.caption)
-//                        .fontWeight(.bold)
-//                        .padding(.vertical, 8)
-//                }
-
                 // Descripción (si está disponible)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Descripción")
@@ -65,9 +56,8 @@ struct BibliotecaDetailView: View {
 
                 // Botones: Preguntar y Descargar
                 HStack(spacing: 20) {
-                    Button(action: {
-                        // Acción de preguntar
-                    }) {
+                    // Navegación al Chat cuando se presiona "Preguntar"
+                    NavigationLink(destination: ChatView(viewModel: ChatViewModel(), documentId: biblioteca.id, userId: "currentUserId")) {
                         HStack {
                             Image(systemName: "bubble.left.and.bubble.right.fill")
                             Text("Preguntar")
@@ -100,6 +90,7 @@ struct BibliotecaDetailView: View {
             .padding()
         }
         .navigationTitle(biblioteca.titulo)
+        .navigationBarTitleDisplayMode(.inline) // Make title inline to save space
     }
 }
 
@@ -117,5 +108,7 @@ struct BibliotecaDetailView: View {
         status: "Activo"
     )
 
-    BibliotecaDetailView(biblioteca: dummyBiblioteca)
+    NavigationStack {
+        BibliotecaDetailView(biblioteca: dummyBiblioteca)
+    }
 }
