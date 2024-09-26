@@ -1,14 +1,24 @@
 import SwiftUI
 
 struct AbogadoListView: View {
-    var lawyers: [Lawyer]
-  
+    @State private var lawyers: [Lawyer] = []
+    @State private var searchText = ""
+
+    var filteredLawyers: [Lawyer] {
+        if searchText.isEmpty {
+            return lawyers
+        } else {
+            return lawyers.filter { $0.nombre.lowercased().contains(searchText.lowercased()) ||
+                                    $0.especializacion.lowercased().contains(searchText.lowercased()) }
+        }
+    }
+
     var body: some View {
         NavigationView {
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    ForEach(lawyers) { lawyer in
-                        NavigationLink(destination: Text(lawyer.nombre)) { // AbogadoDetailView(lawyer: lawyer)
+                    ForEach(filteredLawyers) { lawyer in
+                        NavigationLink(destination: AbogadoDetailView(lawyer: lawyer)) {
                             LawyerCard(lawyer: lawyer)
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -18,7 +28,27 @@ struct AbogadoListView: View {
             }
             .navigationTitle("Abogados")
             .background(Color(.systemGroupedBackground))
+            .searchable(text: $searchText, prompt: "Buscar abogados")
         }
+        .onAppear {
+            fetchLawyers()
+        }
+    }
+    
+    func fetchLawyers() {
+        guard let url = URL(string: "http://localhost:5001/abogados") else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                if let decodedResponse = try? JSONDecoder().decode([Lawyer].self, from: data) {
+                    DispatchQueue.main.async {
+                        self.lawyers = decodedResponse
+                    }
+                    return
+                }
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }.resume()
     }
 }
 
@@ -26,75 +56,59 @@ struct LawyerCard: View {
     var lawyer: Lawyer
     
     var body: some View {
-        HStack(spacing: 16) {
-            Image(lawyer.imageName)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 80, height: 80)
-                .clipShape(Circle())
-                .shadow(radius: 3)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text(lawyer.nombre)
-                    .font(.headline)
-                    .foregroundColor(.primary)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 16) {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 70, height: 70)
+                    .foregroundColor(.blue)
+                    .background(Color.white)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.blue, lineWidth: 2))
+                    .shadow(radius: 5)
                 
-                Label(lawyer.especialidad, systemImage: "briefcase")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    ForEach(lawyer.casos_asignados, id: \.self) { caso in
-                        Label(caso, systemImage: "doc.text")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(lawyer.nombre)
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    
+                    Text(lawyer.especializacion)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Experiencia: \(lawyer.experienciaProfesional)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Casos ganados: \(lawyer.casosSentenciaFavorable)/\(lawyer.casosAtendidos)")
+                        .font(.caption)
+                        .foregroundColor(.green)
                 }
             }
-            Spacer()
+            
+            HStack {
+                Label(lawyer.correo, systemImage: "envelope")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                
+                Spacer()
+                
+                Label(lawyer.telefono, systemImage: "phone")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
     }
 }
 
-#Preview {
-    // Lista de prueba de abogados para previsualización
-    let sampleLawyers = [
-        Lawyer(
-            user_id: "66f32237273de98e8013e4f1",
-            nombre: "Juan Pérez",
-            especialidad: "Derecho Penal",
-            experiencia_profesional: "10 años",
-            disponibilidad: true,
-            maestria: "Maestría en Derecho Penal",
-            direccion: Direccion(calle: "Calle Falsa 123", ciudad: "Ciudad", estado: "Estado", codigo_postal: "12345"),
-            telefono: "8112345678",
-            correo: "juan.perez@example.com",
-            casos_atendidos: 50,
-            casos_con_setencia_a_favor: 45,
-            casos_asignados: ["Caso A", "Caso B"],
-            imageName: "lawyer1"
-        ),
-        Lawyer(
-            user_id: "66f32237273de98e8013e4f2",
-            nombre: "Maria García",
-            especialidad: "Derecho Civil",
-            experiencia_profesional: "5 años",
-            disponibilidad: false,
-            maestria: "Maestría en Derecho Civil",
-            direccion: Direccion(calle: "Calle Verdadera 456", ciudad: "Otra Ciudad", estado: "Otro Estado", codigo_postal: "67890"),
-            telefono: "8123456789",
-            correo: "maria.garcia@example.com",
-            casos_atendidos: 30,
-            casos_con_setencia_a_favor: 25,
-            casos_asignados: ["Caso C", "Caso D"],
-            imageName: "lawyer2"
-        )
-    ]
-    
-    AbogadoListView(lawyers: sampleLawyers)
+struct AbogadoListView_Previews: PreviewProvider {
+    static var previews: some View {
+        AbogadoListView()
+    }
 }

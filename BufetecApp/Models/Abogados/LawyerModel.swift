@@ -8,7 +8,7 @@ class LawyerModel: Observable{
     func fetchLawyers() async {
         
         lawyers.removeAll()
-        let url = URL(string: "http://127.0.0.1:5000/abogados")!
+        let url = URL(string: "http://127.0.0.1:5001/abogados")!
         let components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         
         var request = URLRequest(url: components.url!)

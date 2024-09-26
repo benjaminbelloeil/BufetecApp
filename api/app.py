@@ -148,19 +148,31 @@ def signup():
 
 
 
-@app.route("/abogados",methods=['GET'])
+@app.route('/abogados', methods=['GET'])
 def get_all_abogados():
-    #Solo los disponibles
-    abogados = lawyer_collection.find({"disponibilidad": True})
-    abogados_list = []
-    for item in abogados:
-        abogados_dict = {
-            "nombre": str(item.get('nombre')),  
-            "maestria": item.get('maestria'),
-            "casosAsociados": item.get('casos_asignados'),           
-        }
-        abogados_list.append(abogados_dict)
-    return jsonify(abogados_list)
+    try:
+        abogados = lawyer_collection.find()
+        result = []
+        for abogado in abogados:
+            result.append({
+                "id": str(abogado["_id"]),
+                "userId": str(abogado.get("user_id", "")),
+                "nombre": abogado["nombre"],
+                "especializacion": abogado["especializacion"],
+                "experienciaProfesional": abogado["experiencia_profesional"],
+                "disponibilidad": abogado["disponibilidad"],
+                "maestria": abogado["maestria"],
+                "direccion": abogado["direccion"],
+                "casosAsignados": abogado["casos_asignados"],
+                "telefono": abogado["telefono"],
+                "correo": abogado["correo"],
+                "casosAtendidos": abogado["casos_atendidos"],
+                "casosSentenciaFavorable": abogado["casos_con_sentencia_a_favor"],
+                "imageName": "abogado_placeholder"
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/abogado/<abogado_id>",methods=['GET'])
 def get_one_abogado(abogado_id):
@@ -193,7 +205,6 @@ def get_one_abogado(abogado_id):
             return jsonify({'message': f"No se encontró el abogado con el id {abogado_id}"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
-    
 
 # Role Questionnaire Route
 @app.route('/role', methods=['POST'])
@@ -544,6 +555,91 @@ def add_message_to_chat(chat_id):
             return jsonify({"error": "Chat no encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+def insert_sample_lawyers():
+    try:
+        # Clear existing lawyers
+        result = lawyer_collection.delete_many({})
+        print(f"Cleared {result.deleted_count} existing lawyers from the collection.")
+
+        sample_lawyers = [
+            {
+                "nombre": "María Rodríguez",
+                "especializacion": "Derecho Civil",
+                "experiencia_profesional": "15 años en litigios civiles",
+                "disponibilidad": True,
+                "maestria": "Maestría en Derecho Corporativo",
+                "direccion": {
+                    "calle": "Av. Revolución 123",
+                    "ciudad": "Monterrey",
+                    "estado": "Nuevo León",
+                    "codigo_postal": "64000"
+                },
+                "casos_asignados": [],
+                "telefono": "8181234567",
+                "correo": "maria.rodriguez@bufete.com",
+                "casos_atendidos": 120,
+                "casos_con_sentencia_a_favor": 95,
+            },
+            {
+                "nombre": "Juan Pérez",
+                "especializacion": "Derecho Penal",
+                "experiencia_profesional": "10 años en defensa penal",
+                "disponibilidad": True,
+                "maestria": "Maestría en Criminología",
+                "direccion": {
+                    "calle": "Calle Morelos 456",
+                    "ciudad": "Guadalajara",
+                    "estado": "Jalisco",
+                    "codigo_postal": "44100"
+                },
+                "casos_asignados": [],
+                "telefono": "3339876543",
+                "correo": "juan.perez@bufete.com",
+                "casos_atendidos": 80,
+                "casos_con_sentencia_a_favor": 60,
+            },
+            {
+                "nombre": "Ana López",
+                "especializacion": "Derecho Laboral",
+                "experiencia_profesional": "12 años en conflictos laborales",
+                "disponibilidad": True,
+                "maestria": "Maestría en Derecho del Trabajo",
+                "direccion": {
+                    "calle": "Paseo de la Reforma 789",
+                    "ciudad": "Ciudad de México",
+                    "estado": "CDMX",
+                    "codigo_postal": "06500"
+                },
+                "casos_asignados": [],
+                "telefono": "5551234567",
+                "correo": "ana.lopez@bufete.com",
+                "casos_atendidos": 150,
+                "casos_con_sentencia_a_favor": 130,
+            }
+        ]
+
+        for lawyer in sample_lawyers:
+            result = lawyer_collection.insert_one(lawyer)
+            print(f"Inserted lawyer: {lawyer['nombre']} (ID: {result.inserted_id})")
+
+        # Check final count
+        final_count = lawyer_collection.count_documents({})
+        print(f"Final number of documents in lawyers_collection: {final_count}")
+
+    except Exception as e:
+        print(f"Error in insert_sample_lawyers: {str(e)}")
+        raise
+
+@app.route('/insert_sample_lawyers', methods=['GET'])
+def insert_sample_lawyers_route():
+    insert_sample_lawyers()
+    return jsonify({"message": "Sample lawyers inserted successfully"}), 200
+
+
+
 
 
 # Running the Flask app

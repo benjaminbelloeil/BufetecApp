@@ -2,8 +2,9 @@ import SwiftUI
 
 struct MainView: View {
     @State private var selectedTab: Tab = .profile
-    @State private var userType: UserType = .cliente
+    @State private var userType: UserType = .abogado
     @State private var isLoading = true
+    @State private var lawyers: [Lawyer] = []
     let userId: String
 
     enum Tab: Hashable {
@@ -55,13 +56,9 @@ struct MainView: View {
                                 .tag(Tab.Biblioteca)
                         }
 
-                        AbogadoListView(lawyers: [
-                            Lawyer(name: "Lic. Ana María López", specialty: "Derecho Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
-                            Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
-                            Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Laboral", caseType: "Conflictos Laborales", imageName: "avatar3")
-                        ])
-                        .tabItem { EmptyView() }
-                        .tag(Tab.lawyers)
+                        AbogadoListView()
+                            .tabItem { EmptyView() }
+                            .tag(Tab.lawyers)
                     }
 
                     CustomTabBar(selectedTab: $selectedTab, userType: userType)

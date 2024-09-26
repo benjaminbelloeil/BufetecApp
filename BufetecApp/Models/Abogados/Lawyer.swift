@@ -1,26 +1,25 @@
-import SwiftUI
-struct Lawyer: Identifiable, Codable{
-    var id = UUID()
-    var user_id : String
-    var nombre: String
-    var especialidad: String
-    var experiencia_profesional: String
-    var disponibilidad: Bool
-    var maestria: String
-    var direccion : Direccion
-    var telefono: String
-    var correo : String
-    var casos_atendidos:Int
-    var casos_con_setencia_a_favor: Int
-    var casos_asignados: [String]
-    var imageName: String
-    
-}
+import Foundation
 
-struct Direccion : Codable{
-    var calle: String
-    var ciudad : String
-    var estado : String
-    var codigo_postal: String
+struct Lawyer: Identifiable, Codable {
+    let id: String
+    let userId: String
+    let nombre: String
+    let especializacion: String
+    let experienciaProfesional: String
+    let disponibilidad: Bool
+    let maestria: String
+    let direccion: Direccion
+    let casosAsignados: [String]
+    let telefono: String
+    let correo: String
+    let casosAtendidos: Int
+    let casosSentenciaFavorable: Int
+    let imageName: String
     
+    struct Direccion: Codable {
+        let calle: String
+        let ciudad: String
+        let estado: String
+        let codigo_postal: String
+    }
 }

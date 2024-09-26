@@ -2,43 +2,59 @@ import SwiftUI
 
 struct AbogadoDetailView: View {
     var lawyer: Lawyer
-    @State private var searchText = ""
     @State private var isContactExpanded = false
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(spacing: 20) {
                 // Lawyer image and name
                 VStack {
-                    Image(lawyer.imageName)
+                    Image(systemName: "person.circle.fill")
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 150, height: 150)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 120, height: 120)
+                        .foregroundColor(.white)
+                        .background(Color.blue)
                         .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 4))
                         .shadow(radius: 10)
                     
                     Text(lawyer.nombre)
                         .font(.title)
                         .fontWeight(.bold)
+                    
+                    Text(lawyer.especializacion)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color(.secondarySystemBackground))
+                .background(
+                    LinearGradient(gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.8)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                )
+                .foregroundColor(.white)
                 .cornerRadius(15)
 
                 // Lawyer details
                 VStack(alignment: .leading, spacing: 15) {
-                    detailRow(icon: "briefcase", title: "Especialidad", detail: lawyer.especialidad)
-                    detailRow(icon: "doc.text", title: "Casos Asociados", detail: lawyer.especialidad)
-                    detailRow(icon: "mappin", title: "Dirección", detail: "Zona Tec")
-                    detailRow(icon: "phone", title: "Teléfono", detail: "XXXXXXXXXX")
-                    detailRow(icon: "envelope", title: "Correo", detail: "abogado@example.com")
-                    detailRow(icon: "chart.bar", title: "Casos atendidos", detail: "7")
-                    detailRow(icon: "checkmark.seal", title: "Tasa de éxito", detail: "78%")
+                    detailRow(icon: "briefcase", title: "Especialidad", detail: lawyer.especializacion)
+                    detailRow(icon: "book", title: "Maestría", detail: lawyer.maestria)
+                    detailRow(icon: "clock", title: "Experiencia", detail: lawyer.experienciaProfesional)
+                    detailRow(icon: "mappin", title: "Dirección", detail: formatAddress(lawyer.direccion))
+                    detailRow(icon: "phone", title: "Teléfono", detail: lawyer.telefono)
+                    detailRow(icon: "envelope", title: "Correo", detail: lawyer.correo)
                 }
                 .padding()
-                .background(Color(.secondarySystemBackground))
+                .background(Color.white)
                 .cornerRadius(15)
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+
+                // Statistics
+                HStack(spacing: 15) {
+                    statisticCard(title: "Casos atendidos", value: "\(lawyer.casosAtendidos)")
+                    statisticCard(title: "Casos ganados", value: "\(lawyer.casosSentenciaFavorable)")
+                    statisticCard(title: "Tasa de éxito", value: "\(calculateSuccessRate(lawyer))%")
+                }
 
                 // Contact button
                 Button(action: {
@@ -82,7 +98,7 @@ struct AbogadoDetailView: View {
         }
         .navigationTitle("Detalle del Abogado")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $searchText, prompt: "Buscar en el perfil...")
+        .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
     }
     
     private func detailRow(icon: String, title: String, detail: String) -> some View {
@@ -93,12 +109,38 @@ struct AbogadoDetailView: View {
             
             VStack(alignment: .leading, spacing: 5) {
                 Text(title)
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundColor(.secondary)
                 Text(detail)
                     .font(.body)
             }
         }
+    }
+    
+    private func statisticCard(title: String, value: String) -> some View {
+        VStack {
+            Text(value)
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(.blue)
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+    
+    private func formatAddress(_ direccion: Lawyer.Direccion) -> String {
+        return "\(direccion.calle), \(direccion.ciudad), \(direccion.estado) \(direccion.codigo_postal)"
+    }
+    
+    private func calculateSuccessRate(_ lawyer: Lawyer) -> Int {
+        guard lawyer.casosAtendidos > 0 else { return 0 }
+        return Int((Double(lawyer.casosSentenciaFavorable) / Double(lawyer.casosAtendidos)) * 100)
     }
 }
 
@@ -106,19 +148,20 @@ struct AbogadoDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             AbogadoDetailView(lawyer: Lawyer(
-                user_id: "66f32237273de98e8013e4f2",
-                nombre: "Maria García",
-                especialidad: "Derecho Civil",
-                experiencia_profesional: "5 años",
-                disponibilidad: false,
-                maestria: "Maestría en Derecho Civil",
-                direccion: Direccion(calle: "Calle Verdadera 456", ciudad: "Otra Ciudad", estado: "Otro Estado", codigo_postal: "67890"),
-                telefono: "8123456789",
-                correo: "maria.garcia@example.com",
-                casos_atendidos: 30,
-                casos_con_setencia_a_favor: 25,
-                casos_asignados: ["Caso C", "Caso D"],
-                imageName: "lawyer2"
+                id: "1",
+                userId: "user1",
+                nombre: "Lic. Ana María López",
+                especializacion: "Derecho Procesal",
+                experienciaProfesional: "10 años en litigio",
+                disponibilidad: true,
+                maestria: "Maestría en Derecho Procesal",
+                direccion: Lawyer.Direccion(calle: "Av. Revolución 123", ciudad: "Monterrey", estado: "Nuevo León", codigo_postal: "64000"),
+                casosAsignados: [],
+                telefono: "8112345678",
+                correo: "ana.lopez@ejemplo.com",
+                casosAtendidos: 100,
+                casosSentenciaFavorable: 80,
+                imageName: "avatar1"
             ))
         }
     }
