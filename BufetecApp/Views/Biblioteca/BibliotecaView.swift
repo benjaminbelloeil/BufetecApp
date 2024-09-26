@@ -78,7 +78,6 @@ struct BibliotecaView: View {
                                                 .multilineTextAlignment(.leading) // Justificación a la izquierda
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading) // Toma el ancho restante del contenedor
-                                        
                                     }
                                     .background(Color(.white)) // Fondo claro para toda la tarjeta
                                     .cornerRadius(12) // Bordes redondeados para la tarjeta
@@ -203,7 +202,8 @@ struct BibliotecaView: View {
                         .padding(.horizontal, 16)
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)                .background(Color(.systemGray6)) // Fondo claro para todo
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemGray6)) // Fondo claro para todo
             }
             .edgesIgnoringSafeArea(.bottom)
             .background(Color(.systemGray6))
@@ -213,13 +213,14 @@ struct BibliotecaView: View {
             async {
                 await viewModel.fetchBibliotecas()
                 await viewModel.fetchDocumentos()
+                await viewModel.fetchLawyers()  // Fetch lawyers when the view appears
             }
         }
     }
 }
-    
-    struct BibliotecaView_Previews: PreviewProvider {
-        static var previews: some View {
-            BibliotecaView()
-        }
+
+struct BibliotecaView_Previews: PreviewProvider {
+    static var previews: some View {
+        BibliotecaView()
     }
+}
