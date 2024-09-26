@@ -17,7 +17,7 @@ struct AbogadoDetailView: View {
                         .clipShape(Circle())
                         .shadow(radius: 10)
                     
-                    Text(lawyer.name)
+                    Text(lawyer.nombre)
                         .font(.title)
                         .fontWeight(.bold)
                 }
@@ -28,8 +28,8 @@ struct AbogadoDetailView: View {
 
                 // Lawyer details
                 VStack(alignment: .leading, spacing: 15) {
-                    detailRow(icon: "briefcase", title: "Especialidad", detail: lawyer.specialty)
-                    detailRow(icon: "doc.text", title: "Casos Asociados", detail: lawyer.caseType)
+                    detailRow(icon: "briefcase", title: "Especialidad", detail: lawyer.especialidad)
+                    detailRow(icon: "doc.text", title: "Casos Asociados", detail: lawyer.especialidad)
                     detailRow(icon: "mappin", title: "Dirección", detail: "Zona Tec")
                     detailRow(icon: "phone", title: "Teléfono", detail: "XXXXXXXXXX")
                     detailRow(icon: "envelope", title: "Correo", detail: "abogado@example.com")
@@ -106,10 +106,19 @@ struct AbogadoDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             AbogadoDetailView(lawyer: Lawyer(
-                name: "Lic. Ana María López",
-                specialty: "Maestría en Derecho Procesal",
-                caseType: "Problemas Familiares",
-                imageName: "avatar1"
+                user_id: "66f32237273de98e8013e4f2",
+                nombre: "Maria García",
+                especialidad: "Derecho Civil",
+                experiencia_profesional: "5 años",
+                disponibilidad: false,
+                maestria: "Maestría en Derecho Civil",
+                direccion: Direccion(calle: "Calle Verdadera 456", ciudad: "Otra Ciudad", estado: "Otro Estado", codigo_postal: "67890"),
+                telefono: "8123456789",
+                correo: "maria.garcia@example.com",
+                casos_atendidos: 30,
+                casos_con_setencia_a_favor: 25,
+                casos_asignados: ["Caso C", "Caso D"],
+                imageName: "lawyer2"
             ))
         }
     }

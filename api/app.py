@@ -28,7 +28,7 @@ except Exception as e:
 
 # Collections
 users_collection = mongo.db.users
-lawyers_collection = mongo.db.abogados
+lawyer_collection = mongo.db.abogados
 students_collection = mongo.db.alumnos
 clients_collection = mongo.db.clientes
 
@@ -53,7 +53,7 @@ def insert_student(student_data):
 def insert_lawyer(lawyer_data):
     lawyer_data['contrasena'] = hash_password(lawyer_data['contrasena'])
     lawyer_data['user_id'] = None  # Initialize user_id as None
-    result = lawyers_collection.insert_one(lawyer_data)
+    result = lawyer_collection.insert_one(lawyer_data)
     return result.inserted_id
 
 # Function to insert sample data
@@ -101,7 +101,7 @@ def insert_sample_data():
 
         # Insert lawyers
         for abogado in abogados:
-            if lawyers_collection.count_documents({"id_abogado": abogado["id_abogado"]}) == 0:
+            if lawyer_collection.count_documents({"id_abogado": abogado["id_abogado"]}) == 0:
                 insert_lawyer(abogado)
                 app.logger.info(f"Sample lawyer data inserted: {abogado['nombre']}")
             else:
@@ -146,6 +146,55 @@ def signup():
         app.logger.error(f"Error en el registro: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
+
+@app.route("/abogados",methods=['GET'])
+def get_all_abogados():
+    #Solo los disponibles
+    abogados = lawyer_collection.find({"disponibilidad": True})
+    abogados_list = []
+    for item in abogados:
+        abogados_dict = {
+            "nombre": str(item.get('nombre')),  
+            "maestria": item.get('maestria'),
+            "casosAsociados": item.get('casos_asignados'),           
+        }
+        abogados_list.append(abogados_dict)
+    return jsonify(abogados_list)
+
+@app.route("/abogado/<abogado_id>",methods=['GET'])
+def get_one_abogado(abogado_id):
+    try:
+        if ObjectId.is_valid(abogado_id):
+            abogado = lawyer_collection.find_one({'_id': ObjectId(abogado_id)})  # Suponiendo que el user_id es un string
+        else:
+            return jsonify({'message': "El id proporcionado no es válido"}), 400
+        # Convertir el abogado_id a ObjectId si es necesario
+        if abogado:
+            abogado_dict = {
+                "user_id": str(abogado.get("user_id")),  
+                "especialidad": abogado.get("especialidad"),
+                "experiencia_profesional": abogado.get("experiencia_profesional"),
+                "disponibilidad": abogado.get("disponibilidad"),
+                "casos_asignados": abogado.get("casos_asignados"),
+                "telefono": abogado.get("telefono"),
+                "correo": abogado.get("correo"),
+                "casos_atendidos":abogado.get("casos_atendidos"),
+                "casos_con_sentencia_a_favor":abogado.get("casos_con_sentencia_a_favor"),
+                "direccion": {
+                    "calle": abogado.get("direccion", {}).get("calle"),
+                    "ciudad": abogado.get("direccion", {}).get("ciudad"),
+                    "estado": abogado.get("direccion", {}).get("estado"),
+                    "codigo_postal": abogado.get("direccion", {}).get("codigo_postal")
+                },             
+            }
+            return jsonify(abogado_dict)  # Agregar jsonify para asegurar que la respuesta sea JSON
+        else:
+            return jsonify({'message': f"No se encontró el abogado con el id {abogado_id}"}), 404
+    except Exception as ex:
+        return jsonify({'message': str(ex)}), 500
+    
+
 # Role Questionnaire Route
 @app.route('/role', methods=['POST'])
 def role():
@@ -187,14 +236,14 @@ def role():
             if not id_abogado or not contrasena:
                 return jsonify({"error": "Falta id_abogado o contrasena"}), 400
             
-            abogado = lawyers_collection.find_one({"id_abogado": {"$regex": f"^{id_abogado}$", "$options": "i"}})
+            abogado = lawyer_collection.find_one({"id_abogado": {"$regex": f"^{id_abogado}$", "$options": "i"}})
             if not abogado:
                 return jsonify({"error": "Abogado no encontrado"}), 404
             
             if not verify_password(abogado['contrasena'], contrasena):
                 return jsonify({"error": "Credenciales de abogado inválidas"}), 401
             
-            resultado = lawyers_collection.update_one(
+            resultado = lawyer_collection.update_one(
                 {"_id": abogado['_id']},
                 {"$set": {"user_id": user_id}}
             )

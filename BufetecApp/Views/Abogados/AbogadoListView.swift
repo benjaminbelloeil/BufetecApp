@@ -2,23 +2,13 @@ import SwiftUI
 
 struct AbogadoListView: View {
     var lawyers: [Lawyer]
-    @State private var searchText = ""
-
-    var filteredLawyers: [Lawyer] {
-        if searchText.isEmpty {
-            return lawyers
-        } else {
-            return lawyers.filter { $0.name.lowercased().contains(searchText.lowercased()) ||
-                                    $0.specialty.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-
+  
     var body: some View {
         NavigationView {
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    ForEach(filteredLawyers) { lawyer in
-                        NavigationLink(destination: AbogadoDetailView(lawyer: lawyer)) {
+                    ForEach(lawyers) { lawyer in
+                        NavigationLink(destination: Text(lawyer.nombre)) { // AbogadoDetailView(lawyer: lawyer)
                             LawyerCard(lawyer: lawyer)
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -28,7 +18,6 @@ struct AbogadoListView: View {
             }
             .navigationTitle("Abogados")
             .background(Color(.systemGroupedBackground))
-            .searchable(text: $searchText, prompt: "Buscar abogados")
         }
     }
 }
@@ -46,18 +35,22 @@ struct LawyerCard: View {
                 .shadow(radius: 3)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text(lawyer.name)
+                Text(lawyer.nombre)
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                Label(lawyer.specialty, systemImage: "briefcase")
+                Label(lawyer.especialidad, systemImage: "briefcase")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                Label(lawyer.caseType, systemImage: "doc.text")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(lawyer.casos_asignados, id: \.self) { caso in
+                        Label(caso, systemImage: "doc.text")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                }
             }
             Spacer()
         }
@@ -68,12 +61,40 @@ struct LawyerCard: View {
     }
 }
 
-struct AbogadoListView_Previews: PreviewProvider {
-    static var previews: some View {
-        AbogadoListView(lawyers: [
-            Lawyer(name: "Lic. Ana María López", specialty: "Derecho Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
-            Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
-            Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Laboral", caseType: "Conflictos Laborales", imageName: "avatar3")
-        ])
-    }
+#Preview {
+    // Lista de prueba de abogados para previsualización
+    let sampleLawyers = [
+        Lawyer(
+            user_id: "66f32237273de98e8013e4f1",
+            nombre: "Juan Pérez",
+            especialidad: "Derecho Penal",
+            experiencia_profesional: "10 años",
+            disponibilidad: true,
+            maestria: "Maestría en Derecho Penal",
+            direccion: Direccion(calle: "Calle Falsa 123", ciudad: "Ciudad", estado: "Estado", codigo_postal: "12345"),
+            telefono: "8112345678",
+            correo: "juan.perez@example.com",
+            casos_atendidos: 50,
+            casos_con_setencia_a_favor: 45,
+            casos_asignados: ["Caso A", "Caso B"],
+            imageName: "lawyer1"
+        ),
+        Lawyer(
+            user_id: "66f32237273de98e8013e4f2",
+            nombre: "Maria García",
+            especialidad: "Derecho Civil",
+            experiencia_profesional: "5 años",
+            disponibilidad: false,
+            maestria: "Maestría en Derecho Civil",
+            direccion: Direccion(calle: "Calle Verdadera 456", ciudad: "Otra Ciudad", estado: "Otro Estado", codigo_postal: "67890"),
+            telefono: "8123456789",
+            correo: "maria.garcia@example.com",
+            casos_atendidos: 30,
+            casos_con_setencia_a_favor: 25,
+            casos_asignados: ["Caso C", "Caso D"],
+            imageName: "lawyer2"
+        )
+    ]
+    
+    AbogadoListView(lawyers: sampleLawyers)
 }
