@@ -202,10 +202,11 @@ struct BibliotecaView: View {
                         }
                         .padding(.horizontal, 16)
                     }
-
                 }
-                .background(Color(.systemGray6)) // Fondo claro para toda la tarjeta
+                .frame(maxWidth: .infinity, maxHeight: .infinity)                .background(Color(.systemGray6)) // Fondo claro para todo
             }
+            .edgesIgnoringSafeArea(.bottom)
+            .background(Color(.systemGray6))
             .navigationTitle("Biblioteca Legal")
         }
     }
