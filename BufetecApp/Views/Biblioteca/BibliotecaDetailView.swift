@@ -4,11 +4,11 @@
 //
 //  Created by David Balleza Ayala on 24/09/24.
 //
-
 import SwiftUI
 
 struct BibliotecaDetailView: View {
     var biblioteca: Biblioteca // El modelo que contiene los datos del documento
+    @State private var navigateToChat = false // State to control navigation
 
     var body: some View {
         ScrollView {
@@ -26,27 +26,21 @@ struct BibliotecaDetailView: View {
                     .multilineTextAlignment(.center)
 
                 // Imagen de la portada (si está disponible)
-                AsyncImage(url: URL(string: biblioteca.urlRecurso)) { image in
+                AsyncImage(url: URL(string: biblioteca.portada)) { image in
                     image
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill() // Asegura que la imagen llene todo el frame
                         .frame(width: 150, height: 220)
+                        .cornerRadius(8) // Borde redondeado
+                        .clipped() // Recorta las partes que sobresalen del frame
                 } placeholder: {
                     Image(systemName: "book")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 150, height: 220)
                         .background(Color(.systemGray5))
-                        .cornerRadius(8)
+                        .cornerRadius(8) // Borde redondeado también para el placeholder
                 }
-
-                // Número de páginas (si está disponible)
-//                if let paginas = biblioteca.paginas {
-//                    Text("\(paginas) Páginas")
-//                        .font(.caption)
-//                        .fontWeight(.bold)
-//                        .padding(.vertical, 8)
-//                }
 
                 // Descripción (si está disponible)
                 VStack(alignment: .leading, spacing: 8) {
@@ -62,9 +56,8 @@ struct BibliotecaDetailView: View {
 
                 // Botones: Preguntar y Descargar
                 HStack(spacing: 20) {
-                    Button(action: {
-                        // Acción de preguntar
-                    }) {
+                    // Navegación al Chat cuando se presiona "Preguntar"
+                    NavigationLink(destination: ChatView(viewModel: ChatViewModel(), documentId: biblioteca.id, userId: "currentUserId")) {
                         HStack {
                             Image(systemName: "bubble.left.and.bubble.right.fill")
                             Text("Preguntar")
@@ -97,6 +90,7 @@ struct BibliotecaDetailView: View {
             .padding()
         }
         .navigationTitle(biblioteca.titulo)
+        .navigationBarTitleDisplayMode(.inline) // Make title inline to save space
     }
 }
 
@@ -110,8 +104,11 @@ struct BibliotecaDetailView: View {
         autor: "Aguilar Morales, Luis María",
         fechaCreacion: Date(),
         urlRecurso: "https://example.com/portada.jpg", // Imagen de ejemplo
+        portada: "https://portada.com/hola.png",
         status: "Activo"
     )
 
-    BibliotecaDetailView(biblioteca: dummyBiblioteca)
+    NavigationStack {
+        BibliotecaDetailView(biblioteca: dummyBiblioteca)
+    }
 }

@@ -16,5 +16,6 @@ struct Biblioteca: Identifiable {
     var autor: String
     var fechaCreacion: Date
     var urlRecurso: String
+    var portada: String
     var status: String
 }
