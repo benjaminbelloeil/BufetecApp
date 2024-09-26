@@ -16,7 +16,7 @@ CORS(app)  # Enable CORS for all routes
 logging.basicConfig(level=logging.DEBUG)
 
 # MongoDB configuration
-app.config["MONGO_URI"] = "mongodb://localhost:27017/BufetecDB"
+app.config["MONGO_URI"] = "mongodb://10.14.255.54:27017/BufetecDB"
 mongo = PyMongo(app)
 
 # Test MongoDB connection
