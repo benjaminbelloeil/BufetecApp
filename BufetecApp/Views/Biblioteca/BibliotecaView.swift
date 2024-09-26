@@ -5,6 +5,7 @@ struct BibliotecaView: View {
     @State private var searchQuery: String = ""
     // Variables to easily modify the size of the container
         let containerWidth: CGFloat = 320
+        let cardWidth: CGFloat = 120
         let containerHeight: CGFloat = 160
         let imageWidth: CGFloat = 90
         let imageHeight: CGFloat = 120
@@ -13,21 +14,24 @@ struct BibliotecaView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(alignment: .leading) {
-                    
+                VStack {
                     // Search bar
                     TextField("Search", text: $searchQuery)
-                        .padding()
+                        .padding(8)
                         .background(Color.gray.opacity(0.2))
                         .cornerRadius(10)
                         .padding(.horizontal)
-                    
-                    
+                }
+                .padding(.bottom, 2)
+                .background(Color(.white))
+                
+                VStack(alignment: .leading) {
                     // Sección "Continuar explorando"
                     Text("Continuar explorando")
                         .font(.headline)
                         .padding(.leading)
-                    
+                        .padding(.top)
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) { // Añadir espacio entre las tarjetas
                             ForEach(viewModel.obtenerSugerencias(tipoProceso: "Divorcio").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
@@ -76,7 +80,7 @@ struct BibliotecaView: View {
                                         .frame(maxWidth: .infinity, alignment: .leading) // Toma el ancho restante del contenedor
 
                                     }
-                                    .background(Color(.systemGray6)) // Fondo claro para toda la tarjeta
+                                    .background(Color(.white)) // Fondo claro para toda la tarjeta
                                     .cornerRadius(12) // Bordes redondeados para la tarjeta
                                     .shadow(radius: 1) // Sombra ligera
                                     .frame(width: containerWidth, height: containerHeight) // Tamaño total del contenedor
@@ -92,74 +96,115 @@ struct BibliotecaView: View {
                         .padding(.leading)
 
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
+                        HStack(spacing: 10) { // Ajustar el espacio entre las tarjetas
                             ForEach(viewModel.obtenerSugerencias(tipoProceso: "Divorcio").filter { searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery) }) { biblioteca in
-                            NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
+                                NavigationLink(destination: BibliotecaDetailView(biblioteca: biblioteca)) {
                                     VStack {
                                         // Imagen de portada
                                         ZStack {
                                             Rectangle() // El contenedor de la imagen
-                                                .frame(width: 100, height: 150)
-                                                .foregroundColor(.gray) // Color de fondo si no hay imagen (opcional)
+                                                .frame(width: imageWidth + 30, height: imageHeight) // Tamaño más pequeño para la imagen
+                                                .foregroundColor(.white) // Fondo blanco
+                                                .cornerRadius(8) // Bordes redondeados
+                                                .shadow(radius: 2) // Sombra ligera
+                                            
                                             AsyncImage(url: URL(string: biblioteca.portada)) { image in
                                                 image
                                                     .resizable()
                                                     .scaledToFill() // Escala la imagen para llenar el contenedor
-                                                    .frame(width: 100, height: 150)
+                                                    .frame(width: imageWidth, height: imageHeight)
                                                     .clipped() // Recorta cualquier desbordamiento de la imagen
                                             } placeholder: {
                                                 // Placeholder mientras se carga la imagen
                                                 Image(systemName: "book")
                                                     .resizable()
-                                                    .frame(width: 100, height: 150)
+                                                    .frame(width: 80, height: 120)
                                             }
                                         }
-                                        
-                                        // Título del libro
-                                        Text(biblioteca.titulo)
-                                            .font(.caption)
-                                            .frame(width: 100)
-                                            .multilineTextAlignment(.center)
-                                            .foregroundColor(.black) // Texto en color negro
 
-                                        // Autor del libro
-                                        Text(biblioteca.autor)
-                                            .font(.caption2)
-                                            .foregroundColor(.black) // Texto en color negro
+                                        VStack {
+                                            // Título del libro
+                                            Text(biblioteca.titulo)
+                                                .font(.caption)
+                                                .lineLimit(1) // Limitar a 2 líneas
+                                                .truncationMode(.tail) // Mostrar puntos suspensivos si el texto es largo
+                                                .multilineTextAlignment(.center)
+                                                .foregroundColor(.black) // Texto en color negro
+                                                .frame(width: 100) // Ajustar el ancho para que coincida con la imagen
+                                            
+                                            // Autor del libro
+                                            Text(biblioteca.autor)
+                                                .font(.caption2)
+                                                .lineLimit(1) // Limitar a 1 línea
+                                                .truncationMode(.tail) // Mostrar puntos suspensivos si el texto es largo
+                                                .foregroundColor(.gray) // Texto en color gris
+                                                .frame(width: 120)
+                                        }
                                     }
-                                    .padding(.leading)
+                                    .background(Color.white) // Fondo blanco para la tarjeta
+                                    .cornerRadius(12) // Bordes redondeados para la tarjeta
+                                    .shadow(radius: 2) // Sombra ligera
+                                    .frame(width: cardWidth, height: containerHeight) // Tamaño total del contenedor más pequeño
+                                    .padding(.leading, 0)
                                 }
                             }
                         }
+                        .padding(.horizontal, 16)
                     }
 
-                    
                     // Sección "Tus documentos"
                     Text("Tus documentos")
                         .font(.headline)
                         .padding(.leading)
-                    
+
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
+                        HStack(spacing: 10) { // Ajustar el espacio entre las tarjetas
                             ForEach(viewModel.obtenerDocumentosUsuario().filter { searchQuery.isEmpty || $0.nombreDocumento.localizedCaseInsensitiveContains(searchQuery) }) { documento in
-                            NavigationLink(destination: DocumentDetailView(documento: documento)) {
+                                NavigationLink(destination: DocumentDetailView(documento: documento)) {
                                     VStack {
-                                        Image(systemName: "doc.text")
-                                            .resizable()
-                                            .frame(width: 100, height: 150)
+                                        // Icono del documento
+                                        ZStack {
+                                            Rectangle() // El contenedor de la imagen
+                                                .frame(width: imageWidth + 30, height: imageHeight) // Tamaño más pequeño para la imagen
+                                                .foregroundColor(.white) // Fondo blanco
+                                                .cornerRadius(8) // Bordes redondeados
+                                                .shadow(radius: 2) // Sombra ligera
+                                            
+                                            Image(systemName: "doc.text")
+                                                .resizable()
+                                                .frame(width: imageWidth, height: imageHeight)
+                                        }
+
+                                        // Título del documento
                                         Text(documento.nombreDocumento)
                                             .font(.caption)
-                                            .frame(width: 100)
+                                            .lineLimit(1) // Limitar a 1 líneas
+                                            .truncationMode(.tail) // Mostrar puntos suspensivos si el texto es largo
                                             .multilineTextAlignment(.center)
+                                            .foregroundColor(.black) // Texto en color negro
+                                            .frame(width: 80)
+
+                                        // Autor del documento
                                         Text("Autor desconocido")
                                             .font(.caption2)
+                                            .lineLimit(1) // Limitar a 1 línea
+                                            .truncationMode(.tail) // Mostrar puntos suspensivos si el texto es largo
+                                            .foregroundColor(.gray) // Texto en color gris
+                                            .frame(width: 80)
                                     }
-                                    .padding(.leading)
+                                    .background(Color.white) // Fondo blanco para la tarjeta
+                                    .cornerRadius(12) // Bordes redondeados para la tarjeta
+                                    .shadow(radius: 2) // Sombra ligera
+                                    .frame(width: cardWidth, height: containerHeight) // Tamaño total del contenedor más pequeño
+                                    .padding(.leading, 0)
                                 }
                             }
                         }
+                        .padding(.horizontal, 16)
                     }
+
                 }
+                .background(Color(.systemGray6)) // Fondo claro para toda la tarjeta
             }
             .navigationTitle("Biblioteca Legal")
         }
