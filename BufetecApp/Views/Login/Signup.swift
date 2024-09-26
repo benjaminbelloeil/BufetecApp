@@ -3,18 +3,20 @@ import AuthenticationServices
 
 struct Signup: View {
     @Binding var showSignup: Bool
-    @State private var name: String = ""
-    @State private var email: String = ""
-    @State private var password: String = ""
+    @State private var nombre: String = ""
+    @State private var correo_o_telefono: String = ""
+    @State private var contrasena: String = ""
     @State private var showPassword: Bool = false
     @State private var showQuestions = false
+    @State private var errorMessage: String = ""
+    @State private var tempUserId: String = ""
 
     private var isFormFilled: Bool {
-        !name.isEmpty && !email.isEmpty && !password.isEmpty
+        !nombre.isEmpty && !correo_o_telefono.isEmpty && !contrasena.isEmpty
     }
 
     var body: some View {
-        ZStack {
+        NavigationView {
             VStack(spacing: 20) {
                 Text("Regístrate")
                     .font(.largeTitle)
@@ -67,7 +69,7 @@ struct Signup: View {
                     Divider()
                         .frame(width: 100, height: 1)
                         .background(Color.gray)
-                    Text("Or")
+                    Text("O")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     Divider()
@@ -76,13 +78,13 @@ struct Signup: View {
                 }
                 
                 VStack(spacing: 15) {
-                    TextField("Nombre", text: $name)
+                    TextField("Nombre", text: $nombre)
                         .padding()
                         .background(Color.white)
                         .cornerRadius(10)
                         .shadow(radius: 2)
                     
-                    TextField("Correo Electrónico/Teléfono", text: $email)
+                    TextField("Correo Electrónico/Teléfono", text: $correo_o_telefono)
                         .padding()
                         .background(Color.white)
                         .cornerRadius(10)
@@ -90,9 +92,9 @@ struct Signup: View {
                     
                     HStack {
                         if showPassword {
-                            TextField("Contraseña", text: $password)
+                            TextField("Contraseña", text: $contrasena)
                         } else {
-                            SecureField("Contraseña", text: $password)
+                            SecureField("Contraseña", text: $contrasena)
                         }
                         
                         Button(action: {
@@ -110,8 +112,7 @@ struct Signup: View {
                 .padding(.horizontal)
                 
                 Button(action: {
-                    // Add signup functionality and validation before showing questions
-                    showQuestions = true
+                    signupUser()
                 }) {
                     Text("Crear Cuenta")
                         .frame(maxWidth: .infinity)
@@ -122,6 +123,12 @@ struct Signup: View {
                 }
                 .padding(.horizontal)
                 .disabled(!isFormFilled)
+
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                }
 
                 HStack {
                     Text("¿Tienes cuenta?")
@@ -134,13 +141,70 @@ struct Signup: View {
                 .font(.footnote)
             }
             .padding()
+            .navigationBarHidden(true)
         }
         .fullScreenCover(isPresented: $showQuestions) {
-            QuestionView(showQuestions: $showQuestions)
+            QuestionView(showQuestions: $showQuestions, userId: $tempUserId)
         }
+    }
+
+    private func signupUser() {
+        guard let url = URL(string: "http://localhost:5001/signup") else {
+            print("URL inválida")
+            return
+        }
+
+        let parameters = ["nombre": nombre, "correo_o_telefono": correo_o_telefono, "contrasena": contrasena]
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            print("Error: \(error.localizedDescription)")
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error: \(error.localizedDescription)"
+                }
+                return
+            }
+
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.errorMessage = "No se recibieron datos"
+                }
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    DispatchQueue.main.async {
+                        if let mensaje = json["mensaje"] as? String, mensaje == "Registro iniciado" {
+                            if let tempUserId = json["temp_user_id"] as? String {
+                                self.tempUserId = tempUserId
+                                self.showQuestions = true
+                            }
+                            self.errorMessage = ""
+                        } else if let error = json["error"] as? String {
+                            self.errorMessage = error
+                        }
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
+                }
+            }
+        }.resume()
     }
 }
 
 #Preview {
-    ContentView()
+    Signup(showSignup: .constant(true))
 }

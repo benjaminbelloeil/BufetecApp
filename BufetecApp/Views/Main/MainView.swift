@@ -1,80 +1,135 @@
 import SwiftUI
 
-struct Main: View {
+struct MainView: View {
     @State private var selectedTab: Tab = .profile
-    @State private var userType: UserType = .alumno // Change this to test different user types
+    @State private var userType: UserType = .cliente
+    @State private var isLoading = true
+    let userId: String
 
     enum Tab: Hashable {
-        case profile, clients, cases, lawyers, library
+        case profile, clients, cases, lawyers, Biblioteca
     }
 
     enum UserType {
         case cliente
-        case alumno
+        case estudiante
         case abogado
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                PerfilView()
-                    .tabItem { EmptyView() }
-                    .tag(Tab.profile)
+        Group {
+            if isLoading {
+                ProgressView("Cargando...")
+            } else {
+                ZStack(alignment: .bottom) {
+                    TabView(selection: $selectedTab) {
+                        PerfilView()
+                            .tabItem { EmptyView() }
+                            .tag(Tab.profile)
 
-                if userType == .alumno || userType == .abogado {
-                    ClienteListView(clientes: [
-                                        Cliente(name: "María González", caseType: "Divorcio", status: "Activo"),
-                                        Cliente(name: "Carlos Rodríguez", caseType: "Custodia", status: "En espera"),
-                                        Cliente(name: "Ana Martínez", caseType: "Herencia", status: "Cerrado")
-                                    ])
-                        .tabItem { EmptyView() }
-                        .tag(Tab.clients)
-                }
+                        if userType == .estudiante || userType == .abogado {
+                            ClienteListView(clientes: [
+                                Cliente(name: "María González", caseType: "Divorcio", status: "Activo"),
+                                Cliente(name: "Carlos Rodríguez", caseType: "Custodia", status: "En espera"),
+                                Cliente(name: "Ana Martínez", caseType: "Herencia", status: "Cerrado")
+                            ])
+                            .tabItem { EmptyView() }
+                            .tag(Tab.clients)
+                        }
 
-                if userType == .abogado{
-                    CaseDetailView()
-                        .tabItem { EmptyView() }
-                        .tag(Tab.cases)
-                }
+                        if userType == .abogado {
+                            CaseDetailView()
+                                .tabItem { EmptyView() }
+                                .tag(Tab.cases)
+                        }
+                        
+                        if userType == .cliente {
+                            ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
+                                .tabItem { EmptyView() }
+                                .tag(Tab.cases)
+                        }
 
-                /*if userType == .alumno || userType == .abogado {
-                    LibraryView()//
+                        if userType == .estudiante || userType == .abogado {
+                            BibliotecaView()
+                                .tabItem { EmptyView() }
+                                .tag(Tab.Biblioteca)
+                        }
+
+                        AbogadoListView(lawyers: [
+                            Lawyer(name: "Lic. Ana María López", specialty: "Derecho Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
+                            Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
+                            Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Laboral", caseType: "Conflictos Laborales", imageName: "avatar3")
+                        ])
                         .tabItem { EmptyView() }
-                        .tag(Tab.library)
-                }*/
-                
-                if userType == .cliente {
-                    ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
-                        .tabItem { EmptyView() }
-                        .tag(Tab.cases)
+                        .tag(Tab.lawyers)
+                    }
+
+                    CustomTabBar(selectedTab: $selectedTab, userType: userType)
                 }
-                 
-                AbogadoListView(lawyers: [
-                    Lawyer(name: "Lic. Ana María López", specialty: "Derecho Procesal", caseType: "Problemas Familiares", imageName: "avatar1"),
-                    Lawyer(name: "Lic. Juan Pérez", specialty: "Derecho Penal", caseType: "Casos Penales", imageName: "avatar2"),
-                    Lawyer(name: "Lic. Moka Diaz", specialty: "Derecho Laboral", caseType: "Conflictos Laborales", imageName: "avatar3")
-                ])
-                .tabItem { EmptyView() }
-                .tag(Tab.lawyers)
+                .edgesIgnoringSafeArea(.bottom)
+            }
+        }
+        .onAppear {
+            fetchUserData()
+        }
+    }
+
+    private func fetchUserData() {
+        guard let url = URL(string: "http://localhost:5001/user/\(userId)") else {
+            print("URL inválida")
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
             }
 
-            CustomTabBar(selectedTab: $selectedTab, userType: userType)
-        }
-        .edgesIgnoringSafeArea(.bottom)
+            guard let data = data else {
+                print("No se recibieron datos")
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    DispatchQueue.main.async {
+                        if let rol = json["rol"] as? String {
+                            switch rol {
+                            case "cliente":
+                                self.userType = .cliente
+                            case "estudiante":
+                                self.userType = .estudiante
+                            case "abogado":
+                                self.userType = .abogado
+                            default:
+                                print("Rol desconocido")
+                            }
+                        }
+                        self.isLoading = false
+                    }
+                }
+            } catch {
+                print("Error al decodificar la respuesta: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                }
+            }
+        }.resume()
     }
 }
 
 struct TabItem: Identifiable {
     let id = UUID()
-    let tab: Main.Tab
+    let tab: MainView.Tab
     let icon: String
     let title: String
 }
 
 struct CustomTabBar: View {
-    @Binding var selectedTab: Main.Tab
+    @Binding var selectedTab: MainView.Tab
     @Namespace private var namespace
-    let userType: Main.UserType
+    let userType: MainView.UserType
 
     var tabItems: [TabItem] {
         switch userType {
@@ -84,10 +139,10 @@ struct CustomTabBar: View {
                 TabItem(tab: .cases, icon: "folder.fill", title: "Mi Caso"),
                 TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
             ]
-        case .alumno:
+        case .estudiante:
             return [
                 TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
-              /*  TabItem(tab: .library, icon: "books.vertical.fill", title: "Biblioteca"),*/
+                TabItem(tab: .Biblioteca, icon: "books.vertical.fill", title: "Biblioteca"),
                 TabItem(tab: .clients, icon: "person.3.fill", title: "Clientes"),
                 TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
             ]
@@ -96,7 +151,7 @@ struct CustomTabBar: View {
                 TabItem(tab: .profile, icon: "person.circle.fill", title: "Perfil"),
                 TabItem(tab: .clients, icon: "person.3.fill", title: "Clientes"),
                 TabItem(tab: .cases, icon: "folder.fill", title: "Mis Casos"),
-                /*TabItem(tab: .library, icon: "books.vertical.fill", title: "Biblioteca"),*/
+                TabItem(tab: .Biblioteca, icon: "books.vertical.fill", title: "Biblioteca"),
                 TabItem(tab: .lawyers, icon: "briefcase.fill", title: "Abogados")
             ]
         }
@@ -170,9 +225,8 @@ struct TabBarButton: View {
     }
 }
 
-struct Main_Previews: PreviewProvider {
+struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        Main()
+        MainView(userId: "sampleUserId")
     }
 }
-
