@@ -383,6 +383,36 @@ def get_biblioteca_by_id(biblioteca_id):
             return jsonify({"error": "Recurso no encontrado"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/user/<user_id>', methods=['GET'])
+def get_user(user_id):
+    try:
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        # Check if the user is a client
+        client = clients_collection.find_one({"user_id": ObjectId(user_id)})
+        if client:
+            return jsonify({"rol": "cliente"}), 200
+
+        # Check if the user is a lawyer
+        lawyer = lawyer_collection.find_one({"user_id": ObjectId(user_id)})
+        if lawyer:
+            return jsonify({"rol": "abogado"}), 200
+
+        # Check if the user is a student
+        student = students_collection.find_one({"user_id": ObjectId(user_id)})
+        if student:
+            return jsonify({"rol": "estudiante"}), 200
+
+        return jsonify({"error": "User role not found"}), 404
+
+    except Exception as e:
+        app.logger.error(f"Error fetching user data: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
 
 @app.route('/biblioteca', methods=['POST'])
 def create_biblioteca():
