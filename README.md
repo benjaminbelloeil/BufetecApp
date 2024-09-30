@@ -30,7 +30,7 @@ BufeTec es una plataforma integral que conecta a usuarios con abogados para la g
 ## Tecnologías Utilizadas
 
 - **Lenguaje:** Swift, SwiftUI
-- **Base de Datos:** Firebase Firestore (NoSQL)
+- **Base de Datos:** MongoDB (NoSQL)
 - **Autenticación:** Firebase Authentication
 - **Arquitectura:** MVVM (Model-View-ViewModel)
 - **Gestión de Dependencias:** Swift Package Manager (SPM)

@@ -4,6 +4,7 @@ struct QuestionView: View {
     @Binding var showQuestions: Bool
     @Binding var userId: String
     @State private var userType: UserType?
+    typealias UserType = BufetecApp.UserType
     @State private var currentQuestion = 1
     @State private var selectedProblem: String?
     @State private var id_abogado = ""
@@ -11,10 +12,8 @@ struct QuestionView: View {
     @State private var matricula = ""
     @State private var errorMessage: String = ""
     @State private var showMainView = false
-    @Namespace private var animation
     
     var body: some View {
-        Group {
             if showMainView {
                 MainView(userId: userId)
             } else {
@@ -118,7 +117,6 @@ struct QuestionView: View {
                 .background(Color(UIColor.systemBackground))
                 .edgesIgnoringSafeArea(.all)
             }
-        }
     }
     
     var roleSelectionView: some View {
@@ -343,83 +341,77 @@ struct QuestionView: View {
                     self.errorMessage = "Error: \(error.localizedDescription)"
                 }
                 return
-            }
+            }///
 
             guard let data = data else {
-                DispatchQueue.main.async {
-                    self.errorMessage = "No se recibieron datos"
+                            DispatchQueue.main.async {
+                                self.errorMessage = "No se recibieron datos"
+                            }
+                            return
+                        }
+
+                        do {
+                            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                                DispatchQueue.main.async {
+                                    if let mensaje = json["mensaje"] as? String, mensaje == "Usuario creado y rol asignado exitosamente" {
+                                        if let newUserId = json["user_id"] as? String {
+                                            self.userId = newUserId
+                                        }
+                                        self.showMainView = true
+                                    } else if let error = json["error"] as? String {
+                                        self.errorMessage = error
+                                    }
+                                }
+                            }
+                        } catch {
+                            DispatchQueue.main.async {
+                                self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
+                            }
+                        }
+                    }.resume()
                 }
-                return
             }
 
-            do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    DispatchQueue.main.async {
-                        if let mensaje = json["mensaje"] as? String, mensaje == "Usuario creado y rol asignado exitosamente" {
-                            if let newUserId = json["user_id"] as? String {
-                                self.userId = newUserId
-                            }
-                            self.showMainView = true
-                        } else if let error = json["error"] as? String {
-                            self.errorMessage = error
+            struct OptionRow: View {
+                var option: String
+                var text: String
+                var isSelected: Bool
+                var action: () -> Void
+                
+                var body: some View {
+                    Button(action: action) {
+                        HStack {
+                            Text(option)
+                                .frame(width: 36, height: 36)
+                                .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
+                                .foregroundColor(isSelected ? .white : .black)
+                                .cornerRadius(18)
+                                .font(.headline)
+                            
+                            Text(text)
+                                .foregroundColor(isSelected ? Color.blue : Color.primary)
+                                .font(.system(size: 17, weight: .regular))
+                            Spacer()
                         }
+                        .padding()
+                        .background(isSelected ? Color.blue.opacity(0.1) : Color(UIColor.secondarySystemBackground))
+                        .cornerRadius(10)
                     }
                 }
-            } catch {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
+            }
+
+            extension View {
+                func placeholder<Content: View>(
+                    when shouldShow: Bool,
+                    alignment: Alignment = .leading,
+                    @ViewBuilder placeholder: () -> Content) -> some View {
+                    ZStack(alignment: alignment) {
+                        placeholder().opacity(shouldShow ? 1 : 0)
+                        self
+                    }
                 }
             }
-        }.resume()
-    }
-}
 
-enum UserType: String {
-    case cliente = "cliente"
-    case abogado = "abogado"
-    case estudiante = "estudiante"
-}
-
-struct OptionRow: View {
-    var option: String
-    var text: String
-    var isSelected: Bool
-    var action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Text(option)
-                    .frame(width: 36, height: 36)
-                    .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
-                    .foregroundColor(isSelected ? .white : .black)
-                    .cornerRadius(18)
-                    .font(.headline)
-                
-                Text(text)
-                    .foregroundColor(isSelected ? Color.blue : Color.primary)
-                    .font(.system(size: 17, weight: .regular))
-                Spacer()
+            #Preview {
+                QuestionView(showQuestions: .constant(true), userId: .constant("12345"))
             }
-            .padding()
-            .background(isSelected ? Color.blue.opacity(0.1) : Color(UIColor.secondarySystemBackground))
-            .cornerRadius(10)
-        }
-    }
-}
-
-extension View {
-    func placeholder<Content: View>(
-        when shouldShow: Bool,
-        alignment: Alignment = .leading,
-        @ViewBuilder placeholder: () -> Content) -> some View {
-        ZStack(alignment: alignment) {
-            placeholder().opacity(shouldShow ? 1 : 0)
-            self
-        }
-    }
-}
-
-#Preview {
-    QuestionView(showQuestions: .constant(true), userId: .constant("12345"))
-}
