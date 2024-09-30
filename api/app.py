@@ -642,6 +642,88 @@ def insert_sample_lawyers_route():
 
 
 
+@app.route('/clientes', methods=['GET'])
+def get_all_clientes():
+    try:
+        clientes = clients_collection.find()
+        result = []
+        for cliente in clientes:
+            result.append({
+                "id": str(cliente["_id"]),
+                "nombre": cliente["nombre"],
+                "caso_tipo": cliente["caso_tipo"],
+                "estado_caso": cliente["estado_caso"],
+                "contacto": cliente["contacto"],
+                "fecha_inicio": cliente["fecha_inicio"],
+                "proxima_audiencia": cliente["proxima_audiencia"],
+                "direccion": cliente["direccion"],
+                "telefono": cliente["telefono"],
+                "correo": cliente["correo"]
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def insert_sample_clients():
+    try:
+        # Clear existing clients
+        result = clients_collection.delete_many({})
+        print(f"Cleared {result.deleted_count} existing clients from the collection.")
+
+        sample_clients = [
+            {
+                "nombre": "María González",
+                "caso_tipo": "Divorcio",
+                "estado_caso": "Activo",
+                "contacto": "Lic. Juan Pérez",
+                "fecha_inicio": "01/01/2024",
+                "proxima_audiencia": "15/03/2024",
+                "direccion": "Calle Principal 123, Ciudad",
+                "telefono": "+52 123 456 7890",
+                "correo": "cliente@email.com"
+            },
+            {
+                "nombre": "Carlos Rodríguez",
+                "caso_tipo": "Custodia",
+                "estado_caso": "En espera",
+                "contacto": "Lic. Ana López",
+                "fecha_inicio": "01/01/2024",
+                "proxima_audiencia": "05/03/2024",
+                "direccion": "Calle Segunda 456, Ciudad",
+                "telefono": "+52 333 987 6543",
+                "correo": "carlos@email.com"
+            },
+            {
+                "nombre": "Ana Martínez",
+                "caso_tipo": "Herencia",
+                "estado_caso": "Cerrado",
+                "contacto": "Lic. Pablo Gómez",
+                "fecha_inicio": "01/01/2024",
+                "proxima_audiencia": "10/02/2024",
+                "direccion": "Calle Tercera 789, Ciudad",
+                "telefono": "+52 555 123 4567",
+                "correo": "ana@email.com"
+            }
+        ]
+
+        for client in sample_clients:
+            result = clients_collection.insert_one(client)
+            print(f"Inserted client: {client['nombre']} (ID: {result.inserted_id})")
+
+        # Check final count
+        final_count = clients_collection.count_documents({})
+        print(f"Final number of documents in client_collection: {final_count}")
+
+    except Exception as e:
+        print(f"Error in insert_sample_clients: {str(e)}")
+        raise
+
+@app.route('/insert_sample_clients', methods=['GET'])
+def insert_sample_clients_route():
+    insert_sample_clients()
+    return jsonify({"message": "Sample clients inserted successfully"}), 200
+
+
 # Running the Flask app
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
