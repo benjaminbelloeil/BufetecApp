@@ -24,6 +24,37 @@ struct EstudianteMainView: View {
                 Cliente(name: "María González", caseType: "Divorcio", status: "Activo"),
                 Cliente(name: "Carlos Rodríguez", caseType: "Custodia", status: "En espera"),
                 Cliente(name: "Ana Martínez", caseType: "Herencia", status: "Cerrado")
+            ], casosLegales: [
+                CasoLegal(
+                    idCliente: UUID(),
+                    idAbogado: UUID(),
+                    nombre: "Caso 1",
+                    expediente: "EXP123",
+                    parteActora: "María González",
+                    parteDemandada: "Juan Pérez",
+                    estado: "Activo",
+                    notas: "Notas del caso 1"
+                ),
+                CasoLegal(
+                    idCliente: UUID(),
+                    idAbogado: UUID(),
+                    nombre: "Caso 2",
+                    expediente: "EXP456",
+                    parteActora: "Carlos Rodríguez",
+                    parteDemandada: "Ana López",
+                    estado: "En espera",
+                    notas: "Notas del caso 2"
+                ),
+                CasoLegal(
+                    idCliente: UUID(),
+                    idAbogado: UUID(),
+                    nombre: "Caso 3",
+                    expediente: "EXP789",
+                    parteActora: "Ana Martínez",
+                    parteDemandada: "Luis García",
+                    estado: "Cerrado",
+                    notas: "Notas del caso 3"
+                )
             ])
             .tabItem {
                 Image(systemName: "person.3.fill")

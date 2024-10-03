@@ -8,11 +8,12 @@ import Foundation
 
 struct CasoLegal: Identifiable {
     var id = UUID()
+    var idCliente : UUID
+    var idAbogado : UUID
     var nombre: String
     var expediente: String
     var parteActora: String
     var parteDemandada: String
     var estado: String
-    var perfilCliente: String
     var notas: String
 }

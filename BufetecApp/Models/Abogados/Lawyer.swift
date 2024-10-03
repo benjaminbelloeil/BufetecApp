@@ -1,7 +1,7 @@
 import Foundation
 
 struct Lawyer: Identifiable, Codable {
-    let id: String
+    let id = UUID()
     let userId: String
     let nombre: String
     let especializacion: String
