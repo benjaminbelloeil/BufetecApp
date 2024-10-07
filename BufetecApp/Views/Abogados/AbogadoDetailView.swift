@@ -148,7 +148,6 @@ struct AbogadoDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             AbogadoDetailView(lawyer: Lawyer(
-                id: "1",
                 userId: "user1",
                 nombre: "Lic. Ana María López",
                 especializacion: "Derecho Procesal",
