@@ -286,80 +286,84 @@ def signup():
 def role():
     try:
         datos = request.get_json()
-        app.logger.info(f"Datos de rol recibidos: {datos}")
         temp_user_id = datos.get('temp_user_id')
         rol = datos.get('rol')
 
         if not temp_user_id or not rol:
             return jsonify({"error": "Falta temp_user_id o rol"}), 400
 
-        # Retrieve temporary user data
         temp_user_data = temp_users.get(temp_user_id)
         if not temp_user_data:
             return jsonify({"error": "Datos de usuario temporal no encontrados"}), 404
 
         # Create user in the database
-        contrasena_hasheada = hash_password(temp_user_data['contrasena'])
         nuevo_usuario = {
             "nombre": temp_user_data['nombre'],
             "correo_o_telefono": temp_user_data['correo_o_telefono'],
-            "contrasena": contrasena_hasheada,
+            "contrasena": hash_password(temp_user_data['contrasena']),
         }
         resultado_usuario = users_collection.insert_one(nuevo_usuario)
         user_id = resultado_usuario.inserted_id
 
         if rol == 'cliente':
-            tipo_caso = datos.get('tipo_caso')
-            if not tipo_caso:
-                return jsonify({"error": "Falta tipo_caso para el cliente"}), 400
-            resultado = clients_collection.insert_one({
+            cliente_data = {
                 "user_id": user_id,
-                "tipo_caso": tipo_caso
-            })
+                "nombre": temp_user_data['nombre'],
+                "caso_tipo": None,
+                "estado_caso": None,
+                "contacto": None,
+                "fecha_inicio": None,
+                "proxima_audiencia": None,
+                "direccion": {
+                    "calle": None,
+                    "ciudad": None,
+                    "estado": None,
+                    "codigo_postal": None
+                },
+                "telefono": None,
+                "correo": temp_user_data['correo_o_telefono']
+            }
+            clients_collection.insert_one(cliente_data)
         elif rol == 'abogado':
-            id_abogado = datos.get('id_abogado')
-            contrasena = datos.get('contrasena')
-            if not id_abogado or not contrasena:
-                return jsonify({"error": "Falta id_abogado o contrasena"}), 400
-            
-            abogado = lawyer_collection.find_one({"id_abogado": {"$regex": f"^{id_abogado}$", "$options": "i"}})
-            if not abogado:
-                return jsonify({"error": "Abogado no encontrado"}), 404
-            
-            if not verify_password(abogado['contrasena'], contrasena):
-                return jsonify({"error": "Credenciales de abogado inválidas"}), 401
-            
-            resultado = lawyer_collection.update_one(
-                {"_id": abogado['_id']},
-                {"$set": {"user_id": user_id}}
-            )
+            abogado_data = {
+                "user_id": user_id,
+                "nombre": temp_user_data['nombre'],
+                "especializacion": None,
+                "experiencia_profesional": None,
+                "disponibilidad": True,
+                "maestria": None,
+                "direccion": {
+                    "calle": None,
+                    "ciudad": None,
+                    "estado": None,
+                    "codigo_postal": None
+                },
+                "casos_asignados": [],
+                "telefono": None,
+                "correo": temp_user_data['correo_o_telefono'],
+                "casos_atendidos": 0,
+                "casos_con_sentencia_a_favor": 0
+            }
+            lawyer_collection.insert_one(abogado_data)
         elif rol == 'estudiante':
-            matricula = datos.get('matricula')
-            contrasena = datos.get('contrasena')
-            if not matricula or not contrasena:
-                return jsonify({"error": "Falta matricula o contrasena"}), 400
-            
-            estudiante = students_collection.find_one({"matricula": matricula})
-            if not estudiante:
-                return jsonify({"error": "Estudiante no encontrado"}), 404
-            if not verify_password(estudiante['contrasena'], contrasena):
-                return jsonify({"error": "Credenciales de estudiante inválidas"}), 401
-            
-            resultado = students_collection.update_one(
-                {"matricula": matricula},
-                {"$set": {"user_id": user_id}}
-            )
+            estudiante_data = {
+                "user_id": user_id,
+                "nombre": temp_user_data['nombre'],
+                "matricula": None,
+                "ano_de_estudio": None,
+                "carrera": None,
+                "correo": temp_user_data['correo_o_telefono']
+            }
+            students_collection.insert_one(estudiante_data)
         else:
             return jsonify({"error": "Rol inválido"}), 400
 
         # Remove temporary user data
         del temp_users[temp_user_id]
 
-        app.logger.info(f"Usuario creado y rol asignado para el user ID: {user_id}")
         return jsonify({"mensaje": "Usuario creado y rol asignado exitosamente", "user_id": str(user_id)}), 200
 
     except Exception as e:
-        app.logger.error(f"Error en la asignación de rol: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/login', methods=['POST'])
