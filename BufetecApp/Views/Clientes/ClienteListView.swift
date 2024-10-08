@@ -9,14 +9,20 @@ import SwiftUI
 
 struct ClienteListView: View {
     var clientes: [Cliente]
+    var casosLegales: [CasoLegal]
     @State private var searchText = ""
 
     var filteredClientes: [Cliente] {
         if searchText.isEmpty {
             return clientes
         } else {
-            return clientes.filter { $0.name.lowercased().contains(searchText.lowercased()) ||
-                                    $0.caseType.lowercased().contains(searchText.lowercased()) }
+            return filteredClientesBySearchText
+        }
+    }
+
+    private var filteredClientesBySearchText: [Cliente] {
+        clientes.filter { cliente in
+            cliente.nombre.lowercased().contains(searchText.lowercased())
         }
     }
 
@@ -24,12 +30,7 @@ struct ClienteListView: View {
         NavigationView {
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    ForEach(filteredClientes) { cliente in
-                        NavigationLink(destination: ClienteDetailView(cliente: cliente)) {
-                            ClienteCard(cliente: cliente)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
+                    clienteListContent
                 }
                 .padding()
             }
@@ -38,11 +39,36 @@ struct ClienteListView: View {
             .searchable(text: $searchText, prompt: "Buscar clientes")
         }
     }
+
+    private var clienteListContent: some View {
+        ForEach(filteredClientes) { cliente in
+            clienteNavigationLink(for: cliente)
+        }
+    }
+
+    private func clienteNavigationLink(for cliente: Cliente) -> some View {
+        if let caso = casosLegales.first(where: { $0.idCliente == cliente.id }) {
+            return AnyView(
+                NavigationLink(destination: ClienteDetailView(cliente: cliente, caso: caso)) {
+                    ClienteCard(cliente: cliente, caso: caso)
+                }
+                .buttonStyle(PlainButtonStyle())
+            )
+        } else {
+            return AnyView(
+                NavigationLink(destination: ClienteDetailView(cliente: cliente, caso: nil)) {
+                    ClienteCard(cliente: cliente, caso: nil)
+                }
+                .buttonStyle(PlainButtonStyle())
+            )
+        }
+    }
 }
 
 struct ClienteCard: View {
     var cliente: Cliente
-    
+    var caso: CasoLegal?
+
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: "person.circle.fill")
@@ -51,19 +77,25 @@ struct ClienteCard: View {
                 .frame(width: 80, height: 80)
                 .foregroundColor(.blue)
                 .shadow(radius: 3)
-            
+
             VStack(alignment: .leading, spacing: 8) {
-                Text(cliente.name)
+                Text(cliente.nombre)
                     .font(.headline)
                     .foregroundColor(.primary)
-                
-                Label(cliente.caseType, systemImage: "folder")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
-                Label(cliente.status, systemImage: "circle.fill")
-                    .font(.caption)
-                    .foregroundColor(cliente.statusColor)
+
+                if let caso = caso {
+                    Text(caso.nombre)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    Text(caso.estado)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("No casos legales")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
             }
             Spacer()
         }
@@ -76,24 +108,28 @@ struct ClienteCard: View {
 
 struct ClienteDetailView: View {
     var cliente: Cliente
-    
+    var caso: CasoLegal?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                ClienteInfoHeader(cliente: cliente)
-                ClienteCaseInfo(cliente: cliente)
+                ClienteInfoHeader(cliente: cliente, caso: caso)
+                if let caso = caso {
+                    ClienteCaseInfo(cliente: cliente, caso: caso)
+                }
                 ClienteContactInfo(cliente: cliente)
             }
             .padding()
         }
-        .navigationTitle(cliente.name)
+        .navigationTitle(cliente.nombre)
         .background(Color(.systemGroupedBackground))
     }
 }
 
 struct ClienteInfoHeader: View {
     var cliente: Cliente
-    
+    var caso: CasoLegal?
+
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
             Image(systemName: "person.circle.fill")
@@ -101,14 +137,20 @@ struct ClienteInfoHeader: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 100, height: 100)
                 .foregroundColor(.blue)
-            
-            Text(cliente.name)
+
+            Text(cliente.nombre)
                 .font(.title2)
                 .fontWeight(.bold)
-            
-            Label(cliente.status, systemImage: "circle.fill")
-                .font(.subheadline)
-                .foregroundColor(cliente.statusColor)
+
+            if let caso = caso {
+                Label(caso.estado, systemImage: "circle.fill")
+                    .font(.subheadline)
+                    .foregroundColor(.red)
+            } else {
+                Text("No casos legales")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding()
@@ -119,20 +161,21 @@ struct ClienteInfoHeader: View {
 
 struct ClienteCaseInfo: View {
     var cliente: Cliente
-    
+    var caso: CasoLegal
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Información del Caso")
                 .font(.headline)
-            
+
             HStack {
-                Label(cliente.caseType, systemImage: "folder")
+                Label(caso.nombre, systemImage: "folder")
                 Spacer()
                 Text("Caso #12345")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             Text("Abogado asignado: Lic. Juan Pérez")
             Text("Fecha de inicio: 01/01/2024")
             Text("Próxima audiencia: 15/03/2024")
@@ -145,12 +188,12 @@ struct ClienteCaseInfo: View {
 
 struct ClienteContactInfo: View {
     var cliente: Cliente
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Información de Contacto")
                 .font(.headline)
-            
+
             Label("cliente@email.com", systemImage: "envelope")
             Label("+52 123 456 7890", systemImage: "phone")
             Label("Calle Principal 123, Ciudad", systemImage: "location")
@@ -161,12 +204,97 @@ struct ClienteContactInfo: View {
     }
 }
 
+import SwiftUI
+
 struct ClienteListView_Previews: PreviewProvider {
     static var previews: some View {
-        ClienteListView(clientes: [
-            Cliente(name: "María González", caseType: "Divorcio", status: "Activo"),
-            Cliente(name: "Carlos Rodríguez", caseType: "Custodia", status: "En espera"),
-            Cliente(name: "Ana Martínez", caseType: "Herencia", status: "Cerrado")
-        ])
+        let clientes = [
+            Cliente(
+                user_id: "1",
+                nombre: "María González",
+                contacto: "Contacto 1",
+                proxima_audiencia: Date(),
+                telefono: "123-456-7890",
+                correo: "maria@example.com",
+                fecha_inicio: Date(),
+                direccion: Cliente.Direccion(
+                    calle: "Calle 1",
+                    ciudad: "Ciudad 1",
+                    estado: "Estado 1",
+                    codigo_postal: "12345"
+                ),
+                imageName: "maria"
+            ),
+            Cliente(
+                user_id: "2",
+                nombre: "Carlos Rodríguez",
+                contacto: "Contacto 2",
+                proxima_audiencia: Date(),
+                telefono: "987-654-3210",
+                correo: "carlos@example.com",
+                fecha_inicio: Date(),
+                direccion: Cliente.Direccion(
+                    calle: "Calle 2",
+                    ciudad: "Ciudad 2",
+                    estado: "Estado 2",
+                    codigo_postal: "54321"
+                ),
+                imageName: "carlos"
+            ),
+            Cliente(
+                user_id: "3",
+                nombre: "Ana Martínez",
+                contacto: "Contacto 3",
+                proxima_audiencia: Date(),
+                telefono: "555-555-5555",
+                correo: "ana@example.com",
+                fecha_inicio: Date(),
+                direccion: Cliente.Direccion(
+                    calle: "Calle 3",
+                    ciudad: "Ciudad 3",
+                    estado: "Estado 3",
+                    codigo_postal: "67890"
+                ),
+                imageName: "ana"
+            )
+        ]
+
+        let casosLegales = [
+            CasoLegal(
+                id: UUID(),
+                idCliente: clientes[0].id,
+                idAbogado: UUID(), // Provide appropriate UUID
+                nombre: "Divorcio",
+                expediente: "EXP123",
+                parteActora: "John Doe",
+                parteDemandada: "Jane Doe",
+                estado: "Activo",
+                notas: "Notas del caso de divorcio"
+            ),
+            CasoLegal(
+                id: UUID(),
+                idCliente: clientes[1].id,
+                idAbogado: UUID(), // Provide appropriate UUID
+                nombre: "Custodia",
+                expediente: "EXP456",
+                parteActora: "Alice Smith",
+                parteDemandada: "Bob Smith",
+                estado: "En espera",
+                notas: "Notas del caso de custodia"
+            ),
+            CasoLegal(
+                id: UUID(),
+                idCliente: clientes[2].id,
+                idAbogado: UUID(), // Provide appropriate UUID
+                nombre: "Herencia",
+                expediente: "EXP789",
+                parteActora: "Charlie Brown",
+                parteDemandada: "Lucy Brown",
+                estado: "Cerrado",
+                notas: "Notas del caso de herencia"
+            )
+        ]
+
+        return ClienteListView(clientes: clientes, casosLegales: casosLegales)
     }
 }

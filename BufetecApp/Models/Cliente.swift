@@ -3,20 +3,21 @@ import SwiftUI
 
 struct Cliente: Identifiable {
     let id = UUID()
-    let name: String
-    let caseType: String
-    let status: String
+    let user_id: String
+    let nombre: String
+    let contacto: String
+    let proxima_audiencia: Date
+    let telefono: String
+    let correo: String
+    let fecha_inicio: Date
+    let direccion: Direccion
+    let imageName: String
     
-    var statusColor: Color {
-        switch status {
-        case "Activo":
-            return .green
-        case "En espera":
-            return .orange
-        case "Cerrado":
-            return .red
-        default:
-            return .gray
-        }
+    struct Direccion: Codable {
+        let calle: String
+        let ciudad: String
+        let estado: String
+        let codigo_postal: String
     }
+    
 }
