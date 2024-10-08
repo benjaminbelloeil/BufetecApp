@@ -38,8 +38,8 @@ struct AbogadoDetailView: View {
                 // Lawyer details
                 VStack(alignment: .leading, spacing: 15) {
                     detailRow(icon: "briefcase", title: "Especialidad", detail: lawyer.especializacion)
-                    detailRow(icon: "book", title: "Maestría", detail: lawyer.maestria)
-                    detailRow(icon: "clock", title: "Experiencia", detail: lawyer.experienciaProfesional)
+                    detailRow(icon: "book", title: "Maestría", detail: lawyer.maestria ?? "No disponible")
+                    detailRow(icon: "clock", title: "Experiencia", detail: lawyer.experienciaProfesional ?? "No disponible")
                     detailRow(icon: "mappin", title: "Dirección", detail: formatAddress(lawyer.direccion))
                     detailRow(icon: "phone", title: "Teléfono", detail: lawyer.telefono)
                     detailRow(icon: "envelope", title: "Correo", detail: lawyer.correo)
@@ -139,15 +139,24 @@ struct AbogadoDetailView: View {
     }
     
     private func calculateSuccessRate(_ lawyer: Lawyer) -> Int {
-        guard lawyer.casosAtendidos > 0 else { return 0 }
-        return Int((Double(lawyer.casosSentenciaFavorable) / Double(lawyer.casosAtendidos)) * 100)
+        // Unwrap the optional values with default values (0 in this case)
+        let casosAtendidos = lawyer.casosAtendidos ?? 0
+        let casosSentenciaFavorable = lawyer.casosSentenciaFavorable ?? 0
+        
+        // Ensure there are attended cases to avoid division by zero
+        guard casosAtendidos > 0 else { return 0 }
+        
+        // Perform the calculation
+        return Int((Double(casosSentenciaFavorable) / Double(casosAtendidos)) * 100)
     }
+
 }
 
 struct AbogadoDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             AbogadoDetailView(lawyer: Lawyer(
+                id: UUID().uuidString,
                 userId: "user1",
                 nombre: "Lic. Ana María López",
                 especializacion: "Derecho Procesal",

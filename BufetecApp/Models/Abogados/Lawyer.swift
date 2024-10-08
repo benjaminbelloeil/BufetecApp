@@ -1,41 +1,43 @@
 import Foundation
 
 struct Lawyer: Identifiable, Codable {
-    var id = UUID()
-    let userId: String
+    let id: String  // Keep as String since JSON provides a string
+    let userId: String?
     let nombre: String
     let especializacion: String
-    let experienciaProfesional: String
-    let disponibilidad: Bool
-    let maestria: String
+    let experienciaProfesional: String?
+    let disponibilidad: Bool?  // Change to optional Bool to handle empty strings
+    let maestria: String?
     let direccion: Direccion
-    let casosAsignados: [String]
+    let casosAsignados: [String]?  // Optional to handle empty arrays or empty strings
     let telefono: String
     let correo: String
-    let casosAtendidos: Int
-    let casosSentenciaFavorable: Int
+    let casosAtendidos: Int?  // Optional Int to handle empty strings
+    let casosSentenciaFavorable: Int?  // Optional Int to handle empty strings
     let imageName: String
-    
+
     struct Direccion: Codable {
         let calle: String
         let ciudad: String
         let estado: String
         let codigo_postal: String
     }
-    
-    init(userId: String, nombre: String, especializacion: String, experienciaProfesional: String, disponibilidad: Bool, maestria: String, direccion: Direccion, casosAsignados: [String], telefono: String, correo: String, casosAtendidos: Int, casosSentenciaFavorable: Int, imageName: String) {
-        self.userId = userId
-        self.nombre = nombre
-        self.especializacion = especializacion
-        self.experienciaProfesional = experienciaProfesional
-        self.disponibilidad = disponibilidad
-        self.maestria = maestria
-        self.direccion = direccion
-        self.casosAsignados = casosAsignados
-        self.telefono = telefono
-        self.correo = correo
-        self.casosAtendidos = casosAtendidos
-        self.casosSentenciaFavorable = casosSentenciaFavorable
-        self.imageName = imageName
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "userId"
+        case nombre
+        case especializacion
+        case experienciaProfesional = "experiencia_profesional"  // Map to snake_case
+        case disponibilidad
+        case maestria
+        case direccion
+        case casosAsignados = "casos_asignados"  // Map to snake_case
+        case telefono
+        case correo
+        case casosAtendidos = "casos_atendidos"  // Map to snake_case
+        case casosSentenciaFavorable = "casos_con_sentencia_a_favor"  // Map to snake_case
+        case imageName = "url_recurso"
     }
 }
+

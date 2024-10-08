@@ -426,10 +426,8 @@ def get_all_abogados():
                 "userId": str(abogado.get("user_id", "")),
                 "nombre": abogado.get("nombre", ""),
                 "especializacion": abogado.get("especializacion", abogado.get("especialidad", "")),
-                "especialidad": abogado.get("especialidad", ""),
-                "experienciaProfesional": abogado.get("experiencia_profesional", ""),
                 "experiencia_profesional": abogado.get("experiencia_profesional", ""),
-                "disponibilidad": abogado.get("disponibilidad", ""),
+                "disponibilidad": abogado.get("disponibilidad", True),
                 "maestria": abogado.get("maestria", ""),
                 "direccion": {
                     "calle": abogado.get("direccion", {}).get("calle", ""),
@@ -437,15 +435,12 @@ def get_all_abogados():
                     "estado": abogado.get("direccion", {}).get("estado", ""),
                     "codigo_postal": abogado.get("direccion", {}).get("codigo_postal", "")
                 },
-                "casosAsignados": abogado.get("casos_asignados", ""),
-                "casos_asignados": abogado.get("casos_asignados", ""),
+                "casos_asignados": abogado.get("casos_asignados", []),
                 "telefono": abogado.get("telefono", ""),
                 "correo": abogado.get("correo", ""),
-                "casosAtendidos": abogado.get("casos_atendidos", ""),
-                "casos_atendidos": abogado.get("casos_atendidos", ""),
-                "casosSentenciaFavorable": abogado.get("casos_con_sentencia_a_favor", ""),
-                "casos_con_sentencia_a_favor": abogado.get("casos_con_sentencia_a_favor", ""),
-                "imageName": "abogado_placeholder"
+                "casos_atendidos": abogado.get("casos_atendidos", 0),
+                "casos_con_sentencia_a_favor": abogado.get("casos_con_sentencia_a_favor", 0),
+                "url_recurso": abogado.get("url_recurso", "")
             })
         return jsonify(result), 200
     except Exception as e:

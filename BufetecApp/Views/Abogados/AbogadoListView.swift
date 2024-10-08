@@ -40,6 +40,7 @@ struct AbogadoListView: View {
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let data = data {
+                print(String(data: data, encoding: .utf8) ?? "No readable data")
                 if let decodedResponse = try? JSONDecoder().decode([Lawyer].self, from: data) {
                     DispatchQueue.main.async {
                         self.lawyers = decodedResponse
