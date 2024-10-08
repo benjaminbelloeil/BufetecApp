@@ -806,6 +806,10 @@ def nuevo_caso():
         'responsable':responsable,
     }
     case_id = casos_collection.insert_one(nuevo_caso_data).inserted_id
+    lawyer_collection.update_one(
+        {'_id': abogado_id_obj},
+        {'$push': {'casos_asignados': case_id}}  # Agregar el ID del nuevo caso al campo casos_asignados
+    )
     return {'message': 'Nuevo caso creado', 'case_id': str(case_id)}, 201
 
 
