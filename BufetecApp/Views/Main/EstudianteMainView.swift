@@ -23,6 +23,7 @@ struct EstudianteMainView: View {
             ClienteListView(
                 clientes: [
                     Cliente(
+                        id: "1",
                         user_id: "1",
                         nombre: "María González",
                         contacto: "Contacto 1",
@@ -39,6 +40,7 @@ struct EstudianteMainView: View {
                         imageName: "maria"
                     ),
                     Cliente(
+                        id: "2",
                         user_id: "2",
                         nombre: "Carlos Rodríguez",
                         contacto: "Contacto 2",
@@ -55,6 +57,7 @@ struct EstudianteMainView: View {
                         imageName: "carlos"
                     ),
                     Cliente(
+                        id: "3",
                         user_id: "3",
                         nombre: "Ana Martínez",
                         contacto: "Contacto 3",
@@ -73,37 +76,46 @@ struct EstudianteMainView: View {
                 ],
                 casosLegales: [
                     CasoLegal(
-                        id: UUID(),
-                        idCliente: UUID(), // Provide appropriate UUID
-                        idAbogado: UUID(), // Provide appropriate UUID
+                        id: "1",
+                        idCliente: "1",
+                        idAbogado: "1",
                         nombre: "Divorcio",
                         expediente: "EXP123",
                         parteActora: "John Doe",
                         parteDemandada: "Jane Doe",
                         estado: "Activo",
-                        notas: "Notas del caso de divorcio"
+                        notas: "Notas del caso de divorcio",
+                        proximaAudiencia: Date(),
+                        fechaInicio: Date(),
+                        imageName: "url"
                     ),
                     CasoLegal(
-                        id: UUID(),
-                        idCliente: UUID(), // Provide appropriate UUID
-                        idAbogado: UUID(), // Provide appropriate UUID
+                        id: "2",
+                        idCliente: "2",
+                        idAbogado: "2",
                         nombre: "Custodia",
                         expediente: "EXP456",
                         parteActora: "Alice Smith",
                         parteDemandada: "Bob Smith",
                         estado: "En espera",
-                        notas: "Notas del caso de custodia"
+                        notas: "Notas del caso de custodia",
+                        proximaAudiencia: Date(),
+                        fechaInicio: Date(),
+                        imageName: "url"
                     ),
                     CasoLegal(
-                        id: UUID(),
-                        idCliente: UUID(), // Provide appropriate UUID
-                        idAbogado: UUID(), // Provide appropriate UUID
+                        id: "3",
+                        idCliente: "3",
+                        idAbogado: "3",
                         nombre: "Herencia",
                         expediente: "EXP789",
                         parteActora: "Charlie Brown",
                         parteDemandada: "Lucy Brown",
                         estado: "Cerrado",
-                        notas: "Notas del caso de herencia"
+                        notas: "Notas del caso de herencia",
+                        proximaAudiencia: Date(),
+                        fechaInicio: Date(),
+                        imageName: "url"
                     )
                 ]
             )

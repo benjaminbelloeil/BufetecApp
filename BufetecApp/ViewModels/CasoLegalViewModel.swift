@@ -16,9 +16,14 @@ class CasoLegalViewModel: ObservableObject {
     func loadCasos() {
         // Ejemplo de datos ficticios
         casos = [
-            CasoLegal(idCliente: UUID(), idAbogado: UUID(), nombre: "Caso Ejemplo 1", expediente: "111111", parteActora: "Parte Actora 1", parteDemandada: "Parte Demandada 1", estado: "Activo", notas: "Notas adicionales aquí."),
-            CasoLegal(idCliente: UUID(), idAbogado: UUID(), nombre: "Caso Ejemplo 2", expediente: "222222", parteActora: "Parte Actora 2", parteDemandada: "Parte Demandada 2", estado: "En Proceso", notas: "Notas adicionales aquí."),
+            CasoLegal(id: "1", idCliente: "1", idAbogado: "1", nombre: "Caso Ejemplo 1", expediente: "111111", parteActora: "Parte Actora 1", parteDemandada: "Parte Demandada 1", estado: "Activo", notas: "Notas adicionales aquí.", proximaAudiencia: Date(), fechaInicio: Date(), imageName: "url"),
+            CasoLegal(id: "2", idCliente: "2", idAbogado: "2", nombre: "Caso Ejemplo 2", expediente: "222222", parteActora: "Parte Actora 2", parteDemandada: "Parte Demandada 2", estado: "En Proceso", notas: "Notas adicionales aquí.", proximaAudiencia: Date(), fechaInicio: Date(), imageName: "url"),
             // Otros casos...
+            /*
+             var proximaAudiencia: Date?
+             var fechaInicio: Date?
+             var imageName: String?
+             */
         ]
     }
     

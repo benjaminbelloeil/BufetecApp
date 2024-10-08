@@ -471,13 +471,10 @@ def get_one_abogado(abogado_id):
                     "estado": abogado.get("direccion", {}).get("estado", ""),
                     "codigo_postal": abogado.get("direccion", {}).get("codigo_postal", "")
                 },
-                "casosAsignados": abogado.get("casos_asignados", ""),
                 "casos_asignados": abogado.get("casos_asignados", ""),
                 "telefono": abogado.get("telefono", ""),
                 "correo": abogado.get("correo", ""),
-                "casosAtendidos": abogado.get("casos_atendidos", ""),
                 "casos_atendidos": abogado.get("casos_atendidos", ""),
-                "casosSentenciaFavorable": abogado.get("casos_con_sentencia_a_favor", ""),
                 "casos_con_sentencia_a_favor": abogado.get("casos_con_sentencia_a_favor", ""),
                 "imageName": "abogado_placeholder"
             }
