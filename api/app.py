@@ -421,22 +421,33 @@ def get_all_abogados():
             result.append({
                 "id": str(abogado["_id"]),
                 "userId": str(abogado.get("user_id", "")),
-                "nombre": abogado["nombre"],
-                "especializacion": abogado["especializacion"],
-                "experienciaProfesional": abogado["experiencia_profesional"],
-                "disponibilidad": abogado["disponibilidad"],
-                "maestria": abogado["maestria"],
-                "direccion": abogado["direccion"],
-                "casosAsignados": abogado["casos_asignados"],
-                "telefono": abogado["telefono"],
-                "correo": abogado["correo"],
-                "casosAtendidos": abogado["casos_atendidos"],
-                "casosSentenciaFavorable": abogado["casos_con_sentencia_a_favor"],
+                "nombre": abogado.get("nombre", ""),
+                "especializacion": abogado.get("especializacion", abogado.get("especialidad", "")),
+                "especialidad": abogado.get("especialidad", ""),
+                "experienciaProfesional": abogado.get("experiencia_profesional", ""),
+                "experiencia_profesional": abogado.get("experiencia_profesional", ""),
+                "disponibilidad": abogado.get("disponibilidad", ""),
+                "maestria": abogado.get("maestria", ""),
+                "direccion": {
+                    "calle": abogado.get("direccion", {}).get("calle", ""),
+                    "ciudad": abogado.get("direccion", {}).get("ciudad", ""),
+                    "estado": abogado.get("direccion", {}).get("estado", ""),
+                    "codigo_postal": abogado.get("direccion", {}).get("codigo_postal", "")
+                },
+                "casosAsignados": abogado.get("casos_asignados", ""),
+                "casos_asignados": abogado.get("casos_asignados", ""),
+                "telefono": abogado.get("telefono", ""),
+                "correo": abogado.get("correo", ""),
+                "casosAtendidos": abogado.get("casos_atendidos", ""),
+                "casos_atendidos": abogado.get("casos_atendidos", ""),
+                "casosSentenciaFavorable": abogado.get("casos_con_sentencia_a_favor", ""),
+                "casos_con_sentencia_a_favor": abogado.get("casos_con_sentencia_a_favor", ""),
                 "imageName": "abogado_placeholder"
             })
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/abogado/<abogado_id>", methods=['GET'])
 def get_one_abogado(abogado_id):
@@ -447,28 +458,36 @@ def get_one_abogado(abogado_id):
             return jsonify({'message': "El id proporcionado no es válido"}), 400
         if abogado:
             abogado_dict = {
-                "user_id": str(abogado.get("user_id")),  
-                "especialidad": abogado.get("especialidad"),
-                "experiencia_profesional": abogado.get("experiencia_profesional"),
-                "disponibilidad": abogado.get("disponibilidad"),
-                "casos_asignados": abogado.get("casos_asignados"),
-                "telefono": abogado.get("telefono"),
-                "correo": abogado.get("correo"),
-                "casos_atendidos":abogado.get("casos_atendidos"),
-                "casos_con_sentencia_a_favor":abogado.get("casos_con_sentencia_a_favor"),
+                "userId": str(abogado.get("user_id", "")),
+                "nombre": abogado.get("nombre", ""),
+                "especializacion": abogado.get("especializacion", abogado.get("especialidad", "")),
+                "especialidad": abogado.get("especialidad", ""),
+                "experienciaProfesional": abogado.get("experiencia_profesional", ""),
+                "experiencia_profesional": abogado.get("experiencia_profesional", ""),
+                "disponibilidad": abogado.get("disponibilidad", ""),
+                "maestria": abogado.get("maestria", ""),
                 "direccion": {
-                    "calle": abogado.get("direccion", {}).get("calle"),
-                    "ciudad": abogado.get("direccion", {}).get("ciudad"),
-                    "estado": abogado.get("direccion", {}).get("estado"),
-                    "codigo_postal": abogado.get("direccion", {}).get("codigo_postal")
-                },             
+                    "calle": abogado.get("direccion", {}).get("calle", ""),
+                    "ciudad": abogado.get("direccion", {}).get("ciudad", ""),
+                    "estado": abogado.get("direccion", {}).get("estado", ""),
+                    "codigo_postal": abogado.get("direccion", {}).get("codigo_postal", "")
+                },
+                "casosAsignados": abogado.get("casos_asignados", ""),
+                "casos_asignados": abogado.get("casos_asignados", ""),
+                "telefono": abogado.get("telefono", ""),
+                "correo": abogado.get("correo", ""),
+                "casosAtendidos": abogado.get("casos_atendidos", ""),
+                "casos_atendidos": abogado.get("casos_atendidos", ""),
+                "casosSentenciaFavorable": abogado.get("casos_con_sentencia_a_favor", ""),
+                "casos_con_sentencia_a_favor": abogado.get("casos_con_sentencia_a_favor", ""),
+                "imageName": "abogado_placeholder"
             }
-            return jsonify(abogado_dict)
+            return jsonify(abogado_dict), 200
         else:
             return jsonify({'message': f"No se encontró el abogado con el id {abogado_id}"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
-
+    
 @app.route('/insert_sample_lawyers', methods=['GET'])
 def insert_sample_lawyers_route():
     insert_sample_lawyers()
