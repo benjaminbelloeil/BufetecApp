@@ -12,6 +12,14 @@ struct ClienteMainView: View {
                     Text("Perfil")
                 }
                 .tag(0)
+            
+            BibliotecaView()
+                .tabItem {
+                    Image(systemName: "books.vertical.fill")
+                    Text("Biblioteca")
+                }
+                .tag(1)
+
 
             ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
                 .tabItem {
