@@ -16,7 +16,6 @@ import time
 # App Configuration
 app = Flask(__name__)
 CORS(app)
-logging.basicConfig(level=logging.DEBUG)
 app.config["MONGO_URI"] = "mongodb://10.14.255.54:27017/BufetecDB"
 mongo = PyMongo(app)
 
