@@ -39,7 +39,7 @@ struct AbogadoDetailView: View {
                 VStack(alignment: .leading, spacing: 15) {
                     detailRow(icon: "briefcase", title: "Especialidad", detail: lawyer.especializacion)
                     detailRow(icon: "book", title: "Maestría", detail: lawyer.maestria ?? "No disponible")
-                    detailRow(icon: "clock", title: "Experiencia", detail: lawyer.experienciaProfesional ?? "No disponible")
+                    detailRow(icon: "clock", title: "Experiencia", detail: lawyer.experienciaProfesional)
                     detailRow(icon: "mappin", title: "Dirección", detail: formatAddress(lawyer.direccion))
                     detailRow(icon: "phone", title: "Teléfono", detail: lawyer.telefono)
                     detailRow(icon: "envelope", title: "Correo", detail: lawyer.correo)
@@ -140,8 +140,8 @@ struct AbogadoDetailView: View {
     
     private func calculateSuccessRate(_ lawyer: Lawyer) -> Int {
         // Unwrap the optional values with default values (0 in this case)
-        let casosAtendidos = lawyer.casosAtendidos ?? 0
-        let casosSentenciaFavorable = lawyer.casosSentenciaFavorable ?? 0
+        let casosAtendidos = lawyer.casosAtendidos
+        let casosSentenciaFavorable = lawyer.casosSentenciaFavorable
         
         // Ensure there are attended cases to avoid division by zero
         guard casosAtendidos > 0 else { return 0 }
