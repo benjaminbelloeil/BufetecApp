@@ -14,109 +14,109 @@ struct QuestionView: View {
     @State private var showMainView = false
     
     var body: some View {
-            if showMainView {
-                MainView(userId: userId)
-            } else {
-                VStack(spacing: 20) {
-                    // Header
-                    HStack {
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                if currentQuestion > 1 {
-                                    currentQuestion -= 1
-                                } else {
-                                    showQuestions = false
-                                }
-                            }
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .foregroundColor(.blue)
-                                .padding()
-                        }
-                        Spacer()
-                        Text("Preguntas Iniciales")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        Spacer()
-                        Button(action: {
-                            showQuestions = false
-                        }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.gray)
-                                .padding()
-                        }
-                    }
-                    .padding(.top, 50)
-                    
-                    // Animated Progress bar
-                    GeometryReader { geometry in
-                        ZStack(alignment: .leading) {
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(height: 8)
-                            Rectangle()
-                                .fill(Color.blue)
-                                .frame(width: geometry.size.width * CGFloat(currentQuestion) / CGFloat(totalQuestions), height: 8)
-                                .animation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0), value: currentQuestion)
-                        }
-                        .cornerRadius(4)
-                    }
-                    .frame(height: 8)
-                    .padding(.horizontal)
-                    
-                    Text("\(currentQuestion)/\(totalQuestions)")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    
-                    Spacer()
-                        .frame(height: 20)
-                    
-                    // Questions with transition
-                    ZStack {
-                        if currentQuestion == 1 {
-                            roleSelectionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                        } else if userType == .cliente {
-                            clientQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                        } else if userType == .abogado {
-                            lawyerQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                        } else if userType == .estudiante {
-                            studentQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                        }
-                    }
-                    .animation(.easeInOut(duration: 0.3), value: currentQuestion)
-                    
-                    Spacer()
-                    
-                    // Continue Button
+        if showMainView {
+            MainView(userId: userId)
+        } else {
+            VStack(spacing: 20) {
+                // Header
+                HStack {
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            if currentQuestion < totalQuestions {
-                                currentQuestion += 1
+                            if currentQuestion > 1 {
+                                currentQuestion -= 1
                             } else {
-                                submitResponses()
+                                showQuestions = false
                             }
                         }
                     }) {
-                        Text("Continuar")
-                            .frame(maxWidth: .infinity)
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.blue)
                             .padding()
-                            .background(canProceed ? Color.blue : Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 50)
-                    .disabled(!canProceed)
-
-                    if !errorMessage.isEmpty {
-                        Text(errorMessage)
-                            .foregroundColor(.red)
-                            .font(.footnote)
+                    Spacer()
+                    Text("Preguntas Iniciales")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Button(action: {
+                        showQuestions = false
+                    }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.gray)
+                            .padding()
                     }
                 }
-                .background(Color(UIColor.systemBackground))
-                .edgesIgnoringSafeArea(.all)
+                .padding(.top, 50)
+                
+                // Animated Progress bar
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 8)
+                        Rectangle()
+                            .fill(Color.blue)
+                            .frame(width: geometry.size.width * CGFloat(currentQuestion) / CGFloat(totalQuestions), height: 8)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0), value: currentQuestion)
+                    }
+                    .cornerRadius(4)
+                }
+                .frame(height: 8)
+                .padding(.horizontal)
+                
+                Text("\(currentQuestion)/\(totalQuestions)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                
+                Spacer()
+                    .frame(height: 20)
+                
+                // Questions with transition
+                ZStack {
+                    if currentQuestion == 1 {
+                        roleSelectionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                    } else if userType == .cliente {
+                        clientQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                    } else if userType == .abogado {
+                        lawyerQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                    } else if userType == .estudiante {
+                        studentQuestionView.transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                    }
+                }
+                .animation(.easeInOut(duration: 0.3), value: currentQuestion)
+                
+                Spacer()
+                
+                // Continue Button
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        if currentQuestion < totalQuestions {
+                            currentQuestion += 1
+                        } else {
+                            submitResponses()
+                        }
+                    }
+                }) {
+                    Text("Continuar")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(canProceed ? Color.blue : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 50)
+                .disabled(!canProceed)
+
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                }
             }
+            .background(Color(UIColor.systemBackground))
+            .edgesIgnoringSafeArea(.all)
+        }
     }
     
     var roleSelectionView: some View {
@@ -315,7 +315,7 @@ struct QuestionView: View {
             parameters["tipo_caso"] = selectedProblem
         case .abogado:
             parameters["id_abogado"] = id_abogado
-            parameters["contrasena"] = contrasena
+            parameters["abogado_contrasena"] = contrasena  // Updated field name
         case .estudiante:
             parameters["matricula"] = matricula
             parameters["contrasena"] = contrasena
@@ -336,82 +336,82 @@ struct QuestionView: View {
         }
 
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                if let error = error {
                     self.errorMessage = "Error: \(error.localizedDescription)"
+                    return
                 }
-                return
-            }///
 
-            guard let data = data else {
-                            DispatchQueue.main.async {
-                                self.errorMessage = "No se recibieron datos"
-                            }
-                            return
-                        }
+                guard let httpResponse = response as? HTTPURLResponse,
+                      (200...299).contains(httpResponse.statusCode) else {
+                    self.errorMessage = "Error del servidor: Código de estado inválido"
+                    return
+                }
 
-                        do {
-                            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                                DispatchQueue.main.async {
-                                    if let mensaje = json["mensaje"] as? String, mensaje == "Usuario creado y rol asignado exitosamente" {
-                                        if let newUserId = json["user_id"] as? String {
-                                            self.userId = newUserId
-                                        }
-                                        self.showMainView = true
-                                    } else if let error = json["error"] as? String {
-                                        self.errorMessage = error
-                                    }
-                                }
+                guard let data = data else {
+                    self.errorMessage = "No se recibieron datos"
+                    return
+                }
+
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        if let mensaje = json["mensaje"] as? String, mensaje == "Usuario creado y rol asignado exitosamente" {
+                            if let newUserId = json["user_id"] as? String {
+                                self.userId = newUserId
                             }
-                        } catch {
-                            DispatchQueue.main.async {
-                                self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
-                            }
+                            self.showMainView = true
+                        } else if let error = json["error"] as? String {
+                            self.errorMessage = error
                         }
-                    }.resume()
+                    }
+                } catch {
+                    self.errorMessage = "Error al decodificar la respuesta: \(error.localizedDescription)"
                 }
             }
+        }.resume()
+    }
+}
 
-            struct OptionRow: View {
-                var option: String
-                var text: String
-                var isSelected: Bool
-                var action: () -> Void
+struct OptionRow: View {
+    var option: String
+    var text: String
+    var isSelected: Bool
+    var action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(option)
+                    .frame(width: 36, height: 36)
+                    .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
+                    .foregroundColor(isSelected ? .white : .black)
+                    .cornerRadius(18)
+                    .font(.headline)
                 
-                var body: some View {
-                    Button(action: action) {
-                        HStack {
-                            Text(option)
-                                .frame(width: 36, height: 36)
-                                .background(isSelected ? Color.blue : Color(UIColor.systemGray5))
-                                .foregroundColor(isSelected ? .white : .black)
-                                .cornerRadius(18)
-                                .font(.headline)
-                            
-                            Text(text)
-                                .foregroundColor(isSelected ? Color.blue : Color.primary)
-                                .font(.system(size: 17, weight: .regular))
-                            Spacer()
-                        }
-                        .padding()
-                        .background(isSelected ? Color.blue.opacity(0.1) : Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(10)
-                    }
-                }
+                Text(text)
+                    .foregroundColor(isSelected ? Color.blue : Color.primary)
+                    .font(.system(size: 17, weight: .regular))
+                Spacer()
             }
+            .padding()
+            .background(isSelected ? Color.blue.opacity(0.1) : Color(UIColor.secondarySystemBackground))
+            .cornerRadius(10)
+        }
+    }
+}
 
-            extension View {
-                func placeholder<Content: View>(
-                    when shouldShow: Bool,
-                    alignment: Alignment = .leading,
-                    @ViewBuilder placeholder: () -> Content) -> some View {
-                    ZStack(alignment: alignment) {
-                        placeholder().opacity(shouldShow ? 1 : 0)
-                        self
-                    }
-                }
-            }
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content) -> some View {
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
+        }
+    }
+}
 
-            #Preview {
-                QuestionView(showQuestions: .constant(true), userId: .constant("12345"))
-            }
+#Preview {
+    QuestionView(showQuestions: .constant(true), userId: .constant("12345"))
+}

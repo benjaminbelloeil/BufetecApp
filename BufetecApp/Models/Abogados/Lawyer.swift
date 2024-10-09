@@ -5,15 +5,15 @@ struct Lawyer: Identifiable, Codable {
     let userId: String?
     let nombre: String
     let especializacion: String
-    let experienciaProfesional: String?
+    let experienciaProfesional: String
     let disponibilidad: Bool?  // Change to optional Bool to handle empty strings
     let maestria: String?
     let direccion: Direccion
     let casosAsignados: [String]?  // Optional to handle empty arrays or empty strings
     let telefono: String
     let correo: String
-    let casosAtendidos: Int?  // Optional Int to handle empty strings
-    let casosSentenciaFavorable: Int?  // Optional Int to handle empty strings
+    let casosAtendidos: Int  // Optional Int to handle empty strings
+    let casosSentenciaFavorable: Int  // Optional Int to handle empty strings
     let imageName: String
 
     struct Direccion: Codable {
