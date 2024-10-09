@@ -63,59 +63,6 @@ def run_cleanup():
         time.sleep(3600)
 
 # Sample Data Insertion Functions
-def insert_sample_data():
-    try:
-        # Sample student data
-        estudiantes = [
-            {
-                "matricula": "A00838158",
-                "nombre": "Benjamin Belloeil",
-                "correo": "A00838158@tec.mx",
-                "contrasena": "Benjamin2017",
-                "ano_de_estudio": 3,
-                "carrera": "ITC"
-            }    
-        ]
-
-        # Sample lawyer data
-        abogados = [
-            {
-                "id_abogado": "AB123",
-                "nombre": "María Rodríguez",
-                "correo": "maria.rodriguez@bufete.com",
-                "contrasena": "abogado123",
-                "especializacion": "Derecho Civil",
-                "anos_de_experiencia": 10
-            },
-            {
-                "id_abogado": "AB124",
-                "nombre": "Juan Pérez",
-                "correo": "juan.perez@bufete.com",
-                "contrasena": "abogado124",
-                "especializacion": "Derecho Penal",
-                "anos_de_experiencia": 15
-            }
-        ]
-
-        # Insert students
-        for estudiante in estudiantes:
-            if students_collection.count_documents({"matricula": estudiante["matricula"]}) == 0:
-                insert_student(estudiante)
-                app.logger.info(f"Sample student data inserted: {estudiante['nombre']}")
-            else:
-                app.logger.info(f"Student already exists: {estudiante['nombre']}")
-
-        # Insert lawyers
-        for abogado in abogados:
-            if lawyer_collection.count_documents({"id_abogado": abogado["id_abogado"]}) == 0:
-                insert_lawyer(abogado)
-                app.logger.info(f"Sample lawyer data inserted: {abogado['nombre']}")
-            else:
-                app.logger.info(f"Lawyer already exists: {abogado['nombre']}")
-
-    except Exception as e:
-        app.logger.error(f"Error inserting sample data: {str(e)}")
-
 def insert_sample_lawyers():
     try:
         # Clear existing lawyers
@@ -124,6 +71,8 @@ def insert_sample_lawyers():
 
         sample_lawyers = [
             {
+                "id_abogado": "AB123",
+                "abogado_contrasena": hash_password("abogado123"),  # This will be hashed before insertion
                 "nombre": "María Rodríguez",
                 "especializacion": "Derecho Civil",
                 "experiencia_profesional": "15 años en litigios civiles",
@@ -142,6 +91,8 @@ def insert_sample_lawyers():
                 "casos_con_sentencia_a_favor": 95,
             },
             {
+                "id_abogado": "AB124",
+                "abogado_contrasena": hash_password("abogado124"),  # This will be hashed before insertion
                 "nombre": "Juan Pérez",
                 "especializacion": "Derecho Penal",
                 "experiencia_profesional": "10 años en defensa penal",
@@ -160,6 +111,8 @@ def insert_sample_lawyers():
                 "casos_con_sentencia_a_favor": 60,
             },
             {
+                "id_abogado": "AB125",
+                "abogado_contrasena": hash_password("abogado125"),  # This will be hashed before insertion
                 "nombre": "Ana López",
                 "especializacion": "Derecho Laboral",
                 "experiencia_profesional": "12 años en conflictos laborales",
@@ -178,7 +131,6 @@ def insert_sample_lawyers():
                 "casos_con_sentencia_a_favor": 130,
             }
         ]
-
         for lawyer in sample_lawyers:
             result = lawyer_collection.insert_one(lawyer)
             print(f"Inserted lawyer: {lawyer['nombre']} (ID: {result.inserted_id})")
@@ -197,41 +149,7 @@ def insert_sample_clients():
         result = clients_collection.delete_many({})
         print(f"Cleared {result.deleted_count} existing clients from the collection.")
 
-        sample_clients = [
-            {
-                "nombre": "María González",
-                "caso_tipo": "Divorcio",
-                "estado_caso": "Activo",
-                "contacto": "Lic. Juan Pérez",
-                "fecha_inicio": "01/01/2024",
-                "proxima_audiencia": "15/03/2024",
-                "direccion": "Calle Principal 123, Ciudad",
-                "telefono": "+52 123 456 7890",
-                "correo": "cliente@email.com"
-            },
-            {
-                "nombre": "Carlos Rodríguez",
-                "caso_tipo": "Custodia",
-                "estado_caso": "En espera",
-                "contacto": "Lic. Ana López",
-                "fecha_inicio": "01/01/2024",
-                "proxima_audiencia": "05/03/2024",
-                "direccion": "Calle Segunda 456, Ciudad",
-                "telefono": "+52 333 987 6543",
-                "correo": "carlos@email.com"
-            },
-            {
-                "nombre": "Ana Martínez",
-                "caso_tipo": "Herencia",
-                "estado_caso": "Cerrado",
-                "contacto": "Lic. Pablo Gómez",
-                "fecha_inicio": "01/01/2024",
-                "proxima_audiencia": "10/02/2024",
-                "direccion": "Calle Tercera 789, Ciudad",
-                "telefono": "+52 555 123 4567",
-                "correo": "ana@email.com"
-            }
-        ]
+        sample_clients = [ ]
 
         for client in sample_clients:
             result = clients_collection.insert_one(client)
@@ -296,23 +214,54 @@ def role():
         if not temp_user_data:
             return jsonify({"error": "Datos de usuario temporal no encontrados"}), 404
 
-        # Create user in the database
-        nuevo_usuario = {
-            "nombre": temp_user_data['nombre'],
-            "correo_o_telefono": temp_user_data['correo_o_telefono'],
-            "contrasena": hash_password(temp_user_data['contrasena']),
-        }
-        resultado_usuario = users_collection.insert_one(nuevo_usuario)
-        user_id = resultado_usuario.inserted_id
+        if rol == 'abogado':
+            id_abogado = datos.get('id_abogado')
+            abogado_contrasena = datos.get('abogado_contrasena')
+            
+            if not id_abogado or not abogado_contrasena:
+                return jsonify({"error": "Falta id_abogado o contraseña"}), 400
+            
+            # Find lawyer by id_abogado
+            abogado = lawyer_collection.find_one({"id_abogado": id_abogado})
+            if not abogado:
+                return jsonify({"error": "Abogado no encontrado"}), 404
+            
+            # Verify password
+            if not verify_password(abogado['abogado_contrasena'], abogado_contrasena):
+                return jsonify({"error": "Credenciales de abogado inválidas"}), 401
+            
+            # Create new user account
+            nuevo_usuario = {
+                "nombre": abogado['nombre'],
+                "correo_o_telefono": abogado['correo'],
+                "contrasena": hash_password(temp_user_data['contrasena']),
+            }
+            resultado_usuario = users_collection.insert_one(nuevo_usuario)
+            user_id = resultado_usuario.inserted_id
 
-        if rol == 'cliente':
+            # Update lawyer document with new user_id
+            lawyer_collection.update_one(
+                {"_id": abogado['_id']},
+                {"$set": {"user_id": user_id}}
+            )
+
+        elif rol == 'cliente':
+            # Handle client role assignment
+            nuevo_usuario = {
+                "nombre": temp_user_data['nombre'],
+                "correo_o_telefono": temp_user_data['correo_o_telefono'],
+                "contrasena": hash_password(temp_user_data['contrasena']),
+            }
+            resultado_usuario = users_collection.insert_one(nuevo_usuario)
+            user_id = resultado_usuario.inserted_id
+
             cliente_data = {
                 "user_id": user_id,
                 "nombre": temp_user_data['nombre'],
-                "caso_tipo": None,
-                "estado_caso": None,
-                "contacto": None,
-                "fecha_inicio": None,
+                "caso_tipo": datos.get('tipo_caso'),
+                "estado_caso": "Nuevo",
+                "contacto": temp_user_data['correo_o_telefono'],
+                "fecha_inicio": datetime.now(),
                 "proxima_audiencia": None,
                 "direccion": {
                     "calle": None,
@@ -320,52 +269,54 @@ def role():
                     "estado": None,
                     "codigo_postal": None
                 },
-                "telefono": None,
+                "telefono": temp_user_data['correo_o_telefono'],
                 "correo": temp_user_data['correo_o_telefono']
             }
             clients_collection.insert_one(cliente_data)
-        elif rol == 'abogado':
-            abogado_data = {
-                "user_id": user_id,
-                "nombre": temp_user_data['nombre'],
-                "especializacion": None,
-                "experiencia_profesional": None,
-                "disponibilidad": True,
-                "maestria": None,
-                "direccion": {
-                    "calle": None,
-                    "ciudad": None,
-                    "estado": None,
-                    "codigo_postal": None
-                },
-                "casos_asignados": [],
-                "telefono": None,
-                "correo": temp_user_data['correo_o_telefono'],
-                "casos_atendidos": 0,
-                "casos_con_sentencia_a_favor": 0
-            }
-            lawyer_collection.insert_one(abogado_data)
+
         elif rol == 'estudiante':
-            estudiante_data = {
-                "user_id": user_id,
-                "nombre": temp_user_data['nombre'],
-                "matricula": None,
-                "ano_de_estudio": None,
-                "carrera": None,
-                "correo": temp_user_data['correo_o_telefono']
+            # Handle student role assignment
+            matricula = datos.get('matricula')
+            contrasena = datos.get('contrasena')
+            
+            if not matricula or not contrasena:
+                return jsonify({"error": "Falta matricula o contraseña"}), 400
+            
+            estudiante = students_collection.find_one({"matricula": matricula})
+            if not estudiante:
+                return jsonify({"error": "Estudiante no encontrado"}), 404
+            
+            if not verify_password(estudiante['contrasena'], contrasena):
+                return jsonify({"error": "Credenciales de estudiante inválidas"}), 401
+            
+            nuevo_usuario = {
+                "nombre": estudiante['nombre'],
+                "correo_o_telefono": estudiante['correo'],
+                "contrasena": hash_password(temp_user_data['contrasena']),
             }
-            students_collection.insert_one(estudiante_data)
+            resultado_usuario = users_collection.insert_one(nuevo_usuario)
+            user_id = resultado_usuario.inserted_id
+
+            # Update student document with new user_id
+            students_collection.update_one(
+                {"_id": estudiante['_id']},
+                {"$set": {"user_id": user_id}}
+            )
+
         else:
             return jsonify({"error": "Rol inválido"}), 400
 
         # Remove temporary user data
         del temp_users[temp_user_id]
 
-        return jsonify({"mensaje": "Usuario creado y rol asignado exitosamente", "user_id": str(user_id)}), 200
+        return jsonify({
+            "mensaje": "Usuario creado y rol asignado exitosamente", 
+            "user_id": str(user_id)
+        }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
 @app.route('/login', methods=['POST'])
 def login():
     try:
@@ -855,8 +806,8 @@ if __name__ == '__main__':
     except Exception as e:
         app.logger.error(f"Fallo en la conexión a MongoDB: {str(e)}")
 
-    # Insert sample data
-    insert_sample_data()
+    # Insert sample lawyers
+    insert_sample_lawyers()
 
     # Start the cleanup thread
     cleanup_thread = threading.Thread(target=run_cleanup)
