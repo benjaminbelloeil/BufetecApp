@@ -6,16 +6,16 @@ struct CaseDetailView: View {
     @State private var searchText = ""
     
     let cases: [Case] = [
-        Case(id: 1, title: "Divorcio García", clientName: "Ana García", caseNumber: "DV-2024-001", status: .active),
-        Case(id: 2, title: "Herencia Martínez", clientName: "Juan Martínez", caseNumber: "PR-2024-015", status: .pending),
-        Case(id: 3, title: "Custodia López", clientName: "María López", caseNumber: "FC-2024-007", status: .closed)
+        Case(id: 1, name: "Divorcio García", clientName: "Ana García", caseNumber: "DV-2024-001", processType: "Divorcio", status: "Activo", priority: "Alta", responsiblePerson: "Lic. Juan Pérez", createdAt: Date()),
+        Case(id: 2, name: "Herencia Martínez", clientName: "Juan Martínez", caseNumber: "PR-2024-015", processType: "Probate", status: "Pendiente", priority: "Media", responsiblePerson: "Lic. María Rodríguez", createdAt: Date().addingTimeInterval(-86400)),
+        Case(id: 3, name: "Custodia López", clientName: "María López", caseNumber: "FC-2024-007", processType: "Familia", status: "Cerrado", priority: "Baja", responsiblePerson: "Lic. Carlos Sánchez", createdAt: Date().addingTimeInterval(-172800))
     ]
     
     var filteredCases: [Case] {
         if searchText.isEmpty {
             return cases
         } else {
-            return cases.filter { $0.title.lowercased().contains(searchText.lowercased()) || $0.clientName.lowercased().contains(searchText.lowercased()) }
+            return cases.filter { $0.name.lowercased().contains(searchText.lowercased()) || $0.clientName.lowercased().contains(searchText.lowercased()) }
         }
     }
 
@@ -57,7 +57,7 @@ struct CaseListItem: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(caseItem.title)
+                Text(caseItem.name)
                     .font(.headline)
                 Text(caseItem.clientName)
                     .font(.subheadline)
@@ -76,17 +76,30 @@ struct CaseListItem: View {
 }
 
 struct CaseStatusBadge: View {
-    let status: Case.Status
+    let status: String
     
     var body: some View {
-        Text(status.rawValue)
+        Text(status)
             .font(.caption2)
             .fontWeight(.bold)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(status.color.opacity(0.2))
-            .foregroundColor(status.color)
+            .background(statusColor.opacity(0.2))
+            .foregroundColor(statusColor)
             .cornerRadius(8)
+    }
+    
+    private var statusColor: Color {
+        switch status {
+        case "Activo":
+            return .green
+        case "Pendiente":
+            return .orange
+        case "Cerrado":
+            return .red
+        default:
+            return .gray
+        }
     }
 }
 
@@ -109,7 +122,7 @@ struct CaseDetailSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle(caseItem.title)
+            .navigationTitle(caseItem.name)
             .navigationBarItems(trailing: Button("Cerrar") {
                 presentationMode.wrappedValue.dismiss()
             })
@@ -138,11 +151,24 @@ struct CaseSummaryView: View {
             
             Label(caseItem.caseNumber, systemImage: "folder")
             
-            Label("Próxima audiencia: 15/10/2024", systemImage: "calendar")
+            Label(caseItem.processType, systemImage: "doc.text")
+            
+            Label(caseItem.priority, systemImage: "flag")
+            
+            Label(caseItem.responsiblePerson, systemImage: "person.fill")
+            
+            Label(formatDate(caseItem.createdAt), systemImage: "calendar")
         }
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
     }
 }
 
@@ -155,14 +181,25 @@ struct CaseInformationView: View {
                 .font(.title2)
                 .fontWeight(.bold)
             
-            InfoRow(title: "Juzgado", value: "3º Civil")
-            InfoRow(title: "Juez", value: "Lic. Roberto Sánchez")
-            InfoRow(title: "Parte contraria", value: "Carlos Rodríguez")
-            InfoRow(title: "Abogado contrario", value: "Lic. Laura Gómez")
+            InfoRow(title: "Nombre del Caso", value: caseItem.name)
+            InfoRow(title: "Número de Expediente", value: caseItem.caseNumber)
+            InfoRow(title: "Tipo de Proceso", value: caseItem.processType)
+            InfoRow(title: "Estado", value: caseItem.status)
+            InfoRow(title: "Prioridad", value: caseItem.priority)
+            InfoRow(title: "Cliente", value: caseItem.clientName)
+            InfoRow(title: "Responsable", value: caseItem.responsiblePerson)
+            InfoRow(title: "Fecha de Creación", value: formatDate(caseItem.createdAt))
         }
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
     }
 }
 
@@ -229,24 +266,14 @@ struct ActionButton: View {
 
 struct Case: Identifiable {
     let id: Int
-    let title: String
+    let name: String
     let clientName: String
     let caseNumber: String
-    let status: Status
-    
-    enum Status: String {
-        case active = "Activo"
-        case pending = "Pendiente"
-        case closed = "Cerrado"
-        
-        var color: Color {
-            switch self {
-            case .active: return .green
-            case .pending: return .orange
-            case .closed: return .red
-            }
-        }
-    }
+    let processType: String
+    let status: String
+    let priority: String
+    let responsiblePerson: String
+    let createdAt: Date
 }
 
 struct CaseDetailView_Previews: PreviewProvider {
