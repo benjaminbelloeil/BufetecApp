@@ -11,7 +11,6 @@ struct ClienteCasoView: View {
                 caseHeaderView
                 caseProgressView
                 caseDetailsView
-                upcomingEventsView
                 actionButtonsView
             }
             .padding()
@@ -84,32 +83,6 @@ struct ClienteCasoView: View {
         .cornerRadius(12)
     }
 
-    private var upcomingEventsView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Próximos Eventos")
-                .font(.headline)
-            
-            ForEach(upcomingEvents, id: \.date) { event in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text(event.title)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Text(event.date)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
-                }
-                .padding(.vertical, 8)
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-    }
 
     private var actionButtonsView: some View {
         VStack(spacing: 12) {
@@ -195,12 +168,6 @@ struct CasoCliente {
         }
     }
 }
-
-let upcomingEvents = [
-    (title: "Audiencia Preliminar", date: "15/03/2024"),
-    (title: "Entrega de Documentos", date: "30/03/2024"),
-    (title: "Reunión con Abogado", date: "10/04/2024")
-]
 
 struct ClienteCasoView_Previews: PreviewProvider {
     static var previews: some View {

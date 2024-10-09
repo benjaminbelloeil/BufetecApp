@@ -695,6 +695,18 @@ def abogadosSelect():
         abogados_list.append(abogados_dict)
     return jsonify(abogados_list)
 
+@app.route("/clienteSelect",methods=['GET'])
+#Solo los disponibles
+def clientesSelect():
+    clientes = clients_collection.find({"disponibilidad": True})
+    clientes_list = []
+    for item in clientes:
+        clientes_dict = {
+            "nombre": str(item.get('nombre')),     
+        }
+        clientes_list.append(clientes_dict)
+    return jsonify(clientes_list)
+
 @app.route("/nuevoCaso", methods=['POST'])
 def nuevo_caso():
     nombreCaso = request.json['nombre_caso']
