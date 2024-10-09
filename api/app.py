@@ -65,6 +65,7 @@ def run_cleanup():
 def insert_sample_lawyers():
     try:
         # Clear existing lawyers
+        result = lawyer_collection.delete_many({})
         print(f"Cleared {result.deleted_count} existing lawyers from the collection.")
 
         sample_lawyers = [
