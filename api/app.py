@@ -48,6 +48,12 @@ def insert_lawyer(lawyer_data):
     result = lawyer_collection.insert_one(lawyer_data)
     return result.inserted_id
 
+def insert_client(client_data):
+    client_data['contrasena'] = hash_password(client_data['contrasena'])
+    client_data['user_id'] = None
+    result = clients_collection.insert_one(client_data)
+    return result.inserted_id
+
 def cleanup_temp_users():
     current_time = datetime.datetime.utcnow()
     expired_users = [uid for uid, data in temp_users.items() 
@@ -60,7 +66,7 @@ def run_cleanup():
     while True:
         cleanup_temp_users()
         time.sleep(3600)
-"""
+
 # Sample Data Insertion Functions
 def insert_sample_lawyers():
     try:
@@ -141,15 +147,63 @@ def insert_sample_lawyers():
     except Exception as e:
         print(f"Error in insert_sample_lawyers: {str(e)}")
         raise
-    
-"""
+
 def insert_sample_clients():
     try:
         # Clear existing clients
         result = clients_collection.delete_many({})
         print(f"Cleared {result.deleted_count} existing clients from the collection.")
 
-        sample_clients = [ ]
+        sample_clients = [
+            {
+                "nombre": "Carlos Pérez",
+                "contacto": "Lic. Juan Pérez",
+                "proxima_audiencia": datetime.datetime(2021, 9, 15, 10, 0),
+                "telefono": "8187654321",
+                "correo": "cliente2@gmail.com",
+                "fecha_inicio": datetime.datetime(2021, 8, 1, 9, 0),
+                "direccion": {
+                    "calle": "Calle 123",
+                    "ciudad": "Monterrey",
+                    "estado": "Nuevo León",
+                    "codigo_postal": "64000"
+                },
+                "url_recurso": "https://www.google.com",
+                "disponibilidad": True
+            },
+            {
+                "nombre": "Laura Gómez",
+                "contacto": "Lic. María Rodríguez",
+                "proxima_audiencia": datetime.datetime(2021, 9, 20, 11, 0),
+                "telefono": "8181234567",
+                "correo": "cliente3@gmail.com",
+                "fecha_inicio": datetime.datetime(2021, 8, 5, 10, 0),
+                "direccion": {
+                    "calle": "Avenida 456",
+                    "ciudad": "Monterrey",
+                    "estado": "Nuevo León",
+                    "codigo_postal": "64000"
+                },
+                "url_recurso": "https://www.google.com",
+                "disponibilidad": True
+            },
+            {
+                "nombre": "Jorge Sánchez",
+                "contacto": "Lic. Ana López",
+                "proxima_audiencia": datetime.datetime(2021, 9, 25, 9, 0),
+                "telefono": "8189876543",
+                "correo": "cliente4@gmail.com",
+                "fecha_inicio": datetime.datetime(2021, 8, 10, 11, 0),
+                "direccion": {
+                    "calle": "Calle 789",
+                    "ciudad": "Monterrey",
+                    "estado": "Nuevo León",
+                    "codigo_postal": "64000"
+                },
+                "url_recurso": "https://www.google.com",
+                "disponibilidad": True
+            }
+         ]
 
         for client in sample_clients:
             result = clients_collection.insert_one(client)
@@ -162,6 +216,7 @@ def insert_sample_clients():
     except Exception as e:
         print(f"Error in insert_sample_clients: {str(e)}")
         raise
+
 
 # Routes
 # Authentication Routes
@@ -441,7 +496,7 @@ def get_one_abogado(abogado_id):
     
 @app.route('/insert_sample_lawyers', methods=['GET'])
 def insert_sample_lawyers_route():
-    # insert_sample_lawyers()
+    insert_sample_lawyers()
     return jsonify({"message": "Sample lawyers inserted successfully"}), 200
 
 # Client Routes
@@ -454,18 +509,43 @@ def get_all_clientes():
             result.append({
                 "id": str(cliente["_id"]),
                 "nombre": cliente["nombre"],
-                "caso_tipo": cliente["caso_tipo"],
-                "estado_caso": cliente["estado_caso"],
                 "contacto": cliente["contacto"],
-                "fecha_inicio": cliente["fecha_inicio"],
                 "proxima_audiencia": cliente["proxima_audiencia"],
-                "direccion": cliente["direccion"],
                 "telefono": cliente["telefono"],
-                "correo": cliente["correo"]
+                "correo": cliente["correo"],
+                "fecha_inicio": cliente["fecha_inicio"],
+                "direccion": cliente["direccion"],
+                "url_recurso": cliente["url_recurso"],
+                "disponibilidad": cliente["disponibilidad"]
             })
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/cliente/<cliente_id>", methods=['GET'])
+def get_one_cliente(cliente_id):
+    try:
+        if ObjectId.is_valid(cliente_id):
+            cliente = clients_collection.find_one({'_id': ObjectId(cliente_id)})
+        else:
+            return jsonify({'message': "El id proporcionado no es válido"}), 400
+        if cliente:
+            cliente_dict = {
+                "nombre": cliente.get("nombre", ""),
+                "contacto": cliente.get("contacto", ""),
+                "proxima_audiencia": cliente.get("proxima_audiencia", ""),
+                "telefono": cliente.get("telefono", ""),
+                "correo": cliente.get("correo", ""),
+                "fecha_inicio": cliente.get("fecha_inicio", ""),
+                "direccion": cliente.get("direccion", ""),
+                "url_recurso": cliente.get("url_recurso", ""),
+                "disponibilidad": cliente.get("disponibilidad", "")
+            }
+            return jsonify(cliente_dict), 200
+        else:
+            return jsonify({'message': f"No se encontró el abogado con el id {cliente_id}"}), 404
+    except Exception as ex:
+        return jsonify({'message': str(ex)}), 500
 
 @app.route('/insert_sample_clients', methods=['GET'])
 def insert_sample_clients_route():
@@ -817,6 +897,9 @@ if __name__ == '__main__':
         app.logger.info("Conexión a MongoDB exitosa")
     except Exception as e:
         app.logger.error(f"Fallo en la conexión a MongoDB: {str(e)}")
+
+    # Insert sample lawyers
+    insert_sample_lawyers()
 
     # Start the cleanup thread
     cleanup_thread = threading.Thread(target=run_cleanup)
