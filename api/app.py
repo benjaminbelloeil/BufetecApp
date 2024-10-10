@@ -60,7 +60,7 @@ def run_cleanup():
     while True:
         cleanup_temp_users()
         time.sleep(3600)
-
+"""
 # Sample Data Insertion Functions
 def insert_sample_lawyers():
     try:
@@ -141,7 +141,8 @@ def insert_sample_lawyers():
     except Exception as e:
         print(f"Error in insert_sample_lawyers: {str(e)}")
         raise
-
+    
+"""
 def insert_sample_clients():
     try:
         # Clear existing clients
@@ -440,7 +441,7 @@ def get_one_abogado(abogado_id):
     
 @app.route('/insert_sample_lawyers', methods=['GET'])
 def insert_sample_lawyers_route():
-    insert_sample_lawyers()
+    # insert_sample_lawyers()
     return jsonify({"message": "Sample lawyers inserted successfully"}), 200
 
 # Client Routes
@@ -816,9 +817,6 @@ if __name__ == '__main__':
         app.logger.info("Conexión a MongoDB exitosa")
     except Exception as e:
         app.logger.error(f"Fallo en la conexión a MongoDB: {str(e)}")
-
-    # Insert sample lawyers
-    insert_sample_lawyers()
 
     # Start the cleanup thread
     cleanup_thread = threading.Thread(target=run_cleanup)
