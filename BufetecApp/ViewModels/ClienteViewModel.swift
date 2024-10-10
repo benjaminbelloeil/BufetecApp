@@ -19,22 +19,27 @@ class ClienteViewModel: ObservableObject {
         }
     }
     
-    // Fetch de clientes
+    
     func fetchClientes() async {
-        let url = URL(string: "\(urlPrefix)cliente")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.timeoutInterval = 10
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(for: request)
-            if let decodedResponse = try? JSONDecoder().decode([Cliente].self, from: data) {
-                clientes = decodedResponse
+    let url = URL(string: "\(urlPrefix)clientes")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.timeoutInterval = 10
+    
+    do {
+        let (data, _) = try await URLSession.shared.data(for: request)
+        if let decodedResponse = try? JSONDecoder().decode([Cliente].self, from: data) {
+            DispatchQueue.main.async {
+                self.clientes = decodedResponse
+                print("Fetched clientes: \(self.clientes)") // Debugging print statement
             }
-        } catch {
-            print("Failed to fetch clientes: \(error.localizedDescription)")
+        } else {
+            print("Failed to decode response")
         }
+    } catch {
+        print("Failed to fetch clientes: \(error.localizedDescription)")
     }
+}
 
 
     // Función para eliminar un cliente

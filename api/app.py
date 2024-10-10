@@ -510,10 +510,10 @@ def get_all_clientes():
                 "id": str(cliente["_id"]),
                 "nombre": cliente["nombre"],
                 "contacto": cliente["contacto"],
-                "proxima_audiencia": cliente["proxima_audiencia"],
+                "proxima_audiencia": cliente["proxima_audiencia"].isoformat() if cliente["proxima_audiencia"] else None,
                 "telefono": cliente["telefono"],
                 "correo": cliente["correo"],
-                "fecha_inicio": cliente["fecha_inicio"],
+                "fecha_inicio": cliente["fecha_inicio"].isoformat() if cliente["fecha_inicio"] else None,
                 "direccion": cliente["direccion"],
                 "url_recurso": cliente["url_recurso"],
                 "disponibilidad": cliente["disponibilidad"]
@@ -531,22 +531,24 @@ def get_one_cliente(cliente_id):
             return jsonify({'message': "El id proporcionado no es válido"}), 400
         if cliente:
             cliente_dict = {
+                "id": str(cliente["_id"]),
                 "nombre": cliente.get("nombre", ""),
                 "contacto": cliente.get("contacto", ""),
-                "proxima_audiencia": cliente.get("proxima_audiencia", ""),
+                "proxima_audiencia": cliente.get("proxima_audiencia", "").isoformat() if cliente.get("proxima_audiencia") else None,
                 "telefono": cliente.get("telefono", ""),
                 "correo": cliente.get("correo", ""),
-                "fecha_inicio": cliente.get("fecha_inicio", ""),
+                "fecha_inicio": cliente.get("fecha_inicio", "").isoformat() if cliente.get("fecha_inicio") else None,
                 "direccion": cliente.get("direccion", ""),
                 "url_recurso": cliente.get("url_recurso", ""),
                 "disponibilidad": cliente.get("disponibilidad", "")
             }
             return jsonify(cliente_dict), 200
         else:
-            return jsonify({'message': f"No se encontró el abogado con el id {cliente_id}"}), 404
+            return jsonify({'message': f"No se encontró el cliente con el id {cliente_id}"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
-
+    
+    
 @app.route('/insert_sample_clients', methods=['GET'])
 def insert_sample_clients_route():
     insert_sample_clients()

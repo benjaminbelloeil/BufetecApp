@@ -8,20 +8,20 @@
 import SwiftUI
 
 struct ClienteListView: View {
-    var clientes: [Cliente]
+    @ObservedObject var viewModel = ClienteViewModel()
     var casosLegales: [CasoLegal]
     @State private var searchText = ""
 
     var filteredClientes: [Cliente] {
         if searchText.isEmpty {
-            return clientes
+            return viewModel.clientes
         } else {
             return filteredClientesBySearchText
         }
     }
 
     private var filteredClientesBySearchText: [Cliente] {
-        clientes.filter { cliente in
+        viewModel.clientes.filter { cliente in
             cliente.nombre.lowercased().contains(searchText.lowercased())
         }
     }
@@ -208,106 +208,60 @@ import SwiftUI
 
 struct ClienteListView_Previews: PreviewProvider {
     static var previews: some View {
-        let clientes = [
-            Cliente(
-                id: "1",
-                user_id: "1",
-                nombre: "María González",
-                contacto: "Contacto 1",
-                proxima_audiencia: Date(),
-                telefono: "123-456-7890",
-                correo: "maria@example.com",
-                fecha_inicio: Date(),
-                direccion: Cliente.Direccion(
-                    calle: "Calle 1",
-                    ciudad: "Ciudad 1",
-                    estado: "Estado 1",
-                    codigo_postal: "12345"
-                ),
-                imageName: "maria"
-            ),
-            Cliente(
-                id: "2",
-                user_id: "2",
-                nombre: "Carlos Rodríguez",
-                contacto: "Contacto 2",
-                proxima_audiencia: Date(),
-                telefono: "987-654-3210",
-                correo: "carlos@example.com",
-                fecha_inicio: Date(),
-                direccion: Cliente.Direccion(
-                    calle: "Calle 2",
-                    ciudad: "Ciudad 2",
-                    estado: "Estado 2",
-                    codigo_postal: "54321"
-                ),
-                imageName: "carlos"
-            ),
-            Cliente(
-                id: "3",
-                user_id: "3",
-                nombre: "Ana Martínez",
-                contacto: "Contacto 3",
-                proxima_audiencia: Date(),
-                telefono: "555-555-5555",
-                correo: "ana@example.com",
-                fecha_inicio: Date(),
-                direccion: Cliente.Direccion(
-                    calle: "Calle 3",
-                    ciudad: "Ciudad 3",
-                    estado: "Estado 3",
-                    codigo_postal: "67890"
-                ),
-                imageName: "ana"
-            )
-        ]
-
-        let casosLegales = [
-            CasoLegal(
-                id: "1",
-                idCliente: clientes[0].id,
-                idAbogado: "1",
-                nombre: "Divorcio",
-                expediente: "EXP123",
-                parteActora: "John Doe",
-                parteDemandada: "Jane Doe",
-                estado: "Activo",
-                notas: "Notas del caso de divorcio",
-                proximaAudiencia: Date(),
-                fechaInicio: Date(),
-                imageName: "url"
-            ),
-            CasoLegal(
-                id: "2",
-                idCliente: clientes[1].id,
-                idAbogado: "1",
-                nombre: "Custodia",
-                expediente: "EXP456",
-                parteActora: "Alice Smith",
-                parteDemandada: "Bob Smith",
-                estado: "En espera",
-                notas: "Notas del caso de custodia",
-                proximaAudiencia: Date(),
-                fechaInicio: Date(),
-                imageName: "url"
+        let viewModel = ClienteViewModel()
+        
+        // Wait for the viewModel to fetch data
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            if !viewModel.clientes.isEmpty {
+                let casosLegales = [
+                    CasoLegal(
+                        id: "1",
+                        idCliente: viewModel.clientes[0].id,
+                        idAbogado: "1",
+                        nombre: "Divorcio",
+                        expediente: "EXP123",
+                        parteActora: "John Doe",
+                        parteDemandada: "Jane Doe",
+                        estado: "Activo",
+                        notas: "Notas del caso de divorcio",
+                        proximaAudiencia: Date(),
+                        fechaInicio: Date(),
+                        imageName: "url"
+                    ),
+                    CasoLegal(
+                        id: "2",
+                        idCliente: viewModel.clientes[1].id,
+                        idAbogado: "1",
+                        nombre: "Custodia",
+                        expediente: "EXP456",
+                        parteActora: "Alice Smith",
+                        parteDemandada: "Bob Smith",
+                        estado: "En espera",
+                        notas: "Notas del caso de custodia",
+                        proximaAudiencia: Date(),
+                        fechaInicio: Date(),
+                        imageName: "url"
+                    ),
+                    CasoLegal(
+                        id: "3",
+                        idCliente: viewModel.clientes[2].id,
+                        idAbogado: "2",
+                        nombre: "Herencia",
+                        expediente: "EXP789",
+                        parteActora: "Charlie Brown",
+                        parteDemandada: "Lucy Brown",
+                        estado: "Cerrado",
+                        notas: "Notas del caso de herencia",
+                        proximaAudiencia: Date(),
+                        fechaInicio: Date(),
+                        imageName: "url"
+                    )
+                ]
                 
-            ),
-            CasoLegal(
-                id: "3",
-                idCliente: clientes[2].id,
-                idAbogado: "2",
-                nombre: "Herencia",
-                expediente: "EXP789",
-                parteActora: "Charlie Brown",
-                parteDemandada: "Lucy Brown",
-                estado: "Cerrado",
-                notas: "Notas del caso de herencia",
-                proximaAudiencia: Date(),
-                fechaInicio: Date(),
-                imageName: "url"
-            )
-        ]
-
-        return ClienteListView(clientes: clientes, casosLegales: casosLegales)
+                ClienteListView(viewModel: viewModel, casosLegales: casosLegales)
+            }
+        }
+        
+        return ClienteListView(viewModel: viewModel, casosLegales: [])
     }
 }
