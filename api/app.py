@@ -900,7 +900,7 @@ if __name__ == '__main__':
 
     # Insert sample lawyers
     insert_sample_lawyers()
-
+    insert_sample_clients()
     # Start the cleanup thread
     cleanup_thread = threading.Thread(target=run_cleanup)
     cleanup_thread.start()
