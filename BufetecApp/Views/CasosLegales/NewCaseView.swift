@@ -101,17 +101,6 @@ struct NewCaseView: View {
                 }
                 .buttonStyle(BorderedProminentButtonStyle())
 
-                Button(action: {
-                    if let client = selectedClient {
-                        clientAction = .edit
-                        showingClientSheet = true
-                    }
-                }) {
-                    Label("Editar", systemImage: "pencil")
-                }
-                .buttonStyle(BorderedButtonStyle())
-                .disabled(selectedClient == nil)
-
                 Button(action: deleteClient) {
                     Label("Eliminar", systemImage: "trash")
                 }
