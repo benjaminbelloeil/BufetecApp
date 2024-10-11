@@ -472,6 +472,68 @@ def get_caso_by_id(caso_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+
+@app.route('/caso', methods=['POST'])
+def create_caso():
+    try:
+        datos = request.get_json()
+        nuevo_caso = {
+            "nombre_caso": datos["nombre_caso"],
+            "numero_expediente": datos["numero_expediente"],
+            "tipo_proceso": datos["tipo_proceso"],
+            "estado_proceso": datos["estado_proceso"],
+            "prioridad": datos["prioridad"],
+            "cliente_id": datos["cliente_id"],
+            "abogado_id": datos["abogado_id"],
+            "documentos": datos.get("documentos", []),
+            "responsable": datos["responsable"]
+        }
+        resultado = casos_collection.insert_one(nuevo_caso)
+        return jsonify({"id": str(resultado.inserted_id)}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/caso', methods=['PUT'])
+def update_caso():
+    try:
+        datos = request.get_json()
+        caso_id = datos.get("caso_id")
+        if not caso_id:
+            return jsonify({"error": "Falta caso_id"}), 400
+        
+        caso = casos_collection.find_one({"_id": ObjectId(caso_id)})
+        if not caso:
+            return jsonify({"error": "Caso no encontrado"}), 404
+        
+        update_data = {}
+        if "nombre_caso" in datos:
+            update_data["nombre_caso"] = datos["nombre_caso"]
+        if "numero_expediente" in datos:
+            update_data["numero_expediente"] = datos["numero_expediente"]
+        if "tipo_proceso" in datos:
+            update_data["tipo_proceso"] = datos["tipo_proceso"]
+        if "estado_proceso" in datos:
+            update_data["estado_proceso"] = datos["estado_proceso"]
+        if "prioridad" in datos:
+            update_data["prioridad"] = datos["prioridad"]
+        if "cliente_id" in datos:
+            update_data["cliente_id"] = datos["cliente_id"]
+        if "abogado_id" in datos:
+            update_data["abogado_id"] = datos["abogado_id"]
+        if "documentos" in datos:
+            update_data["documentos"] = datos["documentos"]
+        if "responsable" in datos:
+            update_data["responsable"] = datos["responsable"]
+        
+        casos_collection.update_one(
+            {"_id": ObjectId(caso_id)},
+            {"$set": update_data}
+        )
+        return jsonify({"mensaje": "Caso actualizado exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    
 # Lawyer Routes
 @app.route('/abogados', methods=['GET'])
 def get_all_abogados():
@@ -595,6 +657,25 @@ def get_one_cliente(cliente_id):
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
     
+@app.route("/cliente", methods=['POST'])
+def create_cliente():
+    try:
+        datos = request.get_json()
+        nuevo_cliente = {
+            "nombre": datos["nombre"],
+            "contacto": datos["contacto"],
+            "proxima_audiencia": datos["proxima_audiencia"],
+            "telefono": datos["telefono"],
+            "correo": datos["correo"],
+            "fecha_inicio": datos["fecha_inicio"],
+            "direccion": datos["direccion"],
+            "url_recurso": datos["url_recurso"],
+            "disponibilidad": datos["disponibilidad"]
+        }
+        resultado = clients_collection.insert_one(nuevo_cliente)
+        return jsonify({"id": str(resultado.inserted_id)}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
 @app.route('/insert_sample_clients', methods=['GET'])
 def insert_sample_clients_route():
