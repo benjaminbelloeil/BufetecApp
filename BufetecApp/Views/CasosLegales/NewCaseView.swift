@@ -2,25 +2,21 @@ import SwiftUI
 
 struct NewCaseView: View {
     @Environment(\.presentationMode) var presentationMode
+    @StateObject private var casoLegalViewModel = CasoLegalViewModel()
+    @StateObject private var clientViewModel = ClienteViewModel()
     @State private var caseName: String = ""
     @State private var caseNumber: String = ""
     @State private var processType: String = ""
     @State private var caseStatus: String = "En espera"
     @State private var priority: String = "Alta"
-    @State private var selectedClient: CaseClient?
+    @State private var selectedClient: Cliente?
     @State private var responsiblePerson: String = ""
     @State private var createdAt: Date = Date()
     @State private var documents: [CaseDocument] = []
-    
-    @State private var clients: [CaseClient] = [
-        CaseClient(id: 1, name: "Cliente 1"),
-        CaseClient(id: 2, name: "Cliente 2"),
-        CaseClient(id: 3, name: "Cliente 3")
-    ]
     @State private var showingClientSheet = false
-    @State private var clientAction: ClientAction = .add
+    @State private var clientAction: ClienteAction = .add
 
-    enum ClientAction {
+    enum ClienteAction {
         case add, edit
     }
 
@@ -32,6 +28,7 @@ struct NewCaseView: View {
                     clientsSection
                     documentsSection
                     actionButtonsSection
+                    casosLegalesSection
                 }
                 .padding()
             }
@@ -39,8 +36,11 @@ struct NewCaseView: View {
             .navigationTitle("Nuevo Caso")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(leading: cancelButton, trailing: saveButton)
-            .sheet(isPresented: $showingClientSheet) {
-                ClientFormView(action: clientAction, client: selectedClient, onSave: handleClientSave)
+            .onAppear {
+                Task {
+                    await casoLegalViewModel.fetchCasos()
+                    await clientViewModel.fetchClientes()
+                }
             }
         }
     }
@@ -83,10 +83,10 @@ struct NewCaseView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(clients) { client in
-                        ClientCard(client: client, isSelected: client == selectedClient)
+                    ForEach(clientViewModel.clientes) { cliente in
+                        ClienteCard(cliente: cliente)
                             .onTapGesture {
-                                selectedClient = client
+                                selectedClient = cliente
                             }
                     }
                 }
@@ -159,6 +159,41 @@ struct NewCaseView: View {
         }
     }
 
+    private var casosLegalesSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Casos Legales")
+                .font(.headline)
+
+            ForEach(casoLegalViewModel.casos) { caso in
+                VStack(alignment: .leading) {
+                    Text("Nombre del Caso: \(caso.nombre_caso)")
+                    Text("Número de Expediente: \(caso.numero_expediente)")
+                    Text("Cliente ID: \(caso.cliente_id)")
+                    Text("Abogado ID: \(caso.abogado_id)")
+                    Text("Tipo de Proceso: \(caso.tipo_proceso)")
+                    Text("Estado del Proceso: \(caso.estado_proceso)")
+                    Text("Prioridad: \(caso.prioridad)")
+                    Text("Fecha de Inicio: \(caso.fechaInicio?.description ?? "N/A")")
+                    Text("Fecha de Fin: \(caso.fecha_fin?.description ?? "N/A")")
+                    Text("Documentos:")
+                    ForEach(caso.documentos, id: \.nombre) { documento in
+                        Text("  - \(documento.nombre): \(documento.url)")
+                    }
+                    Text("Responsables:")
+                    ForEach(caso.responsable, id: \.self) { responsable in
+                        Text("  - \(responsable)")
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(8)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+    }
+
     private var cancelButton: some View {
         Button("Cancelar") {
             presentationMode.wrappedValue.dismiss()
@@ -173,7 +208,7 @@ struct NewCaseView: View {
 
     private func addCase() {
         // Implement logic to add a case
-        print("Añadir caso: \(caseName), Expediente: \(caseNumber), Tipo: \(processType), Estado: \(caseStatus), Prioridad: \(priority), Cliente: \(selectedClient?.name ?? "Ninguno"), Responsable: \(responsiblePerson), Fecha: \(createdAt)")
+        print("Añadir caso: \(caseName), Expediente: \(caseNumber), Tipo: \(processType), Estado: \(caseStatus), Prioridad: \(priority), Cliente: \(selectedClient?.nombre ?? "Ninguno"), Responsable: \(responsiblePerson), Fecha: \(createdAt)")
         presentationMode.wrappedValue.dismiss()
     }
 
@@ -183,17 +218,17 @@ struct NewCaseView: View {
     }
 
     private func deleteClient() {
-        if let selected = selectedClient, let index = clients.firstIndex(where: { $0.id == selected.id }) {
-            clients.remove(at: index)
+        if let selected = selectedClient, let index = clientViewModel.clientes.firstIndex(where: { $0.id == selected.id }) {
+            clientViewModel.clientes.remove(at: index)
             selectedClient = nil
         }
     }
 
-    private func handleClientSave(client: CaseClient) {
-        if let index = clients.firstIndex(where: { $0.id == client.id }) {
-            clients[index] = client
+    private func handleClientSave(client: Cliente) {
+        if let index = clientViewModel.clientes.firstIndex(where: { $0.id == client.id }) {
+            clientViewModel.clientes[index] = client
         } else {
-            clients.append(client)
+            clientViewModel.clientes.append(client)
         }
         selectedClient = client
         showingClientSheet = false
@@ -201,7 +236,7 @@ struct NewCaseView: View {
 }
 
 struct ClientCard: View {
-    let client: CaseClient
+    let cliente: Cliente
     var isSelected: Bool = false
 
     var body: some View {
@@ -212,7 +247,7 @@ struct ClientCard: View {
                 .frame(width: 50, height: 50)
                 .foregroundColor(isSelected ? .blue : .gray)
 
-            Text(client.name)
+            Text(cliente.nombre)
                 .font(.caption)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
@@ -228,41 +263,6 @@ struct ClientCard: View {
     }
 }
 
-struct ClientFormView: View {
-    let action: NewCaseView.ClientAction
-    let client: CaseClient?
-    let onSave: (CaseClient) -> Void
-
-    @State private var name: String = ""
-    @Environment(\.presentationMode) var presentationMode
-
-    var body: some View {
-        NavigationView {
-            Form {
-                TextField("Nombre del cliente", text: $name)
-            }
-            .navigationTitle(action == .add ? "Añadir Cliente" : "Editar Cliente")
-            .navigationBarItems(
-                leading: Button("Cancelar") { presentationMode.wrappedValue.dismiss() },
-                trailing: Button("Guardar") {
-                    let newClient = CaseClient(id: client?.id ?? UUID().hashValue, name: name)
-                    onSave(newClient)
-                    presentationMode.wrappedValue.dismiss()
-                }
-            )
-        }
-        .onAppear {
-            if let client = client {
-                name = client.name
-            }
-        }
-    }
-}
-
-struct CaseClient: Identifiable, Equatable {
-    let id: Int
-    var name: String
-}
 
 struct CaseDocument: Identifiable {
     let id: UUID
