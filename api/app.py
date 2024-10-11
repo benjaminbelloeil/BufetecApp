@@ -55,7 +55,7 @@ def insert_client(client_data):
     return result.inserted_id
 
 def cleanup_temp_users():
-    current_time = datetime.datetime.utcnow()
+    current_time = datetime.datetime.now(datetime.UTC)
     expired_users = [uid for uid, data in temp_users.items() 
                     if (current_time - data['timestamp']).total_seconds() > 3600]
     for uid in expired_users:

@@ -9,7 +9,7 @@ struct Cliente: Identifiable, Codable {
     var correo: String
     var fecha_inicio: Date?
     var direccion: Direccion
-    var imageName: String
+    var url_recurso: String
     var disponibilidad: Bool
 
     struct Direccion: Codable {
@@ -28,7 +28,17 @@ struct Cliente: Identifiable, Codable {
         case correo
         case fecha_inicio
         case direccion
-        case imageName = "url_recurso"
+        case url_recurso
         case disponibilidad
     }
+}
+
+extension JSONDecoder {
+    static let custom: JSONDecoder = {
+        let decoder = JSONDecoder()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        decoder.dateDecodingStrategy = .formatted(formatter)
+        return decoder
+    }()
 }
