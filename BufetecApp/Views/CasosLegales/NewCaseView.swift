@@ -28,7 +28,6 @@ struct NewCaseView: View {
                     clientsSection
                     documentsSection
                     actionButtonsSection
-                    casosLegalesSection
                 }
                 .padding()
             }
@@ -157,41 +156,6 @@ struct NewCaseView: View {
             }
             .buttonStyle(BorderedButtonStyle())
         }
-    }
-
-    private var casosLegalesSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Casos Legales")
-                .font(.headline)
-
-            ForEach(casoLegalViewModel.casos) { caso in
-                VStack(alignment: .leading) {
-                    Text("Nombre del Caso: \(caso.nombre_caso)")
-                    Text("Número de Expediente: \(caso.numero_expediente)")
-                    Text("Cliente ID: \(caso.cliente_id)")
-                    Text("Abogado ID: \(caso.abogado_id)")
-                    Text("Tipo de Proceso: \(caso.tipo_proceso)")
-                    Text("Estado del Proceso: \(caso.estado_proceso)")
-                    Text("Prioridad: \(caso.prioridad)")
-                    Text("Fecha de Inicio: \(caso.fechaInicio?.description ?? "N/A")")
-                    Text("Fecha de Fin: \(caso.fecha_fin?.description ?? "N/A")")
-                    Text("Documentos:")
-                    ForEach(caso.documentos, id: \.nombre) { documento in
-                        Text("  - \(documento.nombre): \(documento.url)")
-                    }
-                    Text("Responsables:")
-                    ForEach(caso.responsable, id: \.self) { responsable in
-                        Text("  - \(responsable)")
-                    }
-                }
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(8)
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(12)
     }
 
     private var cancelButton: some View {
