@@ -2,45 +2,51 @@ import SwiftUI
 
 struct CasoLegal: Identifiable, Codable {
     var id: String
-    var idCliente: String?
-    var idAbogado: String?
-    var nombre: String
-    var expediente: String
-    var parteActora: String?
-    var parteDemandada: String?
-    var estado: String
-    var notas: String
-    var proximaAudiencia: Date?
+    var nombre_caso: String
+    var numero_expediente: String
+    var cliente_id: String
+    var abogado_id: String
+    var tipo_proceso: String
+    var estado_proceso: String
+    var prioridad: String
     var fechaInicio: Date?
-    var imageName: String?
+    var fecha_fin: Date?
+    var documentos: [Documento]
+    var responsable: [String]
 
-    init(id: String, idCliente: String?, idAbogado: String?, nombre: String, expediente: String, parteActora: String, parteDemandada: String, estado: String, notas: String, proximaAudiencia: Date, fechaInicio: Date, imageName: String) {
+
+ struct Documento: Codable {
+        var nombre: String
+        var url: String
+    }
+
+    init(id: String, nombre_caso: String, numero_expediente: String, cliente_id: String, abogado_id: String, tipo_proceso: String, estado_proceso: String, prioridad: String, fechaInicio: Date?, fecha_fin: Date?, documentos: [Documento], responsable: [String]) {
         self.id = id
-        self.idCliente = idCliente
-        self.idAbogado = idAbogado
-        self.nombre = nombre
-        self.expediente = expediente
-        self.parteActora = parteActora
-        self.parteDemandada = parteDemandada
-        self.estado = estado
-        self.notas = notas
-        self.proximaAudiencia = proximaAudiencia
+        self.nombre_caso = nombre_caso
+        self.numero_expediente = numero_expediente
+        self.cliente_id = cliente_id
+        self.abogado_id = abogado_id
+        self.tipo_proceso = tipo_proceso
+        self.estado_proceso = estado_proceso
+        self.prioridad = prioridad
         self.fechaInicio = fechaInicio
-        self.imageName = imageName
+        self.fecha_fin = fecha_fin
+        self.documentos = documentos
+        self.responsable = responsable
     }
 
     enum CodingKeys: String, CodingKey {
         case id = "id"
-        case idCliente = "cliende_id"
-        case idAbogado = "abogado_id"
-        case nombre = "tipo_proceso"
-        case expediente = "expediente"
-        case parteActora = "parte_actora"
-        case parteDemandada = "parte_demandada"
-        case estado = "estado_proceso"
-        case notas = "notas"
-        case proximaAudiencia = "proxima_audiencia"
-        case fechaInicio = "fecha_inicio"
-        case imageName = "url_recurso"
+        case nombre_caso = "nombre_caso"
+        case numero_expediente = "numero_expediente"
+        case cliente_id = "cliente_id"
+        case abogado_id = "abogado_id"
+        case tipo_proceso = "tipo_proceso"
+        case estado_proceso = "estado_proceso"
+        case prioridad = "prioridad"
+        case fechaInicio = "fechaInicio"
+        case fecha_fin = "fecha_fin"
+        case documentos = "documentos"
+        case responsable = "responsable"
     }
 }

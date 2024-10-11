@@ -16,22 +16,43 @@ class CasoLegalViewModel: ObservableObject {
     func loadCasos() {
         // Ejemplo de datos ficticios
         casos = [
-            CasoLegal(id: "1", idCliente: "1", idAbogado: "1", nombre: "Caso Ejemplo 1", expediente: "111111", parteActora: "Parte Actora 1", parteDemandada: "Parte Demandada 1", estado: "Activo", notas: "Notas adicionales aquí.", proximaAudiencia: Date(), fechaInicio: Date(), imageName: "url"),
-            CasoLegal(id: "2", idCliente: "2", idAbogado: "2", nombre: "Caso Ejemplo 2", expediente: "222222", parteActora: "Parte Actora 2", parteDemandada: "Parte Demandada 2", estado: "En Proceso", notas: "Notas adicionales aquí.", proximaAudiencia: Date(), fechaInicio: Date(), imageName: "url"),
-            // Otros casos...
-            /*
-             var proximaAudiencia: Date?
-             var fechaInicio: Date?
-             var imageName: String?
-             */
-        ]
+                    CasoLegal(
+                        id: "1",
+                        nombre_caso: "Pvp",
+                        numero_expediente: "1",
+                        cliente_id: "1",
+                        abogado_id: "1",
+                        tipo_proceso: "Divorcio",
+                        estado_proceso: "Activo",
+                        prioridad: "Alta",
+                        fechaInicio: Date(),
+                        fecha_fin: Date(),
+                        documentos: [CasoLegal.Documento(nombre: "Juan", url: "heh.pdf")],
+                        responsable: ["Juan", "Paco"]
+                    ),
+                    CasoLegal(
+                        id: "2",
+                        nombre_caso: "Caso de Ejemplo",
+                        numero_expediente: "2",
+                        cliente_id: "2",
+                        abogado_id: "2",
+                        tipo_proceso: "Civil",
+                        estado_proceso: "En Proceso",
+                        prioridad: "Media",
+                        fechaInicio: Date(),
+                        fecha_fin: nil,
+                        documentos: [CasoLegal.Documento(nombre: "Paco", url: "doc.pdf")],
+                        responsable: ["Ana", "Luis"]
+                    )
+                    // Otros casos...
+                ]
     }
     
     func filteredCasos(searchText: String) -> [CasoLegal] {
         if searchText.isEmpty {
             return casos
         } else {
-            return casos.filter { $0.nombre.lowercased().contains(searchText.lowercased()) }
+            return casos.filter { $0.nombre_caso.lowercased().contains(searchText.lowercased()) }
         }
     }
 

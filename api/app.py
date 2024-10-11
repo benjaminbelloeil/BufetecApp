@@ -425,6 +425,53 @@ def get_user(user_id):
         app.logger.error(f"Error fetching user data: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
+# Casos Routes
+@app.route('/casos', methods=['GET'])
+def get_all_casos():
+    try:
+        casos = casos_collection.find()
+        result = []
+        for caso in casos:
+            result.append({
+                "id": str(caso["_id"]),
+                "nombre_caso": caso["nombre_caso"],
+                "numero_expediente": caso["numero_expediente"],
+                "tipo_proceso": caso["tipo_proceso"],
+                "estado_proceso": caso["estado_proceso"],
+                "prioridad": caso["prioridad"],
+                "cliente_id": str(caso["cliente_id"]),
+                "abogado_id": str(caso["abogado_id"]),
+                "documentos": caso["documentos"],
+                "responsable": caso["responsable"]
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/caso/<caso_id>', methods=['GET'])
+def get_caso_by_id(caso_id):
+    try:
+        caso = casos_collection.find_one({"_id": ObjectId(caso_id)})
+        if caso:
+            result = {
+                "id": str(caso["_id"]),
+                "nombre_caso": caso["nombre_caso"],
+                "numero_expediente": caso["numero_expediente"],
+                "tipo_proceso": caso["tipo_proceso"],
+                "estado_proceso": caso["estado_proceso"],
+                "prioridad": caso["prioridad"],
+                "cliente_id": str(caso["cliente_id"]),
+                "abogado_id": str(caso["abogado_id"]),
+                "documentos": caso["documentos"],
+                "responsable": caso["responsable"]
+            }
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "Caso no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 # Lawyer Routes
 @app.route('/abogados', methods=['GET'])
 def get_all_abogados():
