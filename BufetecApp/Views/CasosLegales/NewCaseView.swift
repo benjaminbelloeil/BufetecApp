@@ -14,19 +14,15 @@ struct NewCaseView: View {
     @State private var createdAt: Date = Date()
     @State private var documents: [CaseDocument] = []
     @State private var showingClientSheet = false
-    @State private var clientAction: ClienteAction = .add
-
-    enum ClienteAction {
-        case add, edit
-    }
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
                     caseInfoSection
-                    clientsSection
+                    clientAssignmentSection
                     documentsSection
+                    clientsSection
                     actionButtonsSection
                 }
                 .padding()
@@ -40,6 +36,9 @@ struct NewCaseView: View {
                     await casoLegalViewModel.fetchCasos()
                     await clientViewModel.fetchClientes()
                 }
+            }
+            .sheet(isPresented: $showingClientSheet) {
+                ClientSelectionSheet(selectedClient: $selectedClient, clientViewModel: clientViewModel)
             }
         }
     }
@@ -80,36 +79,46 @@ struct NewCaseView: View {
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
+    private var clientAssignmentSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Cliente Asignado")
+                .font(.headline)
+                .padding(.bottom, 8)
+
+            if let selectedClient = selectedClient {
+                ClienteCard2(cliente: selectedClient, isSelected: true)
+            } else {
+                Text("Ningún cliente asignado")
+                    .foregroundColor(.secondary)
+            }
+
+            Button(action: {
+                showingClientSheet = true
+            }) {
+                Label("Asignar Cliente", systemImage: "person.badge.plus")
+            }
+            .buttonStyle(BorderedProminentButtonStyle())
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+
     private var clientsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Clientes en espera")
+            Text("Clientes en Espera")
                 .font(.headline)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(clientViewModel.clientes.filter { $0.disponibilidad }) { cliente in
-                        ClienteCard2(cliente: cliente)
+                    ForEach(clientViewModel.clientes.filter { $0.disponibilidad && $0.id != selectedClient?.id }) { cliente in
+                        ClienteCard2(cliente: cliente, isSelected: false)
                             .onTapGesture {
                                 selectedClient = cliente
                             }
                     }
                 }
-            }
-
-            HStack(spacing: 12) {
-                Button(action: {
-                    clientAction = .add
-                    showingClientSheet = true
-                }) {
-                    Label("Añadir", systemImage: "plus")
-                }
-                .buttonStyle(BorderedProminentButtonStyle())
-
-                Button(action: deleteClient) {
-                    Label("Eliminar", systemImage: "trash")
-                }
-                .buttonStyle(BorderedButtonStyle())
-                .disabled(selectedClient == nil)
             }
         }
         .padding()
@@ -190,50 +199,28 @@ struct NewCaseView: View {
         // Implement logic to cancel case creation
         presentationMode.wrappedValue.dismiss()
     }
-
-    private func deleteClient() {
-        if let selected = selectedClient, let index = clientViewModel.clientes.firstIndex(where: { $0.id == selected.id }) {
-            clientViewModel.clientes.remove(at: index)
-            selectedClient = nil
-        }
-    }
-
-    private func handleClientSave(client: Cliente) {
-        if let index = clientViewModel.clientes.firstIndex(where: { $0.id == client.id }) {
-            clientViewModel.clientes[index] = client
-        } else {
-            clientViewModel.clientes.append(client)
-        }
-        selectedClient = client
-        showingClientSheet = false
-    }
 }
 
 struct ClienteCard2: View {
     let cliente: Cliente
-    var isSelected: Bool = false
+    let isSelected: Bool
 
     var body: some View {
-        VStack {
+        HStack {
             Image(systemName: "person.circle.fill")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 50, height: 50)
+                .frame(width: 40, height: 40)
                 .foregroundColor(isSelected ? .blue : .gray)
 
             Text(cliente.nombre)
-                .font(.caption)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
+                .font(.subheadline)
+                .lineLimit(1)
         }
-        .frame(width: 80, height: 100)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color(.tertiarySystemGroupedBackground))
+        .background(isSelected ? Color(.systemBlue).opacity(0.1) : Color(.tertiarySystemGroupedBackground))
         .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
-        )
     }
 }
 
@@ -245,5 +232,28 @@ struct CaseDocument: Identifiable {
 struct NewCaseView_Previews: PreviewProvider {
     static var previews: some View {
         NewCaseView()
+    }
+}
+
+struct ClientSelectionSheet: View {
+    @Binding var selectedClient: Cliente?
+    let clientViewModel: ClienteViewModel
+    @Environment(\.presentationMode) var presentationMode
+
+    var body: some View {
+        NavigationView {
+            List(clientViewModel.clientes.filter { $0.disponibilidad }) { cliente in
+                Button {
+                    selectedClient = cliente
+                    presentationMode.wrappedValue.dismiss()
+                } label: {
+                    ClienteCard2(cliente: cliente, isSelected: false)
+                }
+            }
+            .navigationTitle("Seleccionar Cliente")
+            .navigationBarItems(trailing: Button("Cancelar") {
+                presentationMode.wrappedValue.dismiss()
+            })
+        }
     }
 }
