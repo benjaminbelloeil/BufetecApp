@@ -33,8 +33,8 @@ temp_users = {} #type: ignore
 def hash_password(contrasena):
     return generate_password_hash(contrasena)
 
-def hash_password(contrasena):
-    return generate_password_hash(contrasena, method='pbkdf2:sha256')
+def verify_password(contrasena_almacenada, contrasena_proporcionada):
+    return check_password_hash(contrasena_almacenada, contrasena_proporcionada)
 
 def insert_student(student_data):
     student_data['contrasena'] = hash_password(student_data['contrasena'])
@@ -470,11 +470,6 @@ def get_one_abogado(abogado_id):
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
     
-@app.route('/insert_sample_lawyers', methods=['GET'])
-def insert_sample_lawyers_route():
-    insert_sample_lawyers()
-    return jsonify({"message": "Sample lawyers inserted successfully"}), 200
-
 # Client Routes
 @app.route('/clientes', methods=['GET'])
 def get_all_clientes():
@@ -544,11 +539,6 @@ def create_cliente():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route('/insert_sample_clients', methods=['GET'])
-def insert_sample_clients_route():
-    insert_sample_clients()
-    return jsonify({"message": "Sample clients inserted successfully"}), 200
-
 # Library Routes
 @app.route('/biblioteca', methods=['GET'])
 def get_all_biblioteca():
@@ -836,6 +826,8 @@ if __name__ == '__main__':
         # Test MongoDB connection
         mongo.db.command('ping')
         app.logger.info("Conexión a MongoDB exitosa")
+        
+
     except Exception as e:
         app.logger.error(f"Fallo en la conexión a MongoDB: {str(e)}")
 
