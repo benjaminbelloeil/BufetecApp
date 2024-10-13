@@ -6,6 +6,7 @@ struct ClienteCasoView: View {
     @State private var showingContactForm = false
     @State private var abogadoName: String = ""
     @StateObject private var lawyerModel = LawyerModel()
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -14,18 +15,15 @@ struct ClienteCasoView: View {
                     caseDetailsView(casoLegal: casoLegal)
                     actionButtonsView(casoLegal: casoLegal)
                 } else if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(.title)
-                        .foregroundColor(.red)
+                    errorView(message: errorMessage)
                 } else {
-                    Text("Cargando...")
-                        .font(.title)
+                    loadingView()
                 }
             }
             .padding()
         }
         .navigationTitle("Mi Caso")
-        .background(Color(.systemGroupedBackground))
+        .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
         .sheet(isPresented: $showingContactForm) {
             ContactFormView()
         }
@@ -42,38 +40,94 @@ struct ClienteCasoView: View {
     }
 
     private func caseHeaderView(casoLegal: CasoLegal) -> some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Text(casoLegal.nombre_caso)
-                .font(.title)
-                .fontWeight(.bold)
+                .font(.system(size: 28, weight: .bold))
             Text(casoLegal.tipo_proceso)
-                .font(.title2)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(.secondary)
+            statusBadge(status: casoLegal.estado_proceso)
+        }
+        .padding(24)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 5)
+    }
+
+    private func statusBadge(status: String) -> some View {
+        Text(status)
+            .font(.system(size: 14, weight: .semibold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(statusColor(for: status).opacity(0.2))
+            .foregroundColor(statusColor(for: status))
+            .cornerRadius(20)
+    }
+
+    private func statusColor(for status: String) -> Color {
+        switch status.lowercased() {
+        case "en proceso":
+            return .blue
+        case "finalizado":
+            return .green
+        default:
+            return .orange
         }
     }
 
-
     private func caseDetailsView(casoLegal: CasoLegal) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 20) {
             Text("Detalles del Caso")
-                .font(.headline)
+                .font(.system(size: 22, weight: .bold))
+                .padding(.bottom, 8)
             
             DetalleRow(title: "Abogado asignado", value: abogadoName)
             DetalleRow(title: "Tipo de caso", value: casoLegal.tipo_proceso)
             DetalleRow(title: "Estado actual", value: casoLegal.estado_proceso)
         }
-        .padding()
+        .padding(24)
         .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 5)
     }
 
     private func actionButtonsView(casoLegal: CasoLegal) -> some View {
-        HStack {
-            Button(action: {
-                showingContactForm.toggle()
-            }) {
-                Text("Contactar")
+        Button(action: {
+            showingContactForm.toggle()
+        }) {
+            HStack {
+                Image(systemName: "message.fill")
+                Text("Contactar Abogado")
+                    .fontWeight(.semibold)
             }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(15)
+            .shadow(color: Color.blue.opacity(0.3), radius: 5, x: 0, y: 3)
         }
+    }
+
+    private func errorView(message: String) -> some View {
+        Text(message)
+            .font(.system(size: 18, weight: .medium))
+            .foregroundColor(.white)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color.red)
+            .cornerRadius(15)
+    }
+
+    private func loadingView() -> some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .scaleEffect(1.5)
+            Text("Cargando...")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -84,9 +138,11 @@ struct DetalleRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .fontWeight(.bold)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.secondary)
             Spacer()
             Text(value)
+                .font(.system(size: 16, weight: .semibold))
         }
     }
 }
@@ -97,15 +153,23 @@ struct ContactFormView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Contacto")) {
+                Section(header: Text("Contacto").textCase(.uppercase)) {
                     TextField("Nombre", text: .constant(""))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     TextField("Correo", text: .constant(""))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.emailAddress)
                     TextField("Mensaje", text: .constant(""))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
             }
             .navigationTitle("Formulario de Contacto")
-            .navigationBarItems(trailing: Button("Cerrar") {
+            .navigationBarItems(trailing: Button(action: {
                 presentationMode.wrappedValue.dismiss()
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.gray)
+                    .imageScale(.large)
             })
         }
     }

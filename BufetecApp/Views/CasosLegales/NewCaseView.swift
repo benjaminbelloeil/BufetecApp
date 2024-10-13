@@ -82,12 +82,12 @@ struct NewCaseView: View {
 
     private var clientsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Clientes Asignados")
+            Text("Clientes en espera")
                 .font(.headline)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(clientViewModel.clientes) { cliente in
+                    ForEach(clientViewModel.clientes.filter { $0.disponibilidad }) { cliente in
                         ClienteCard2(cliente: cliente)
                             .onTapGesture {
                                 selectedClient = cliente
