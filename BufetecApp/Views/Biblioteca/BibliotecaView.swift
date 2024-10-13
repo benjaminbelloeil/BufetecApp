@@ -144,6 +144,10 @@ struct LargeBookCard: View {
                 .foregroundColor(.secondary)
         }
         .frame(width: 160)
+        .padding(8)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 
@@ -174,6 +178,10 @@ struct SmallBookCard: View {
                 .foregroundColor(.secondary)
         }
         .frame(width: 120)
+        .padding(8)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 
@@ -183,7 +191,7 @@ struct DocumentCard: View {
     var body: some View {
         VStack(alignment: .leading) {
             ZStack {
-                Color(.systemGray5)
+                Color(.systemGray6)
                     .frame(width: 120, height: 160)
                     .cornerRadius(10)
                 
@@ -203,6 +211,10 @@ struct DocumentCard: View {
                 .foregroundColor(.secondary)
         }
         .frame(width: 120)
+        .padding(8)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 

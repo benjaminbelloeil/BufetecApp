@@ -6,44 +6,79 @@ struct CaseDetailView: View {
     @State private var selectedCase: CasoLegal?
     @State private var isPresentingNewCaseView = false
     @State private var searchText = ""
+    @State private var selectedTab = 0
 
     var filteredCases: [CasoLegal] {
         if searchText.isEmpty {
             return casoLegalViewModel.casos
         } else {
-            return casoLegalViewModel.casos.filter { 
-                $0.nombre_caso.lowercased().contains(searchText.lowercased()) || 
-                $0.cliente_id.lowercased().contains(searchText.lowercased()) 
+            return casoLegalViewModel.casos.filter {
+                $0.nombre_caso.lowercased().contains(searchText.lowercased()) ||
+                $0.cliente_id.lowercased().contains(searchText.lowercased())
             }
         }
     }
 
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(filteredCases) { caseItem in
-                    CaseListItem(caseItem: caseItem, clienteViewModel: clienteViewModel)
-                        .onTapGesture {
-                            selectedCase = caseItem
+        TabView(selection: $selectedTab) {
+            NavigationView {
+                ZStack {
+                    Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all)
+                    
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(filteredCases) { caseItem in
+                                CaseListItem(caseItem: caseItem, clienteViewModel: clienteViewModel)
+                                    .onTapGesture {
+                                        selectedCase = caseItem
+                                    }
+                            }
                         }
+                        .padding()
+                    }
+                }
+                .searchable(text: $searchText, prompt: "Buscar casos")
+                .navigationTitle("Mis Casos")
+                .navigationBarItems(trailing: addButton)
+                .sheet(isPresented: $isPresentingNewCaseView) {
+                    NewCaseView()
+                }
+                .sheet(item: $selectedCase) { caseItem in
+                    CaseDetailSheet(caseItem: caseItem, clienteViewModel: clienteViewModel)
+                }
+                .onAppear {
+                    Task {
+                        await casoLegalViewModel.fetchCasos()
+                        await clienteViewModel.fetchClientes()
+                    }
                 }
             }
-            .listStyle(InsetGroupedListStyle())
-            .searchable(text: $searchText, prompt: "Buscar casos")
-            .navigationTitle("Mis Casos")
-            .navigationBarItems(trailing: addButton)
-            .sheet(isPresented: $isPresentingNewCaseView) {
-                NewCaseView()
+            .tabItem {
+                Image(systemName: "folder.fill")
+                Text("Casos")
             }
-            .sheet(item: $selectedCase) { caseItem in
-                CaseDetailSheet(caseItem: caseItem, clienteViewModel: clienteViewModel)
-            }
-            .onAppear {
-                Task {
-                    await casoLegalViewModel.fetchCasos()
-                    await clienteViewModel.fetchClientes()
+            .tag(0)
+
+            PerfilView()
+                .tabItem {
+                    Image(systemName: "person.circle.fill")
+                    Text("Perfil")
                 }
-            }
+                .tag(1)
+
+            BibliotecaView()
+                .tabItem {
+                    Image(systemName: "books.vertical.fill")
+                    Text("Biblioteca")
+                }
+                .tag(2)
+
+            AbogadoListView()
+                .tabItem {
+                    Image(systemName: "briefcase.fill")
+                    Text("Abogados")
+                }
+                .tag(3)
         }
     }
 
@@ -52,6 +87,8 @@ struct CaseDetailView: View {
             isPresentingNewCaseView = true
         }) {
             Image(systemName: "plus")
+                .foregroundColor(.blue)
+                .font(.system(size: 18, weight: .bold))
         }
     }
 }
@@ -61,23 +98,36 @@ struct CaseListItem: View {
     @ObservedObject var clienteViewModel: ClienteViewModel
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(caseItem.nombre_caso)
-                    .font(.headline)
-                Text(clienteName(for: caseItem.cliente_id))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(caseItem.nombre_caso)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    Text(clienteName(for: caseItem.cliente_id))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                CaseStatusBadge(status: caseItem.estado_proceso)
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
+            
+            HStack {
                 Text(caseItem.numero_expediente)
                     .font(.caption)
                     .foregroundColor(.secondary)
-                CaseStatusBadge(status: caseItem.estado_proceso)
+                Spacer()
+                Text(caseItem.tipo_proceso)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
+            
+            CaseStatusProgressBar(status: caseItem.estado_proceso)
         }
-        .padding(.vertical, 8)
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
     private func clienteName(for id: String) -> String {
@@ -103,7 +153,7 @@ struct CaseStatusBadge: View {
         switch status.lowercased() {
         case "activo":
             return .green
-        case "pendiente", "En espera":
+        case "pendiente", "en espera":
             return .orange
         case "cerrado":
             return .red
@@ -121,16 +171,16 @@ struct CaseStatusProgressBar: View {
             ZStack(alignment: .leading) {
                 Rectangle()
                     .fill(Color.gray.opacity(0.2))
-                    .frame(height: 20)
-                    .cornerRadius(10)
+                    .frame(height: 8)
+                    .cornerRadius(4)
 
                 Rectangle()
                     .fill(statusColor)
-                    .frame(width: progressWidth(for: geometry.size.width), height: 20)
-                    .cornerRadius(10)
+                    .frame(width: progressWidth(for: geometry.size.width), height: 8)
+                    .cornerRadius(4)
             }
         }
-        .frame(height: 20)
+        .frame(height: 8)
     }
 
     private var statusColor: Color {
@@ -182,6 +232,7 @@ struct CaseDetailSheet: View {
             .navigationBarItems(trailing: Button("Cerrar") {
                 presentationMode.wrappedValue.dismiss()
             })
+            .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
         }
     }
 
@@ -195,29 +246,33 @@ struct CaseSummaryView: View {
     @ObservedObject var clienteViewModel: ClienteViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Resumen del Caso")
                 .font(.title2)
                 .fontWeight(.bold)
 
-            HStack {
-                Label(clienteName(for: caseItem.cliente_id), systemImage: "person")
-                Spacer()
-                CaseStatusProgressBar(status: caseItem.estado_proceso)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Label(clienteName(for: caseItem.cliente_id), systemImage: "person")
+                    Spacer()
+                    CaseStatusBadge(status: caseItem.estado_proceso)
+                }
+
+                Label(caseItem.numero_expediente, systemImage: "folder")
+
+                Label(caseItem.tipo_proceso, systemImage: "doc.text")
+
+                Label(caseItem.prioridad, systemImage: "flag")
+
+                Label(caseItem.responsable.joined(separator: ", "), systemImage: "person.fill")
+
+                Label(formatDate(caseItem.fechaInicio ?? Date()), systemImage: "calendar")
             }
-
-            Label(caseItem.numero_expediente, systemImage: "folder")
-
-            Label(caseItem.tipo_proceso, systemImage: "doc.text")
-
-            Label(caseItem.prioridad, systemImage: "flag")
-
-            Label(caseItem.responsable.joined(separator: ", "), systemImage: "person.fill")
-
         }
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
     private func clienteName(for id: String) -> String {
@@ -237,22 +292,26 @@ struct CaseInformationView: View {
     @ObservedObject var clienteViewModel: ClienteViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Información del Caso")
                 .font(.title2)
                 .fontWeight(.bold)
 
-            InfoRow(title: "Nombre del Caso", value: caseItem.nombre_caso)
-            InfoRow(title: "Número de Expediente", value: caseItem.numero_expediente)
-            InfoRow(title: "Tipo de Proceso", value: caseItem.tipo_proceso)
-            InfoRow(title: "Estado", value: caseItem.estado_proceso)
-            InfoRow(title: "Prioridad", value: caseItem.prioridad)
-            InfoRow(title: "Cliente", value: clienteName(for: caseItem.cliente_id))
-            InfoRow(title: "Responsable", value: caseItem.responsable.joined(separator: ", "))
+            VStack(spacing: 12) {
+                InfoRow(title: "Nombre del Caso", value: caseItem.nombre_caso)
+                InfoRow(title: "Número de Expediente", value: caseItem.numero_expediente)
+                InfoRow(title: "Tipo de Proceso", value: caseItem.tipo_proceso)
+                InfoRow(title: "Estado", value: caseItem.estado_proceso)
+                InfoRow(title: "Prioridad", value: caseItem.prioridad)
+                InfoRow(title: "Cliente", value: clienteName(for: caseItem.cliente_id))
+                InfoRow(title: "Responsable", value: caseItem.responsable.joined(separator: ", "))
+                InfoRow(title: "Fecha de Creación", value: formatDate(caseItem.fechaInicio ?? Date()))
+            }
         }
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
     private func clienteName(for id: String) -> String {

@@ -31,7 +31,7 @@ struct NewCaseView: View {
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all))
             .navigationTitle("Nuevo Caso")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(leading: cancelButton, trailing: saveButton)
@@ -45,7 +45,11 @@ struct NewCaseView: View {
     }
 
     private var caseInfoSection: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Información del Caso")
+                .font(.headline)
+                .padding(.bottom, 8)
+
             TextField("Nombre del caso", text: $caseName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
 
@@ -73,6 +77,7 @@ struct NewCaseView: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
     private var clientsSection: some View {
@@ -83,7 +88,7 @@ struct NewCaseView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(clientViewModel.clientes) { cliente in
-                        ClienteCard(cliente: cliente)
+                        ClienteCard2(cliente: cliente)
                             .onTapGesture {
                                 selectedClient = cliente
                             }
@@ -110,6 +115,7 @@ struct NewCaseView: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
     private var documentsSection: some View {
@@ -120,14 +126,17 @@ struct NewCaseView: View {
             ForEach(documents) { document in
                 HStack {
                     Image(systemName: "doc")
+                        .foregroundColor(.blue)
                     Text(document.name)
                     Spacer()
                     Button(action: {
                         // Implement document deletion
                     }) {
                         Image(systemName: "trash")
+                            .foregroundColor(.red)
                     }
                 }
+                .padding(.vertical, 8)
             }
 
             Button(action: {
@@ -140,6 +149,7 @@ struct NewCaseView: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
     private var actionButtonsSection: some View {
@@ -199,7 +209,7 @@ struct NewCaseView: View {
     }
 }
 
-struct ClientCard: View {
+struct ClienteCard2: View {
     let cliente: Cliente
     var isSelected: Bool = false
 
@@ -226,7 +236,6 @@ struct ClientCard: View {
         )
     }
 }
-
 
 struct CaseDocument: Identifiable {
     let id: UUID
