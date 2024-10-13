@@ -615,6 +615,27 @@ def create_biblioteca():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+#Document Routes
+@app.route('/documentos', methods=['GET'])
+def get_all_documentos():
+    try:
+        documentos = mongo.db.documentos.find()
+        result = []
+        for documento in documentos:
+            result.append({
+                "id": str(documento["_id"]),
+                "casoId": documento["casoId"],
+                "userId": documento["userId"],
+                "nombreDocumento": documento["nombreDocumento"],
+                "tipoDocumento": documento["tipoDocumento"],
+                "urlDocumento": documento["urlDocumento"],
+                "createdAt": documento["createdAt"],
+                "status": documento["status"]
+            })
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 
 # Chat Routes
 @app.route('/chats/<user_id>', methods=['GET'])
