@@ -40,7 +40,6 @@ struct AbogadoListView: View {
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let data = data {
-                print(String(data: data, encoding: .utf8) ?? "No readable data")
                 if let decodedResponse = try? JSONDecoder().decode([Lawyer].self, from: data) {
                     DispatchQueue.main.async {
                         self.lawyers = decodedResponse
@@ -57,54 +56,44 @@ struct LawyerCard: View {
     var lawyer: Lawyer
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 16) {
-                Image(systemName: "person.circle.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 70, height: 70)
-                    .foregroundColor(.blue)
-                    .background(Color.white)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.blue, lineWidth: 2))
-                    .shadow(radius: 5)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(lawyer.nombre)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Text(lawyer.especializacion)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    Text("Experiencia: \(lawyer.experienciaProfesional)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("Casos ganados: \(lawyer.casosSentenciaFavorable)/\(lawyer.casosAtendidos)")
-                        .font(.caption)
-                        .foregroundColor(.green)
-                }
-            }
+        HStack(spacing: 16) {
+            Circle()
+                .fill(LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                .frame(width: 80, height: 80)
+                .overlay(
+                    Text(lawyer.nombre.prefix(1).uppercased())
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                )
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
             
-            HStack {
-                Label(lawyer.correo, systemImage: "envelope")
-                    .font(.caption)
-                    .foregroundColor(.blue)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(lawyer.nombre)
+                    .font(.headline)
+                    .foregroundColor(.primary)
                 
-                Spacer()
+                Text(lawyer.especializacion)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
                 
-                Label(lawyer.telefono, systemImage: "phone")
+                Text("Experiencia: \(lawyer.experienciaProfesional)")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                
+                Text("Casos ganados: \(lawyer.casosSentenciaFavorable)/\(lawyer.casosAtendidos)")
+                    .font(.caption)
+                    .foregroundColor(.green)
             }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .foregroundColor(.gray)
         }
         .padding()
-        .background(Color.white)
-        .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
     }
 }
 

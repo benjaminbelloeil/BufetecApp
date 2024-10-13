@@ -33,8 +33,8 @@ temp_users = {} #type: ignore
 def hash_password(contrasena):
     return generate_password_hash(contrasena)
 
-def verify_password(contrasena_almacenada, contrasena_proporcionada):
-    return check_password_hash(contrasena_almacenada, contrasena_proporcionada)
+def hash_password(contrasena):
+    return generate_password_hash(contrasena, method='pbkdf2:sha256')
 
 def insert_student(student_data):
     student_data['contrasena'] = hash_password(student_data['contrasena'])

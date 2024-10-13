@@ -206,7 +206,6 @@ struct DocumentCard: View {
     }
 }
 
-// Preview
 struct BibliotecaView_Previews: PreviewProvider {
     static var previews: some View {
         BibliotecaView()

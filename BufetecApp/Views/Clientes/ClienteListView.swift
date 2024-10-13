@@ -51,12 +51,15 @@ struct ClienteCard: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
+            Circle()
+                .fill(LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .topLeading, endPoint: .bottomTrailing))
                 .frame(width: 80, height: 80)
-                .foregroundColor(.blue)
-                .shadow(radius: 3)
+                .overlay(
+                    Text(cliente.nombre.prefix(1).uppercased())
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                )
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(cliente.nombre)
@@ -72,11 +75,14 @@ struct ClienteCard: View {
                     .foregroundColor(.secondary)
             }
             Spacer()
+            
+            Image(systemName: "chevron.right")
+                .foregroundColor(.gray)
         }
         .padding()
         .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -101,11 +107,15 @@ struct ClienteInfoHeader: View {
 
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .foregroundColor(.blue)
+            Circle()
+                .fill(LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                .frame(width: 120, height: 120)
+                .overlay(
+                    Text(cliente.nombre.prefix(1).uppercased())
+                        .font(.system(size: 48, weight: .bold))
+                        .foregroundColor(.white)
+                )
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
 
             Text(cliente.nombre)
                 .font(.title2)
@@ -117,8 +127,11 @@ struct ClienteInfoHeader: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.secondarySystemBackground))
+                .shadow(color: Color.black.opacity(0.05), radius: 15, x: 0, y: 10)
+        )
     }
 }
 
@@ -126,17 +139,36 @@ struct ClienteContactInfo: View {
     var cliente: Cliente
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Información de Contacto")
                 .font(.headline)
+                .padding(.bottom, 8)
 
-            Label(cliente.correo, systemImage: "envelope")
-            Label(cliente.telefono, systemImage: "phone")
-            Label("\(cliente.direccion.calle), \(cliente.direccion.ciudad)", systemImage: "location")
+            ContactInfoRow(icon: "envelope", text: cliente.correo)
+            ContactInfoRow(icon: "phone", text: cliente.telefono)
+            ContactInfoRow(icon: "location", text: "\(cliente.direccion.calle), \(cliente.direccion.ciudad)")
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.secondarySystemBackground))
+                .shadow(color: Color.black.opacity(0.05), radius: 15, x: 0, y: 10)
+        )
+    }
+}
+
+struct ContactInfoRow: View {
+    var icon: String
+    var text: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(.blue)
+                .frame(width: 24, height: 24)
+            Text(text)
+                .foregroundColor(.secondary)
+        }
     }
 }
 
