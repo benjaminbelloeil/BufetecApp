@@ -11,7 +11,6 @@ struct ClienteCasoView: View {
             VStack(spacing: 24) {
                 if let casoLegal = viewModel.caso {
                     caseHeaderView(casoLegal: casoLegal)
-                    caseProgressView(casoLegal: casoLegal)
                     caseDetailsView(casoLegal: casoLegal)
                     actionButtonsView(casoLegal: casoLegal)
                 } else if let errorMessage = viewModel.errorMessage {
@@ -44,32 +43,14 @@ struct ClienteCasoView: View {
 
     private func caseHeaderView(casoLegal: CasoLegal) -> some View {
         VStack(spacing: 12) {
-            Text(casoLegal.tipo_proceso)
+            Text(casoLegal.nombre_caso)
                 .font(.title)
                 .fontWeight(.bold)
-            Text(casoLegal.nombre_caso)
+            Text(casoLegal.tipo_proceso)
                 .font(.title2)
         }
     }
 
-    private func caseProgressView(casoLegal: CasoLegal) -> some View {
-        VStack {
-            Text("Progreso del Caso")
-                .font(.headline)
-            HStack {
-                Spacer()
-                Text("En proceso")
-                    .font(.caption)
-                    .foregroundColor(.blue)
-                Spacer()
-                Text("Finalizado")
-                    .font(.caption)
-            }
-        }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-    }
 
     private func caseDetailsView(casoLegal: CasoLegal) -> some View {
         VStack(alignment: .leading, spacing: 16) {

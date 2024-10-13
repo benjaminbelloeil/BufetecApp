@@ -27,14 +27,14 @@ struct ClienteMainView: View {
                     Image(systemName: "folder.fill")
                     Text("Mi Caso")
                 }
-                .tag(1)
+                .tag(2)
 
             AbogadoListView()
                 .tabItem {
                     Image(systemName: "briefcase.fill")
                     Text("Abogados")
                 }
-                .tag(2)
+                .tag(3)
         }
     }
 }
