@@ -103,7 +103,7 @@ struct CaseStatusBadge: View {
         switch status.lowercased() {
         case "activo":
             return .green
-        case "pendiente", "en espera":
+        case "pendiente", "En espera":
             return .orange
         case "cerrado":
             return .red
