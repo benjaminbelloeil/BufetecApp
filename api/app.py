@@ -67,157 +67,6 @@ def run_cleanup():
         cleanup_temp_users()
         time.sleep(3600)
 
-# Sample Data Insertion Functions
-def insert_sample_lawyers():
-    try:
-        # Clear existing lawyers
-        result = lawyer_collection.delete_many({})
-        print(f"Cleared {result.deleted_count} existing lawyers from the collection.")
-
-        sample_lawyers = [
-            {
-                "id_abogado": "AB123",
-                "abogado_contrasena": hash_password("abogado123"),  # This will be hashed before insertion
-                "nombre": "María Rodríguez",
-                "especializacion": "Derecho Civil",
-                "experiencia_profesional": "15 años en litigios civiles",
-                "disponibilidad": True,
-                "maestria": "Maestría en Derecho Corporativo",
-                "direccion": {
-                    "calle": "Av. Revolución 123",
-                    "ciudad": "Monterrey",
-                    "estado": "Nuevo León",
-                    "codigo_postal": "64000"
-                },
-                "casos_asignados": [],
-                "telefono": "8181234567",
-                "correo": "maria.rodriguez@bufete.com",
-                "casos_atendidos": 120,
-                "casos_con_sentencia_a_favor": 95,
-            },
-            {
-                "id_abogado": "AB124",
-                "abogado_contrasena": hash_password("abogado124"),  # This will be hashed before insertion
-                "nombre": "Juan Pérez",
-                "especializacion": "Derecho Penal",
-                "experiencia_profesional": "10 años en defensa penal",
-                "disponibilidad": True,
-                "maestria": "Maestría en Criminología",
-                "direccion": {
-                    "calle": "Calle Morelos 456",
-                    "ciudad": "Guadalajara",
-                    "estado": "Jalisco",
-                    "codigo_postal": "44100"
-                },
-                "casos_asignados": [],
-                "telefono": "3339876543",
-                "correo": "juan.perez@bufete.com",
-                "casos_atendidos": 80,
-                "casos_con_sentencia_a_favor": 60,
-            },
-            {
-                "id_abogado": "AB125",
-                "abogado_contrasena": hash_password("abogado125"),  # This will be hashed before insertion
-                "nombre": "Ana López",
-                "especializacion": "Derecho Laboral",
-                "experiencia_profesional": "12 años en conflictos laborales",
-                "disponibilidad": True,
-                "maestria": "Maestría en Derecho del Trabajo",
-                "direccion": {
-                    "calle": "Paseo de la Reforma 789",
-                    "ciudad": "Ciudad de México",
-                    "estado": "CDMX",
-                    "codigo_postal": "06500"
-                },
-                "casos_asignados": [],
-                "telefono": "5551234567",
-                "correo": "ana.lopez@bufete.com",
-                "casos_atendidos": 150,
-                "casos_con_sentencia_a_favor": 130,
-            }
-        ]
-        for lawyer in sample_lawyers:
-            result = lawyer_collection.insert_one(lawyer)
-            print(f"Inserted lawyer: {lawyer['nombre']} (ID: {result.inserted_id})")
-
-        # Check final count
-        final_count = lawyer_collection.count_documents({})
-        print(f"Final number of documents in lawyers_collection: {final_count}")
-
-    except Exception as e:
-        print(f"Error in insert_sample_lawyers: {str(e)}")
-        raise
-
-def insert_sample_clients():
-    try:
-        # Clear existing clients
-        result = clients_collection.delete_many({})
-        print(f"Cleared {result.deleted_count} existing clients from the collection.")
-
-        sample_clients = [
-            {
-                "nombre": "Carlos Pérez",
-                "contacto": "Lic. Juan Pérez",
-                "proxima_audiencia": datetime.datetime(2021, 9, 15, 10, 0),
-                "telefono": "8187654321",
-                "correo": "cliente2@gmail.com",
-                "fecha_inicio": datetime.datetime(2021, 8, 1, 9, 0),
-                "direccion": {
-                    "calle": "Calle 123",
-                    "ciudad": "Monterrey",
-                    "estado": "Nuevo León",
-                    "codigo_postal": "64000"
-                },
-                "url_recurso": "https://www.google.com",
-                "disponibilidad": True
-            },
-            {
-                "nombre": "Laura Gómez",
-                "contacto": "Lic. María Rodríguez",
-                "proxima_audiencia": datetime.datetime(2021, 9, 20, 11, 0),
-                "telefono": "8181234567",
-                "correo": "cliente3@gmail.com",
-                "fecha_inicio": datetime.datetime(2021, 8, 5, 10, 0),
-                "direccion": {
-                    "calle": "Avenida 456",
-                    "ciudad": "Monterrey",
-                    "estado": "Nuevo León",
-                    "codigo_postal": "64000"
-                },
-                "url_recurso": "https://www.google.com",
-                "disponibilidad": True
-            },
-            {
-                "nombre": "Jorge Sánchez",
-                "contacto": "Lic. Ana López",
-                "proxima_audiencia": datetime.datetime(2021, 9, 25, 9, 0),
-                "telefono": "8189876543",
-                "correo": "cliente4@gmail.com",
-                "fecha_inicio": datetime.datetime(2021, 8, 10, 11, 0),
-                "direccion": {
-                    "calle": "Calle 789",
-                    "ciudad": "Monterrey",
-                    "estado": "Nuevo León",
-                    "codigo_postal": "64000"
-                },
-                "url_recurso": "https://www.google.com",
-                "disponibilidad": True
-            }
-         ]
-
-        for client in sample_clients:
-            result = clients_collection.insert_one(client)
-            print(f"Inserted client: {client['nombre']} (ID: {result.inserted_id})")
-
-        # Check final count
-        final_count = clients_collection.count_documents({})
-        print(f"Final number of documents in client_collection: {final_count}")
-
-    except Exception as e:
-        print(f"Error in insert_sample_clients: {str(e)}")
-        raise
-
-
 # Routes
 # Authentication Routes
 @app.route('/signup', methods=['POST'])
@@ -495,7 +344,22 @@ def create_caso():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    
+@app.route('/caso/cliente/<cliente_id>', methods=['GET'])
+def get_caso_by_cliente_id(cliente_id):
+    try:
+        caso = casos_collection.find_one({"cliente_id": ObjectId(cliente_id)})
+        if not caso:
+            return jsonify({"error": "Caso no encontrado"}), 404
+        
+        # Convert ObjectId to string for JSON serialization
+        caso["_id"] = str(caso["_id"])
+        caso["cliente_id"] = str(caso["cliente_id"])
+        caso["abogado_id"] = str(caso["abogado_id"])
+        
+        return jsonify(caso), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/caso', methods=['PUT'])
 def update_caso():
     try:
@@ -751,83 +615,6 @@ def create_biblioteca():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Document Routes
-@app.route('/documentos', methods=['GET'])
-def get_all_documents():
-    try:
-        documentos = mongo.db.documentos.find()
-        result = []
-        for documento in documentos:
-            result.append({
-                "id": str(documento["_id"]),
-                "casoId": documento["caso_id"],
-                "userId": documento["user_id"],
-                "nombreDocumento": documento["nombre_documento"],
-                "tipoDocumento": documento["tipo_documento"],
-                "urlDocumento": documento["url_documento"],
-                "status": documento["status"],
-                "createdAt": documento["created_at"]
-            })
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/documentos/<user_id>', methods=['GET'])
-def get_documents_by_user(user_id):
-    try:
-        documentos = mongo.db.documentos.find({"user_id": user_id})
-        result = []
-        for documento in documentos:
-            result.append({
-                "id": str(documento["_id"]),
-                "casoId": documento["caso_id"],
-                "userId": documento["user_id"],
-                "nombreDocumento": documento["nombre_documento"],
-                "tipoDocumento": documento["tipo_documento"],
-                "urlDocumento": documento["url_documento"],
-                "status": documento["status"],
-                "createdAt": documento["fecha_creacion"]
-            })
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/documento/<documento_id>', methods=['GET'])
-def get_document_by_id(documento_id):
-    try:
-        documento = mongo.db.documentos.find_one({"_id": ObjectId(documento_id)})
-        if documento:
-            result = {
-                "id": str(documento["_id"]),
-                "casoId": documento["casoId"],
-                "nombre_documento": documento["nombre_documento"],
-                "tipo_documento": documento["tipo_documento"],
-                "url_documento": documento["url_documento"],
-                "status": documento["status"],
-                "fecha_creacion": documento["fecha_creacion"]
-            }
-            return jsonify(result), 200
-        else:
-            return jsonify({"error": "Documento no encontrado"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/documento', methods=['POST'])
-def create_document():
-    try:
-        datos = request.get_json()
-        nuevo_documento = {
-            "casoId": datos["casoId"],
-            "nombre_documento": datos["nombre_documento"],
-            "tipo_documento": datos["tipo_documento"],
-            "url_documento": datos["url_documento"],
-            "status": datos["status"],
-            "fecha_creacion": datos.get("fecha_creacion", datetime.datetime.utcnow())
-        }
-        resultado = mongo.db.documentos.insert_one(nuevo_documento)
-        return jsonify({"id": str(resultado.inserted_id)}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # Chat Routes
 @app.route('/chats/<user_id>', methods=['GET'])
@@ -1030,13 +817,6 @@ if __name__ == '__main__':
         app.logger.info("Conexión a MongoDB exitosa")
     except Exception as e:
         app.logger.error(f"Fallo en la conexión a MongoDB: {str(e)}")
-
-    # Insert sample lawyers
-    insert_sample_lawyers()
-    insert_sample_clients()
-    # Start the cleanup thread
-    cleanup_thread = threading.Thread(target=run_cleanup)
-    cleanup_thread.start()
 
     # Run the Flask app
     app.run(debug=True, host='0.0.0.0', port=5001)

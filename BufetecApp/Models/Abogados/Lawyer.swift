@@ -1,7 +1,7 @@
 import Foundation
 
 struct Lawyer: Identifiable, Codable {
-    let id: String  // Keep as String since JSON provides a string
+    let id: String?  // Keep as String since JSON provides a string
     let userId: String?
     let nombre: String
     let especializacion: String
@@ -14,7 +14,6 @@ struct Lawyer: Identifiable, Codable {
     let correo: String
     let casosAtendidos: Int  // Optional Int to handle empty strings
     let casosSentenciaFavorable: Int  // Optional Int to handle empty strings
-    let imageName: String
 
     struct Direccion: Codable {
         let calle: String
@@ -37,7 +36,6 @@ struct Lawyer: Identifiable, Codable {
         case correo
         case casosAtendidos = "casos_atendidos"  // Map to snake_case
         case casosSentenciaFavorable = "casos_con_sentencia_a_favor"  // Map to snake_case
-        case imageName = "url_recurso"
     }
 }
 

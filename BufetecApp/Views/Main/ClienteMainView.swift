@@ -3,7 +3,8 @@ import SwiftUI
 struct ClienteMainView: View {
     @State private var selectedTab = 0
     let userId: String
-
+    let clienteId: String
+    @StateObject private var viewModel = CasoLegalViewModel()
     var body: some View {
         TabView(selection: $selectedTab) {
             PerfilView()
@@ -21,7 +22,7 @@ struct ClienteMainView: View {
                 .tag(1)
 
 
-            ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
+            ClienteCasoView(viewModel: viewModel, clienteId: clienteId)
                 .tabItem {
                     Image(systemName: "folder.fill")
                     Text("Mi Caso")
@@ -40,6 +41,6 @@ struct ClienteMainView: View {
 
 struct ClienteMainView_Previews: PreviewProvider {
     static var previews: some View {
-        ClienteMainView(userId: "sampleUserId")
+        ClienteMainView(userId: "sampleUserId", clienteId: "670b3dd3defd761576ebb5e9")
     }
 }

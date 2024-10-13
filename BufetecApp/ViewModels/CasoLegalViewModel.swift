@@ -3,6 +3,7 @@ import SwiftUI
 
 class CasoLegalViewModel: ObservableObject {
     @Published var casos: [CasoLegal] = []
+    @Published var caso: CasoLegal?
     @Published var errorMessage: String? // Property to store error messages
     
     let urlPrefix = "http://localhost:5001/"
@@ -54,6 +55,58 @@ class CasoLegalViewModel: ObservableObject {
             }
         }
     }
+
+    func fetchCasoByClienteId(clienteId: String) async {
+    guard let url = URL(string: "\(urlPrefix)caso/cliente/\(clienteId)") else {
+        DispatchQueue.main.async {
+            self.errorMessage = "Invalid URL"
+        }
+        return
+    }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.timeoutInterval = 10
+    
+    do {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            print("HTTP Status Code: \(httpResponse.statusCode)")
+            if httpResponse.statusCode != 200 {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Failed to fetch caso: \(httpResponse.statusCode)"
+                }
+                return
+            }
+        }
+        
+        // Print the JSON response
+        if let jsonString = String(data: data, encoding: .utf8) {
+            print("JSON Response: \(jsonString)")
+        }
+        
+        // Print raw data
+        print("Raw Data: \(data)")
+        
+        let decoder = JSONDecoder()
+        do {
+            let decodedResponse = try decoder.decode(CasoLegal.self, from: data)
+            DispatchQueue.main.async {
+                self.caso = decodedResponse
+                self.errorMessage = nil
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to decode response: \(error.localizedDescription)"
+            }
+        }
+    } catch {
+        DispatchQueue.main.async {
+            self.errorMessage = "Failed to fetch caso: \(error.localizedDescription)"
+        }
+    }
+}
 
     // Función para eliminar un caso
     func deleteCaso(caso: CasoLegal) async {

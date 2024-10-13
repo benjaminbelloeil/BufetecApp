@@ -214,7 +214,6 @@ struct CaseSummaryView: View {
 
             Label(caseItem.responsable.joined(separator: ", "), systemImage: "person.fill")
 
-            Label(formatDate(caseItem.fechaInicio ?? Date()), systemImage: "calendar")
         }
         .padding()
         .background(Color(.secondarySystemBackground))
@@ -250,7 +249,6 @@ struct CaseInformationView: View {
             InfoRow(title: "Prioridad", value: caseItem.prioridad)
             InfoRow(title: "Cliente", value: clienteName(for: caseItem.cliente_id))
             InfoRow(title: "Responsable", value: caseItem.responsable.joined(separator: ", "))
-            InfoRow(title: "Fecha de Creación", value: formatDate(caseItem.fechaInicio ?? Date()))
         }
         .padding()
         .background(Color(.secondarySystemBackground))

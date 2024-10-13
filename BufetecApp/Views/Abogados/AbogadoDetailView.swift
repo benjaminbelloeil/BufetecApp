@@ -180,8 +180,7 @@ struct AbogadoDetailView_Previews: PreviewProvider {
                 telefono: "8112345678",
                 correo: "ana.lopez@ejemplo.com",
                 casosAtendidos: 100,
-                casosSentenciaFavorable: 80,
-                imageName: "avatar1"
+                casosSentenciaFavorable: 80
             ))
         }
     }

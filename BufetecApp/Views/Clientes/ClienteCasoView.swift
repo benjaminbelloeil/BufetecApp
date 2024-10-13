@@ -1,59 +1,62 @@
 import SwiftUI
 
 struct ClienteCasoView: View {
-    var casoCliente: CasoCliente
-    @State private var showingDocuments = false
+    @ObservedObject var viewModel: CasoLegalViewModel
+    var clienteId: String
     @State private var showingContactForm = false
-
+    @State private var abogadoName: String = ""
+    @StateObject private var lawyerModel = LawyerModel()
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                caseHeaderView
-                caseProgressView
-                caseDetailsView
-                actionButtonsView
+                if let casoLegal = viewModel.caso {
+                    caseHeaderView(casoLegal: casoLegal)
+                    caseProgressView(casoLegal: casoLegal)
+                    caseDetailsView(casoLegal: casoLegal)
+                    actionButtonsView(casoLegal: casoLegal)
+                } else if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .font(.title)
+                        .foregroundColor(.red)
+                } else {
+                    Text("Cargando...")
+                        .font(.title)
+                }
             }
             .padding()
         }
         .navigationTitle("Mi Caso")
         .background(Color(.systemGroupedBackground))
-        .sheet(isPresented: $showingDocuments) {
-            DocumentsView()
-        }
         .sheet(isPresented: $showingContactForm) {
             ContactFormView()
         }
-    }
-
-    private var caseHeaderView: some View {
-        VStack(spacing: 12) {
-            Text(casoCliente.caseType)
-                .font(.title2)
-                .fontWeight(.bold)
-            HStack {
-                Label(casoCliente.status, systemImage: "circle.fill")
-                    .font(.subheadline)
-                    .foregroundColor(casoCliente.statusColor)
-                Spacer()
-                Text("Caso #12345")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+        .onAppear {
+            Task {
+                await viewModel.fetchCasoByClienteId(clienteId: clienteId)
+                if let casoLegal = viewModel.caso {
+                    if let nombre = await lawyerModel.fetchLawyerName(by: casoLegal.abogado_id) {
+                        abogadoName = nombre
+                    }
+                }
             }
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
     }
 
-    private var caseProgressView: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private func caseHeaderView(casoLegal: CasoLegal) -> some View {
+        VStack(spacing: 12) {
+            Text(casoLegal.tipo_proceso)
+                .font(.title)
+                .fontWeight(.bold)
+            Text(casoLegal.nombre_caso)
+                .font(.title2)
+        }
+    }
+
+    private func caseProgressView(casoLegal: CasoLegal) -> some View {
+        VStack {
             Text("Progreso del Caso")
                 .font(.headline)
-            ProgressView(value: 0.6)
-                .accentColor(.blue)
             HStack {
-                Text("Iniciado")
-                    .font(.caption)
                 Spacer()
                 Text("En proceso")
                     .font(.caption)
@@ -68,35 +71,27 @@ struct ClienteCasoView: View {
         .cornerRadius(12)
     }
 
-    private var caseDetailsView: some View {
+    private func caseDetailsView(casoLegal: CasoLegal) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Detalles del Caso")
                 .font(.headline)
             
-            DetalleRow(title: "Abogado asignado", value: "Lic. Juan Pérez")
-            DetalleRow(title: "Fecha de inicio", value: "01/01/2024")
-            DetalleRow(title: "Tipo de caso", value: casoCliente.caseType)
-            DetalleRow(title: "Estado actual", value: casoCliente.status)
+            DetalleRow(title: "Abogado asignado", value: abogadoName)
+            DetalleRow(title: "Tipo de caso", value: casoLegal.tipo_proceso)
+            DetalleRow(title: "Estado actual", value: casoLegal.estado_proceso)
         }
         .padding()
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
     }
 
-
-    private var actionButtonsView: some View {
-        VStack(spacing: 12) {
-            Button(action: { showingDocuments = true }) {
-                Label("Ver Documentos", systemImage: "doc.text")
-                    .frame(maxWidth: .infinity)
+    private func actionButtonsView(casoLegal: CasoLegal) -> some View {
+        HStack {
+            Button(action: {
+                showingContactForm.toggle()
+            }) {
+                Text("Contactar")
             }
-            .buttonStyle(PrimaryButtonStyle())
-
-            Button(action: { showingContactForm = true }) {
-                Label("Contactar Abogado", systemImage: "message")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(SecondaryButtonStyle())
         }
     }
 }
@@ -108,71 +103,35 @@ struct DetalleRow: View {
     var body: some View {
         HStack {
             Text(title)
-                .foregroundColor(.secondary)
+                .fontWeight(.bold)
             Spacer()
             Text(value)
-                .fontWeight(.medium)
         }
     }
 }
 
-struct PrimaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
-    }
-}
-
-struct SecondaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding()
-            .background(Color.blue.opacity(0.1))
-            .foregroundColor(.blue)
-            .cornerRadius(10)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.blue, lineWidth: 1)
-            )
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
-    }
-}
-
-struct DocumentsView: View {
-    var body: some View {
-        Text("Documents View")
-    }
-}
-
 struct ContactFormView: View {
-    var body: some View {
-        Text("Contact Form View")
-    }
-}
+    @Environment(\.presentationMode) var presentationMode
 
-struct CasoCliente {
-    var name: String
-    var caseType: String
-    var status: String
-    
-    var statusColor: Color {
-        switch status {
-        case "Activo": return .green
-        case "En espera": return .orange
-        case "Finalizado": return .blue
-        default: return .gray
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Contacto")) {
+                    TextField("Nombre", text: .constant(""))
+                    TextField("Correo", text: .constant(""))
+                    TextField("Mensaje", text: .constant(""))
+                }
+            }
+            .navigationTitle("Formulario de Contacto")
+            .navigationBarItems(trailing: Button("Cerrar") {
+                presentationMode.wrappedValue.dismiss()
+            })
         }
     }
 }
 
 struct ClienteCasoView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
-            ClienteCasoView(casoCliente: CasoCliente(name: "María González", caseType: "Divorcio", status: "Activo"))
-        }
+        ClienteCasoView(viewModel: CasoLegalViewModel(), clienteId: "670b3dd3defd761576ebb5e9")
     }
 }

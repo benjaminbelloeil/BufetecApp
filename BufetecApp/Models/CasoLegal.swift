@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CasoLegal: Identifiable, Codable {
-    var id: String
+    var id: String?
     var nombre_caso: String
     var numero_expediente: String
     var cliente_id: String

@@ -14,7 +14,7 @@ struct MainView: View {
             } else if let userType = userType {
                 switch userType {
                 case .cliente:
-                    ClienteMainView(userId: userId)
+                    ClienteMainView(userId: userId, clienteId: "670b3dd3defd761576ebb5e9")
                 case .abogado:
                     AbogadoMainView(userId: userId)
                 case .estudiante:
