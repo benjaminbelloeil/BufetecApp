@@ -473,6 +473,8 @@ def get_caso_by_id(caso_id):
         return jsonify({"error": str(e)}), 500
     
 
+from bson import ObjectId
+
 @app.route('/caso', methods=['POST'])
 def create_caso():
     try:
@@ -483,8 +485,8 @@ def create_caso():
             "tipo_proceso": datos["tipo_proceso"],
             "estado_proceso": datos["estado_proceso"],
             "prioridad": datos["prioridad"],
-            "cliente_id": datos["cliente_id"],
-            "abogado_id": datos["abogado_id"],
+            "cliente_id": ObjectId(datos["cliente_id"]),
+            "abogado_id": ObjectId(datos["abogado_id"]),
             "documentos": datos.get("documentos", []),
             "responsable": datos["responsable"]
         }
@@ -492,6 +494,7 @@ def create_caso():
         return jsonify({"id": str(resultado.inserted_id)}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
     
 @app.route('/caso', methods=['PUT'])
 def update_caso():

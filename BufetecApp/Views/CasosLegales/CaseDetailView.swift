@@ -149,11 +149,11 @@ struct CaseStatusProgressBar: View {
     private func progressWidth(for totalWidth: CGFloat) -> CGFloat {
         switch status.lowercased() {
         case "activo":
-            return totalWidth * 1.0
+            return totalWidth * 0.8
         case "pendiente", "en espera":
-            return totalWidth * 0.5
+            return totalWidth * 0.25
         case "cerrado":
-            return totalWidth * 0.0
+            return totalWidth * 1.0
         default:
             return totalWidth * 0.1
         }
