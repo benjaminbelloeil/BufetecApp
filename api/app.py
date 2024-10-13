@@ -539,6 +539,43 @@ def create_cliente():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@app.route('/cliente/<cliente_id>', methods=['PUT'])
+def update_cliente(cliente_id):
+    try:
+        datos = request.get_json()
+        cliente = clients_collection.find_one({"_id": ObjectId(cliente_id)})
+        if not cliente:
+            return jsonify({"error": "Cliente no encontrado"}), 404
+        
+        update_data = {}
+        if "nombre" in datos:
+            update_data["nombre"] = datos["nombre"]
+        if "contacto" in datos:
+            update_data["contacto"] = datos["contacto"]
+        if "proxima_audiencia" in datos:
+            update_data["proxima_audiencia"] = datos["proxima_audiencia"]
+        if "telefono" in datos:
+            update_data["telefono"] = datos["telefono"]
+        if "correo" in datos:
+            update_data["correo"] = datos["correo"]
+        if "fecha_inicio" in datos:
+            update_data["fecha_inicio"] = datos["fecha_inicio"]
+        if "direccion" in datos:
+            update_data["direccion"] = datos["direccion"]
+        if "url_recurso" in datos:
+            update_data["url_recurso"] = datos["url_recurso"]
+        
+        # Set disponibilidad to false when creating a case
+        update_data["disponibilidad"] = False
+        
+        clients_collection.update_one(
+            {"_id": ObjectId(cliente_id)},
+            {"$set": update_data}
+        )
+        return jsonify({"mensaje": "Cliente actualizado exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 # Library Routes
 @app.route('/biblioteca', methods=['GET'])
 def get_all_biblioteca():
