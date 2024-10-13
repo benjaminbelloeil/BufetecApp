@@ -564,9 +564,8 @@ def update_cliente(cliente_id):
             update_data["direccion"] = datos["direccion"]
         if "url_recurso" in datos:
             update_data["url_recurso"] = datos["url_recurso"]
-        
-        # Set disponibilidad to false when creating a case
-        update_data["disponibilidad"] = False
+        if "disponibilidad" in datos:
+            update_data["disponibilidad"] = datos["disponibilidad"]
         
         clients_collection.update_one(
             {"_id": ObjectId(cliente_id)},

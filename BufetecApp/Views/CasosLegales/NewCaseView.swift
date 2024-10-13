@@ -14,6 +14,7 @@ struct NewCaseView: View {
     @State private var createdAt: Date = Date()
     @State private var documents: [CaseDocument] = []
     @State private var showingClientSheet = false
+    @State private var abogadoId: String = "670b3dd3defd761576ebb5e8" // Define abogado_id as a @State property
 
     var body: some View {
         NavigationView {
@@ -21,7 +22,6 @@ struct NewCaseView: View {
                 VStack(spacing: 24) {
                     caseInfoSection
                     clientAssignmentSection
-                    documentsSection
                     clientsSection
                     actionButtonsSection
                 }
@@ -127,47 +127,9 @@ struct NewCaseView: View {
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 
-    private var documentsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Documentos")
-                .font(.headline)
-
-            ForEach(documents) { document in
-                HStack {
-                    Image(systemName: "doc")
-                        .foregroundColor(.blue)
-                    Text(document.name)
-                    Spacer()
-                    Button(action: {
-                        // Implement document deletion
-                    }) {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
-                    }
-                }
-                .padding(.vertical, 8)
-            }
-
-            Button(action: {
-                // Implement document addition
-            }) {
-                Label("Añadir Documento", systemImage: "plus")
-            }
-            .buttonStyle(BorderedProminentButtonStyle())
-        }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-    }
-
     private var actionButtonsSection: some View {
         HStack(spacing: 16) {
-            Button(action: addCase) {
-                Text("Guardar Caso")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(BorderedProminentButtonStyle())
+
 
             Button(action: removeCase) {
                 Text("Cancelar")
@@ -190,9 +152,83 @@ struct NewCaseView: View {
     }
 
     private func addCase() {
-        // Implement logic to add a case
-        print("Añadir caso: \(caseName), Expediente: \(caseNumber), Tipo: \(processType), Estado: \(caseStatus), Prioridad: \(priority), Cliente: \(selectedClient?.nombre ?? "Ninguno"), Responsable: \(responsiblePerson), Fecha: \(createdAt)")
-        presentationMode.wrappedValue.dismiss()
+        guard let selectedClient = selectedClient else {
+            print("No client selected")
+            return
+        }
+
+        let clientId = selectedClient.id
+        let clientUpdateURL = URL(string: "http://localhost:5001/cliente/\(clientId)")!
+        let caseCreateURL = URL(string: "http://localhost:5001/caso")!
+
+                // Create the request body for the PUT request
+        let clientUpdateBody: [String: Any] = [
+            "_id": ["$oid": selectedClient.id],
+            "nombre": selectedClient.nombre,
+            "contacto": selectedClient.contacto,
+            "telefono": selectedClient.telefono,
+            "correo": selectedClient.correo,
+            "direccion": [
+                "calle": selectedClient.direccion.calle,
+                "ciudad": selectedClient.direccion.ciudad,
+                "estado": selectedClient.direccion.estado,
+                "codigo_postal": selectedClient.direccion.codigo_postal
+            ],
+            "disponibilidad": false
+        ]
+
+               // Create the request body for the POST request
+        let caseCreateBody: [String: Any] = [
+            "nombre_caso": caseName,
+            "numero_expediente": caseNumber,
+            "tipo_proceso": processType,
+            "estado_proceso": caseStatus,
+            "prioridad": priority,
+            "cliente_id": clientId,
+            "abogado_id": abogadoId, // Use the abogadoId property
+            "documentos": [], // Start with an empty documentos array
+            "responsable": [responsiblePerson] // Ensure responsable is a string array
+        ]
+        // Perform the PUT request to update the client's disponibilidad
+        var clientUpdateRequest = URLRequest(url: clientUpdateURL)
+        clientUpdateRequest.httpMethod = "PUT"
+        clientUpdateRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        clientUpdateRequest.httpBody = try? JSONSerialization.data(withJSONObject: clientUpdateBody)
+
+        URLSession.shared.dataTask(with: clientUpdateRequest) { data, response, error in
+            if let error = error {
+                print("Failed to update client: \(error)")
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                print("Failed to update client: Invalid response")
+                return
+            }
+
+            // Perform the POST request to create the new case
+            var caseCreateRequest = URLRequest(url: caseCreateURL)
+            caseCreateRequest.httpMethod = "POST"
+            caseCreateRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            caseCreateRequest.httpBody = try? JSONSerialization.data(withJSONObject: caseCreateBody)
+
+            URLSession.shared.dataTask(with: caseCreateRequest) { data, response, error in
+                if let error = error {
+                    print("Failed to create case: \(error)")
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 201 else {
+                    print("Failed to create case: Invalid response")
+                    return
+                }
+
+                print("Case created successfully")
+                DispatchQueue.main.async {
+                    presentationMode.wrappedValue.dismiss()
+                }
+            }.resume()
+        }.resume()
     }
 
     private func removeCase() {
