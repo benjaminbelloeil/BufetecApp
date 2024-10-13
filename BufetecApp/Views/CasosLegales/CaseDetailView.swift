@@ -20,7 +20,6 @@ struct CaseDetailView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
             NavigationView {
                 ZStack {
                     Color(.systemGroupedBackground).edgesIgnoringSafeArea(.all)
@@ -53,33 +52,6 @@ struct CaseDetailView: View {
                     }
                 }
             }
-            .tabItem {
-                Image(systemName: "folder.fill")
-                Text("Casos")
-            }
-            .tag(0)
-
-            PerfilView()
-                .tabItem {
-                    Image(systemName: "person.circle.fill")
-                    Text("Perfil")
-                }
-                .tag(1)
-
-            BibliotecaView()
-                .tabItem {
-                    Image(systemName: "books.vertical.fill")
-                    Text("Biblioteca")
-                }
-                .tag(2)
-
-            AbogadoListView()
-                .tabItem {
-                    Image(systemName: "briefcase.fill")
-                    Text("Abogados")
-                }
-                .tag(3)
-        }
     }
 
     private var addButton: some View {
