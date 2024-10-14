@@ -2,11 +2,11 @@ import SwiftUI
 
 struct AbogadoMainView: View {
     @State private var selectedTab = 0
-    let abogadoId: String
+    let userId: String
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            PerfilView(abogadoId: abogadoId)
+            PerfilView(userId: userId)
                 .tabItem {
                     Image(systemName: "person.circle.fill")
                     Text("Perfil")
@@ -46,6 +46,6 @@ struct AbogadoMainView: View {
 
 struct AbogadoMainView_Previews: PreviewProvider {
     static var previews: some View {
-        AbogadoMainView(abogadoId: "6706c745dfc597d5f283d303")
+        AbogadoMainView(userId: "sampleUserId")
     }
 }

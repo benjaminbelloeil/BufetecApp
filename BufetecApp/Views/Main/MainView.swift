@@ -10,13 +10,13 @@ struct MainView: View {
     var body: some View {
         VStack {
             if isLoading {
-                ProgressView("Loading...") as ProgressView<Text, EmptyView>
+                ProgressView("Loading...")
             } else if let userType = userType {
                 switch userType {
                 case .cliente:
-                    ClienteMainView(userId: userId, clienteId: "670b3dd3defd761576ebb5e9")
+                    ClienteMainView(userId: userId)
                 case .abogado:
-                    AbogadoMainView(abogadoId: "6706c745dfc597d5f283d303")
+                    AbogadoMainView(userId: userId)
                 case .estudiante:
                     EstudianteMainView(userId: userId)
                 }
@@ -106,6 +106,6 @@ struct MainView: View {
 
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
-        MainView(userId: "sampleUserId")
+        MainView(userId: "66f45dad306974579379e3ee")
     }
 }

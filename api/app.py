@@ -162,19 +162,19 @@ def role():
             cliente_data = {
                 "user_id": user_id,
                 "nombre": temp_user_data['nombre'],
-                "caso_tipo": datos.get('tipo_caso'),
-                "estado_caso": "Nuevo",
                 "contacto": temp_user_data['correo_o_telefono'],
-                "fecha_inicio": datetime.now(),
                 "proxima_audiencia": None,
+                "telefono": temp_user_data['correo_o_telefono'],
+                "correo": temp_user_data['correo_o_telefono'],
+                "fecha_inicio": datetime.datetime.now(),
                 "direccion": {
                     "calle": None,
                     "ciudad": None,
                     "estado": None,
                     "codigo_postal": None
                 },
-                "telefono": temp_user_data['correo_o_telefono'],
-                "correo": temp_user_data['correo_o_telefono']
+                "url_recurso": datos.get("url_recurso", ""),
+                "disponibilidad": True
             }
             clients_collection.insert_one(cliente_data)
 
@@ -251,30 +251,60 @@ def get_user(user_id):
     try:
         user = users_collection.find_one({"_id": ObjectId(user_id)})
         if not user:
-            print("User not found")
             return jsonify({"error": "User not found"}), 404
+
+        user_data = {
+            "id": str(user["_id"]),
+            "nombre": user.get("nombre", ""),
+            "correo_o_telefono": user.get("correo_o_telefono", "")
+        }
 
         # Check if the user is a client
         client = clients_collection.find_one({"user_id": ObjectId(user_id)})
         if client:
-            return jsonify({"rol": "cliente"}), 200
+            user_data["rol"] = "cliente"
+            user_data.update({
+                "contacto": client.get("contacto", ""),
+                "proxima_audiencia": client.get("proxima_audiencia", ""),
+                "fecha_inicio": client.get("fecha_inicio", ""),
+                "direccion": client.get("direccion", {}),
+                "url_recurso": client.get("url_recurso", ""),
+                "disponibilidad": client.get("disponibilidad", "")
+            })
+            return jsonify(user_data), 200
 
         # Check if the user is a lawyer
-        lawyer = lawyer_collection.find_one({"id_abogado": user_id})
-        if lawyer and lawyer['id_abogado'] == str(user['_id']):
-            return jsonify({"rol": "abogado"}), 200
+        lawyer = lawyer_collection.find_one({"user_id": ObjectId(user_id)})
+        if lawyer:
+            user_data["rol"] = "abogado"
+            user_data.update({
+                "especializacion": lawyer.get("especializacion", ""),
+                "experiencia_profesional": lawyer.get("experiencia_profesional", ""),
+                "disponibilidad": lawyer.get("disponibilidad", ""),
+                "maestria": lawyer.get("maestria", ""),
+                "direccion": lawyer.get("direccion", {}),
+                "casos_asignados": lawyer.get("casos_asignados", ""),
+                "casos_atendidos": lawyer.get("casos_atendidos", ""),
+                "casos_con_sentencia_a_favor": lawyer.get("casos_con_sentencia_a_favor", "")
+            })
+            return jsonify(user_data), 200
 
         # Check if the user is a student
         student = students_collection.find_one({"user_id": ObjectId(user_id)})
         if student:
-            return jsonify({"rol": "estudiante"}), 200
+            user_data["rol"] = "estudiante"
+            user_data.update({
+                "matricula": student.get("matricula", ""),
+                "carrera": student.get("carrera", ""),
+                "ano_de_estudio": student.get("ano_de_estudio", "")
+            })
+            return jsonify(user_data), 200
 
         return jsonify({"error": "User role not found"}), 404
 
     except Exception as e:
         app.logger.error(f"Error fetching user data: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 # Casos Routes
 @app.route('/casos', methods=['GET'])
 def get_all_casos():

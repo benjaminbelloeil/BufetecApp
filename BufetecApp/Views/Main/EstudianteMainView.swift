@@ -6,7 +6,7 @@ struct EstudianteMainView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            PerfilView(abogadoId: "6706c745dfc597d5f283d303")
+            PerfilView(userId: userId)
                 .tabItem {
                     Image(systemName: "person.circle.fill")
                     Text("Perfil")
@@ -20,14 +20,12 @@ struct EstudianteMainView: View {
                 }
                 .tag(1)
 
-            ClienteListView(
-            )
-            .tabItem {
-                Image(systemName: "person.3.fill")
-                Text("Clientes")
-            }
-            .tag(2)
-            
+            ClienteListView()
+                .tabItem {
+                    Image(systemName: "person.3.fill")
+                    Text("Clientes")
+                }
+                .tag(2)
             
             AbogadoListView()
                 .tabItem {
