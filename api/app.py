@@ -251,6 +251,7 @@ def get_user(user_id):
     try:
         user = users_collection.find_one({"_id": ObjectId(user_id)})
         if not user:
+            print("User not found")
             return jsonify({"error": "User not found"}), 404
 
         # Check if the user is a client
@@ -259,8 +260,8 @@ def get_user(user_id):
             return jsonify({"rol": "cliente"}), 200
 
         # Check if the user is a lawyer
-        lawyer = lawyer_collection.find_one({"user_id": ObjectId(user_id)})
-        if lawyer:
+        lawyer = lawyer_collection.find_one({"id_abogado": user_id})
+        if lawyer and lawyer['id_abogado'] == str(user['_id']):
             return jsonify({"rol": "abogado"}), 200
 
         # Check if the user is a student
@@ -273,7 +274,6 @@ def get_user(user_id):
     except Exception as e:
         app.logger.error(f"Error fetching user data: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 
 # Casos Routes
 @app.route('/casos', methods=['GET'])
@@ -467,6 +467,36 @@ def get_one_abogado(abogado_id):
             return jsonify(abogado_dict), 200
         else:
             return jsonify({'message': f"No se encontró el abogado con el id {abogado_id}"}), 404
+    except Exception as ex:
+        return jsonify({'message': str(ex)}), 500
+    
+@app.route("/lawyer/<abogado_id>", methods=['GET'])
+def get_one_lawyer(abogado_id):
+    try:
+        abogado = lawyer_collection.find_one({'id_abogado': abogado_id})
+        if abogado:
+            abogado_dict = {
+                "abogado_id": str(abogado.get("id_abogado", "")),
+                "nombre": abogado.get("nombre", ""),
+                "especializacion": abogado.get("especializacion", ""),
+                "experiencia_profesional": abogado.get("experiencia_profesional", ""),
+                "disponibilidad": abogado.get("disponibilidad", ""),
+                "maestria": abogado.get("maestria", ""),
+                "direccion": {
+                    "calle": abogado.get("direccion", {}).get("calle", ""),
+                    "ciudad": abogado.get("direccion", {}).get("ciudad", ""),
+                    "estado": abogado.get("direccion", {}).get("estado", ""),
+                    "codigo_postal": abogado.get("direccion", {}).get("codigo_postal", "")
+                },
+                "casos_asignados": abogado.get("casos_asignados", ""),
+                "telefono": abogado.get("telefono", ""),
+                "correo": abogado.get("correo", ""),
+                "casos_atendidos": abogado.get("casos_atendidos", ""),
+                "casos_con_sentencia_a_favor": abogado.get("casos_con_sentencia_a_favor", "")
+            }
+            return jsonify(abogado_dict), 200
+        else:
+            return jsonify({'message': f"No se encontró el abogado con el id_abogado {abogado_id}"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
     

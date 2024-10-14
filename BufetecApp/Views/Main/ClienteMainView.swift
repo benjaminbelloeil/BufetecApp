@@ -7,7 +7,7 @@ struct ClienteMainView: View {
     @StateObject private var viewModel = CasoLegalViewModel()
     var body: some View {
         TabView(selection: $selectedTab) {
-            PerfilView()
+            PerfilView(abogadoId: "6706c745dfc597d5f283d303")
                 .tabItem {
                     Image(systemName: "person.circle.fill")
                     Text("Perfil")

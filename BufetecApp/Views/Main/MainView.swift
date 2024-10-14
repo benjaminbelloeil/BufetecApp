@@ -16,7 +16,7 @@ struct MainView: View {
                 case .cliente:
                     ClienteMainView(userId: userId, clienteId: "670b3dd3defd761576ebb5e9")
                 case .abogado:
-                    AbogadoMainView(userId: userId)
+                    AbogadoMainView(abogadoId: "6706c745dfc597d5f283d303")
                 case .estudiante:
                     EstudianteMainView(userId: userId)
                 }
