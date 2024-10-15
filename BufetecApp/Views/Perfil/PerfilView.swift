@@ -6,6 +6,7 @@ struct PerfilView: View {
     @State private var isLoading: Bool = true
     @State private var errorMessage: String?
     @State private var shouldNavigateToLogin: Bool = false
+    @Binding var showIntro: Bool
 
     var body: some View {
         NavigationStack {
@@ -77,6 +78,7 @@ struct PerfilView: View {
 
     private var logoutButton: some View {
         Button(action: {
+            shouldNavigateToLogin = true
         }) {
             Text("Cerrar sesión")
                 .frame(maxWidth: .infinity)
@@ -205,6 +207,6 @@ struct ErrorView: View {
 
 struct PerfilView_Previews: PreviewProvider {
     static var previews: some View {
-        PerfilView(userId: "670d6c4fc0cad37765214a64")
+        PerfilView(userId: "670d6c4fc0cad37765214a64", showIntro: .constant(false))
     }
 }
