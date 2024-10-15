@@ -31,11 +31,15 @@ struct ClienteCasoView: View {
         .onAppear {
             Task {
                 await viewModel.fetchClienteIdByUserId(userId: userId)
+                print("User ID: \(userId)")
                 if let fetchedClienteId = viewModel.clienteId {
                     clienteId = fetchedClienteId
+                    print("Cliente ID: \(clienteId)")
                     await viewModel.fetchCasoByClienteId(clienteId: clienteId)
                     if let casoLegal = viewModel.caso {
+                        print("Caso ID: \(casoLegal.id)")
                         if let nombre = await lawyerModel.fetchLawyerName(by: casoLegal.abogado_id) {
+                            print("Abogado: \(nombre)")
                             abogadoName = nombre
                         }
                     }
