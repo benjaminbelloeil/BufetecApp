@@ -149,7 +149,7 @@ struct Signup: View {
     }
 
     private func signupUser() {
-        guard let url = URL(string: "http://localhost:5001/signup") else {
+        guard let url = URL(string: "http://10.14.255.54:5001/signup") else {
             print("URL inválida")
             return
         }

@@ -13,7 +13,7 @@ class BibliotecaViewModel: ObservableObject {
     @Published var documentos: [Documento] = []
     @Published var chats: [Chat] = []
     
-    let urlPrefix = "http://localhost:5001/"
+    let urlPrefix = "http://10.14.255.54:5001/"
     
     init() {
         Task {

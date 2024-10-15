@@ -42,7 +42,7 @@ struct MainView: View {
     }
     
     private func fetchUserData() {
-        guard let url = URL(string: "http://localhost:5001/user/\(userId)") else {
+        guard let url = URL(string: "http://10.14.255.54:5001/user/\(userId)") else {
             print("URL inválida")
             self.errorMessage = "Invalid URL"
             self.isLoading = false

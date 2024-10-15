@@ -1,14 +1,14 @@
 # Imports
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify # type: ignore
 from flask_pymongo import PyMongo #type: ignore
-from werkzeug.security import generate_password_hash, check_password_hash
-from bson.objectid import ObjectId
+from werkzeug.security import generate_password_hash, check_password_hash # type: ignore
+from bson.objectid import ObjectId # type: ignore
 from flask_cors import CORS #type: ignore
 import logging
 import uuid
 import datetime 
 from datetime import timedelta
-from pytz import timezone
+from pytz import timezone # type: ignore
 import re
 import threading
 import time
@@ -359,7 +359,7 @@ def get_caso_by_id(caso_id):
         return jsonify({"error": str(e)}), 500
     
 
-from bson import ObjectId
+from bson import ObjectId # type: ignore
 
 @app.route('/caso', methods=['POST'])
 def create_caso():

@@ -7,7 +7,7 @@ class CasoLegalViewModel: ObservableObject {
     @Published var clienteId: String?
     @Published var errorMessage: String? // Property to store error messages
     
-    let urlPrefix = "http://localhost:5001/"
+    let urlPrefix = "http://10.14.255.54:5001/"
     
     init() {
         Task {

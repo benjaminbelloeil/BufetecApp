@@ -36,7 +36,7 @@ struct AbogadoListView: View {
     }
     
     func fetchLawyers() {
-        guard let url = URL(string: "http://localhost:5001/abogados") else { return }
+        guard let url = URL(string: "http://10.14.255.54:5001/abogados") else { return }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let data = data {

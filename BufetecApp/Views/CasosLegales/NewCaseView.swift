@@ -158,8 +158,8 @@ struct NewCaseView: View {
         }
 
         let clientId = selectedClient.id
-        let clientUpdateURL = URL(string: "http://localhost:5001/cliente/\(clientId)")!
-        let caseCreateURL = URL(string: "http://localhost:5001/caso")!
+        let clientUpdateURL = URL(string: "http://10.14.255.54:5001/cliente/\(clientId)")!
+        let caseCreateURL = URL(string: "http://10.14.255.54:5001/caso")!
 
                 // Create the request body for the PUT request
         let clientUpdateBody: [String: Any] = [
