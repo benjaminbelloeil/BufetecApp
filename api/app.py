@@ -174,7 +174,7 @@ def role():
                     "codigo_postal": None
                 },
                 "url_recurso": datos.get("url_recurso", ""),
-                "disponibilidad": True
+                "disponibilidad": False
             }
             clients_collection.insert_one(cliente_data)
 

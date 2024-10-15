@@ -2,6 +2,7 @@ import Foundation
 
 struct Cliente: Identifiable, Codable {
     var id: String
+    var user_id: String?
     var nombre: String
     var contacto: String
     var proxima_audiencia: Date?
