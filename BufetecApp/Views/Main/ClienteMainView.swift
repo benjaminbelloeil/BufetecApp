@@ -21,7 +21,7 @@ struct ClienteMainView: View {
                 }
                 .tag(1)
 
-            ClienteCasoView(viewModel: viewModel, clienteId: userId)
+            ClienteCasoView(viewModel: viewModel, userId: userId)
                 .tabItem {
                     Image(systemName: "folder.fill")
                     Text("Mi Caso")

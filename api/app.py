@@ -587,7 +587,27 @@ def get_one_cliente(cliente_id):
             return jsonify({'message': f"No se encontró el cliente con el id {cliente_id}"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
-    
+
+@app.route("/cliente", methods=['GET'])
+def get_cliente_by_user_id():
+    user_id = request.args.get('user_id')
+    if user_id:
+        try:
+            user_id = ObjectId(user_id)
+        except Exception:
+            return jsonify({'message': "El parámetro user_id no es un ObjectId válido"}), 400
+        
+        cliente = clients_collection.find_one({'user_id': user_id})
+        if cliente:
+            cliente_dict = {
+                "id": str(cliente["_id"]),
+            }
+            return jsonify(cliente_dict), 200
+        else:
+            return jsonify({'message': f"No se encontró el cliente con el user_id {user_id}"}), 404
+    else:
+        return jsonify({'message': "El parámetro user_id es requerido"}), 400
+
 @app.route("/cliente", methods=['POST'])
 def create_cliente():
     try:

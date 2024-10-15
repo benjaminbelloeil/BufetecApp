@@ -2,7 +2,8 @@ import SwiftUI
 
 struct ClienteCasoView: View {
     @ObservedObject var viewModel: CasoLegalViewModel
-    var clienteId: String
+    var userId: String
+    @State private var clienteId: String = ""
     @State private var showingContactForm = false
     @State private var abogadoName: String = ""
     @StateObject private var lawyerModel = LawyerModel()
@@ -29,10 +30,14 @@ struct ClienteCasoView: View {
         }
         .onAppear {
             Task {
-                await viewModel.fetchCasoByClienteId(clienteId: clienteId)
-                if let casoLegal = viewModel.caso {
-                    if let nombre = await lawyerModel.fetchLawyerName(by: casoLegal.abogado_id) {
-                        abogadoName = nombre
+                await viewModel.fetchClienteIdByUserId(userId: userId)
+                if let fetchedClienteId = viewModel.clienteId {
+                    clienteId = fetchedClienteId
+                    await viewModel.fetchCasoByClienteId(clienteId: clienteId)
+                    if let casoLegal = viewModel.caso {
+                        if let nombre = await lawyerModel.fetchLawyerName(by: casoLegal.abogado_id) {
+                            abogadoName = nombre
+                        }
                     }
                 }
             }
@@ -177,6 +182,6 @@ struct ContactFormView: View {
 
 struct ClienteCasoView_Previews: PreviewProvider {
     static var previews: some View {
-        ClienteCasoView(viewModel: CasoLegalViewModel(), clienteId: "670b3dd3defd761576ebb5e9")
+        ClienteCasoView(viewModel: CasoLegalViewModel(), userId: "sampleUserId")
     }
 }
