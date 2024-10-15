@@ -146,7 +146,7 @@ struct ClienteContactInfo: View {
 
             ContactInfoRow(icon: "envelope", text: cliente.correo)
             ContactInfoRow(icon: "phone", text: cliente.telefono)
-            ContactInfoRow(icon: "location", text: "\(cliente.direccion.calle), \(cliente.direccion.ciudad)")
+            ContactInfoRow(icon: "location", text: "\(cliente.direccion.calle ?? "nose"), \(cliente.direccion.ciudad ?? "nose")")
         }
         .padding()
         .background(

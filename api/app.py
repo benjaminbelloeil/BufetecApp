@@ -158,23 +158,30 @@ def role():
             }
             resultado_usuario = users_collection.insert_one(nuevo_usuario)
             user_id = resultado_usuario.inserted_id
+           
+           # Get the current date
+            current_date = datetime.datetime.now()
+
+            # Set the time to zeros
+            proxima_audiencia_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            fecha_inicio_date = current_date.replace(hour=0, minute=0, second=0, microsecond=0)
 
             cliente_data = {
                 "user_id": user_id,
                 "nombre": temp_user_data['nombre'],
                 "contacto": temp_user_data['correo_o_telefono'],
-                "proxima_audiencia": None,
+                "proxima_audiencia": proxima_audiencia_date,
                 "telefono": temp_user_data['correo_o_telefono'],
                 "correo": temp_user_data['correo_o_telefono'],
-                "fecha_inicio": datetime.datetime.now(),
+                "fecha_inicio": fecha_inicio_date,
                 "direccion": {
-                    "calle": None,
-                    "ciudad": None,
-                    "estado": None,
-                    "codigo_postal": None
+                    "calle": "sin completar",
+                    "ciudad": "sin completar",
+                    "estado": "sin completar",
+                    "codigo_postal": "sin completar"
                 },
-                "url_recurso": datos.get("url_recurso", ""),
-                "disponibilidad": False
+                "url_recurso": datos.get("url_recurso", "sin completar"),
+                "disponibilidad": True
             }
             clients_collection.insert_one(cliente_data)
 
@@ -539,6 +546,7 @@ def get_all_clientes():
         for cliente in clientes:
             result.append({
                 "id": str(cliente["_id"]),
+                "user_id": str(cliente.get("user_id", "")),
                 "nombre": cliente["nombre"],
                 "contacto": cliente["contacto"],
                 "proxima_audiencia": cliente["proxima_audiencia"].isoformat() if cliente["proxima_audiencia"] else None,
@@ -563,6 +571,7 @@ def get_one_cliente(cliente_id):
         if cliente:
             cliente_dict = {
                 "id": str(cliente["_id"]),
+                "user_id": str(cliente.get("user_id", "")),
                 "nombre": cliente.get("nombre", ""),
                 "contacto": cliente.get("contacto", ""),
                 "proxima_audiencia": cliente.get("proxima_audiencia", "").isoformat() if cliente.get("proxima_audiencia") else None,
@@ -610,6 +619,8 @@ def update_cliente(cliente_id):
         update_data = {}
         if "nombre" in datos:
             update_data["nombre"] = datos["nombre"]
+        if "user_id" in datos:
+            update_data["user_id"] = datos["user_id"]
         if "contacto" in datos:
             update_data["contacto"] = datos["contacto"]
         if "proxima_audiencia" in datos:
