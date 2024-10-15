@@ -957,6 +957,6 @@ if __name__ == '__main__':
 
     except Exception as e:
         app.logger.error(f"Fallo en la conexión a MongoDB: {str(e)}")
-
+    
     # Run the Flask app
     app.run(debug=True, host='0.0.0.0', port=5001)

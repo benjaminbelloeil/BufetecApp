@@ -12,27 +12,34 @@ struct EstudianteMainView: View {
                     Text("Perfil")
                 }
                 .tag(0)
+            
+            CaseDetailView()
+                .tabItem {
+                    Image(systemName: "folder.fill")
+                    Text("Mis Casos")
+                }
+                .tag(1)
 
             BibliotecaView()
                 .tabItem {
                     Image(systemName: "books.vertical.fill")
                     Text("Biblioteca")
                 }
-                .tag(1)
+                .tag(2)
 
             ClienteListView()
                 .tabItem {
                     Image(systemName: "person.3.fill")
                     Text("Clientes")
                 }
-                .tag(2)
+                .tag(3)
             
             AbogadoListView()
                 .tabItem {
                     Image(systemName: "briefcase.fill")
                     Text("Abogados")
                 }
-                .tag(3)
+                .tag(4)
         }
     }
 }
