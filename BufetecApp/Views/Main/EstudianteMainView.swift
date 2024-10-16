@@ -38,6 +38,12 @@ struct EstudianteMainView: View {
                             Text("Clientes")
                         }
                         .tag(3)
+                    AbogadoListView()
+                        .tabItem {
+                            Image(systemName: "suitcase.fill")
+                            Text("Abogados")
+                        }
+                        .tag(4)
                 }
             }
         }

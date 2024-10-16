@@ -23,11 +23,12 @@ struct PerfilView: View {
                 }
             }
             .padding(.vertical)
-            .background(Color(.systemBackground))
-            .navigationTitle("Mi perfil")
-            .onAppear {
-                fetchUserData()
-            }
+        }
+        .background(Color(.systemBackground))
+        .edgesIgnoringSafeArea(.horizontal)
+        .navigationTitle("Mi perfil")
+        .onAppear {
+            fetchUserData()
         }
         .fullScreenCover(isPresented: $shouldShowLoginModal) {
             Login(showSignup: .constant(false), showIntro: $showIntro)
@@ -63,6 +64,7 @@ struct PerfilView: View {
             Text("Información Personal")
                 .font(.headline)
                 .fontWeight(.semibold)
+                .padding(.horizontal, 16)
             
             ForEach(sortedUserDataKeys(), id: \.self) { key in
                 if !["nombre", "rol", "id"].contains(key) {
@@ -70,12 +72,11 @@ struct PerfilView: View {
                 }
             }
         }
-        .padding(20)
+        .padding(.vertical, 20)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 4)
     }
 
     private var logoutButton: some View {
@@ -89,7 +90,7 @@ struct PerfilView: View {
                 .foregroundColor(.white)
                 .cornerRadius(12)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 4)
         .shadow(color: Color.red.opacity(0.3), radius: 3, x: 0, y: 2)
     }
 
@@ -135,8 +136,6 @@ struct PerfilView: View {
     }
 }
 
-
-
 struct InfoRows: View {
     let key: String
     let value: Any?
@@ -162,6 +161,7 @@ struct InfoRows: View {
             }
         }
         .padding(.vertical, 4)
+        .padding(.horizontal, 16)
     }
 
     private func formatFieldName(_ name: String) -> String {
