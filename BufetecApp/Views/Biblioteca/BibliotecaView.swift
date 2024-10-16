@@ -22,6 +22,8 @@ struct BibliotecaView: View {
                     forYouSection
                     
                     yourDocumentsSection
+                    
+                    educationalVideosSection  // Sección de Videos Educativos
                 }
                 .padding(.top)
             }
@@ -97,6 +99,23 @@ struct BibliotecaView: View {
         }
     }
     
+    private var educationalVideosSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            sectionHeader(title: "Videos Educativos")
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(filteredVideos()) { video in
+                        NavigationLink(destination: VideoDetailView(video: video)) {
+                            VideoCard(video: video)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+    
     private func sectionHeader(title: String) -> some View {
         Text(title)
             .font(.title2)
@@ -113,6 +132,12 @@ struct BibliotecaView: View {
     private func filteredDocuments() -> [Documento] {
         viewModel.obtenerDocumentosUsuario().filter {
             searchQuery.isEmpty || $0.nombreDocumento.localizedCaseInsensitiveContains(searchQuery)
+        }
+    }
+
+    private func filteredVideos() -> [Video] {
+        viewModel.obtenerVideosEducativos().filter {
+            searchQuery.isEmpty || $0.titulo.localizedCaseInsensitiveContains(searchQuery)
         }
     }
 }
@@ -207,6 +232,40 @@ struct DocumentCard: View {
                 .lineLimit(2)
             
             Text("Documento personal")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .frame(width: 120)
+        .padding(8)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}
+
+struct VideoCard: View {
+    let video: Video
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            AsyncImage(url: URL(string: video.thumbnailURL)) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 120, height: 160)
+                    .clipped()
+            } placeholder: {
+                Color.gray
+                    .frame(width: 120, height: 160)
+                    .overlay(Image(systemName: "video").foregroundColor(.white))
+            }
+            .cornerRadius(10)
+            
+            Text(video.titulo)
+                .font(.caption)
+                .lineLimit(2)
+            
+            Text(video.duracion)
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
