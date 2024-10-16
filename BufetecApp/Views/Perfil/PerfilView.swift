@@ -64,7 +64,7 @@ struct PerfilView: View {
             Text("Información Personal")
                 .font(.headline)
                 .fontWeight(.semibold)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
             
             ForEach(sortedUserDataKeys(), id: \.self) { key in
                 if !["nombre", "rol", "id"].contains(key) {
@@ -73,12 +73,12 @@ struct PerfilView: View {
             }
         }
         .padding(.vertical, 20)
+        .frame(maxWidth: .infinity)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 16)
     }
-
+    
     private var logoutButton: some View {
         Button(action: {
             shouldShowLoginModal = true
@@ -90,7 +90,7 @@ struct PerfilView: View {
                 .foregroundColor(.white)
                 .cornerRadius(12)
         }
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 16)
         .shadow(color: Color.red.opacity(0.3), radius: 3, x: 0, y: 2)
     }
 
@@ -141,27 +141,28 @@ struct InfoRows: View {
     let value: Any?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        HStack(alignment: .top) {
             Text(formatFieldName(key))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+                .frame(width: 130, alignment: .leading)
+            
+            Spacer()
             
             if key == "direccion" {
-                if let dictValue = value as? [String: Any] {
-                    ForEach(["calle", "ciudad", "estado", "codigo_postal"], id: \.self) { subKey in
-                        if let subValue = dictValue[subKey] as? String, !subValue.isEmpty {
-                            Text(subValue)
-                                .font(.body)
-                        }
-                    }
-                }
+                AddressView(address: value as? [String: String] ?? [:])
+            } else if key == "casos_asignados" {
+                Text(formatCasosAsignados(value))
+                    .font(.body)
+                    .multilineTextAlignment(.trailing)
             } else {
                 Text(formatFieldValue(value))
                     .font(.body)
+                    .multilineTextAlignment(.trailing)
             }
         }
         .padding(.vertical, 4)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 20)
     }
 
     private func formatFieldName(_ name: String) -> String {
@@ -181,15 +182,41 @@ struct InfoRows: View {
             formatter.dateStyle = .medium
             formatter.timeStyle = .short
             return formatter.string(from: date)
-        case let array as [Any]:
-            return array.isEmpty ? "N/A" : "(\n\(array.map { "  \(formatFieldValue($0))" }.joined(separator: ",\n"))\n)"
         case .none, is NSNull:
             return "N/A"
         default:
             return String(describing: value ?? "N/A")
         }
     }
+    
+    private func formatCasosAsignados(_ value: Any?) -> String {
+        if let casos = value as? [String], !casos.isEmpty {
+            return casos.joined(separator: ", ")
+        } else {
+            return "Ninguno"
+        }
+    }
 }
+
+struct AddressView: View {
+    let address: [String: String]
+    
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 2) {
+            if let calle = address["calle"] {
+                Text(calle)
+            }
+            if let ciudad = address["ciudad"] {
+                Text(ciudad)
+            }
+            if let estado = address["estado"], let codigoPostal = address["codigo_postal"] {
+                Text("\(estado), \(codigoPostal)")
+            }
+        }
+        .font(.body)
+    }
+}
+
 
 struct ErrorView: View {
     let message: String
