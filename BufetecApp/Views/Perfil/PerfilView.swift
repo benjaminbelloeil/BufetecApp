@@ -5,45 +5,45 @@ struct PerfilView: View {
     @State private var userData: [String: Any] = [:]
     @State private var isLoading: Bool = true
     @State private var errorMessage: String?
-    @State private var shouldNavigateToLogin: Bool = false
+    @State private var shouldShowLoginModal: Bool = false
     @Binding var showIntro: Bool
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    if isLoading {
-                        ProgressView("Cargando...")
-                    } else if let errorMessage = errorMessage {
-                        ErrorView(message: errorMessage)
-                    } else {
-                        profileHeader
-                        informationCard
-                        logoutButton
-                    }
+        ScrollView {
+            VStack(spacing: 20) {
+                if isLoading {
+                    ProgressView("Cargando...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let errorMessage = errorMessage {
+                    ErrorView(message: errorMessage)
+                } else {
+                    profileHeader
+                    informationCard
+                    logoutButton
                 }
-                .padding(.vertical)
             }
+            .padding(.vertical)
             .background(Color(.systemBackground))
             .navigationTitle("Mi perfil")
             .onAppear {
                 fetchUserData()
             }
-            .navigationDestination(isPresented: $shouldNavigateToLogin) {
-                Login(showSignup: .constant(false), showIntro: .constant(false))
-            }
+        }
+        .fullScreenCover(isPresented: $shouldShowLoginModal) {
+            Login(showSignup: .constant(false), showIntro: $showIntro)
         }
     }
 
     private var profileHeader: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             ZStack {
                 Circle()
                     .fill(LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 100, height: 100)
+                    .frame(width: 110, height: 110)
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                 
                 Text(String(userData["nombre"] as? String ?? "").prefix(1).uppercased())
-                    .font(.system(size: 40, weight: .bold))
+                    .font(.system(size: 44, weight: .bold))
                     .foregroundColor(.white)
             }
             
@@ -55,6 +55,7 @@ struct PerfilView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
+        .padding(.bottom, 8)
     }
 
     private var informationCard: some View {
@@ -72,13 +73,14 @@ struct PerfilView: View {
         .padding(20)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
     }
 
     private var logoutButton: some View {
         Button(action: {
-            shouldNavigateToLogin = true
+            shouldShowLoginModal = true
         }) {
             Text("Cerrar sesión")
                 .frame(maxWidth: .infinity)
@@ -88,6 +90,7 @@ struct PerfilView: View {
                 .cornerRadius(12)
         }
         .padding(.horizontal, 16)
+        .shadow(color: Color.red.opacity(0.3), radius: 3, x: 0, y: 2)
     }
 
     private func fetchUserData() {
@@ -132,12 +135,14 @@ struct PerfilView: View {
     }
 }
 
+
+
 struct InfoRows: View {
     let key: String
     let value: Any?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(formatFieldName(key))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -156,6 +161,7 @@ struct InfoRows: View {
                     .font(.body)
             }
         }
+        .padding(.vertical, 4)
     }
 
     private func formatFieldName(_ name: String) -> String {
@@ -191,7 +197,7 @@ struct ErrorView: View {
     var body: some View {
         VStack {
             Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
+                .font(.system(size: 48))
                 .foregroundColor(.red)
             Text("Error")
                 .font(.headline)
@@ -201,6 +207,10 @@ struct ErrorView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
         .padding()
     }
 }
